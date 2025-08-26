@@ -1,0 +1,204 @@
+/* =============================================================
+   AirBnG – Global Styles (only app-wide frame)
+   File: src/styles/global.css
+   Import once in src/index.js: import "./styles/global.css";
+   ============================================================= */
+
+/* ------------------------------
+   0) Modern reset & base
+------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body, h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd { margin: 0; }
+ul[role='list'], ol[role='list'] { list-style: none; }
+body { min-height: 100dvh; line-height: 1.5; }
+h1, h2, h3, h4, h5, h6 { line-height: 1.2; }
+img, picture { max-width: 100%; display: block; }
+input, button, textarea, select { font: inherit; }
+button { border: 0; background: none; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+/* ------------------------------
+   1) Design tokens (light theme)
+------------------------------ */
+:root {
+  /* App shell */
+  --app-max-width: 412px;
+  --header-height: 60px;          /* used in header.css */
+  --bottom-nav-height: 80px;      /* used in navigation.css */
+
+  /* Brand & palette */
+  --primary: #4561DB;
+  --primary-600: #3E57C8;
+  --secondary: #706BED;
+  --accent-pink: #FF78C8;
+  --accent-mint: #78DCFF;
+  --success: #2EB872;
+  --warning: #F5A524;
+  --danger:  #E5484D;
+
+  /* Greys */
+  --text-strong: #111111;
+  --text: #333333;
+  --text-muted: #777777;
+  --border: #E0E0E0;
+  --surface: #FFFFFF;
+  --bg: #F5F5F5;
+
+  /* Typography */
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+  --font-brand: 'BMJUA', var(--font-sans);
+  --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-16: 16px; --fs-18: 18px; --fs-20: 20px; --fs-22: 22px; --fs-28: 28px;
+
+  /* Spacing */
+  --sp-2: 2px; --sp-4: 4px; --sp-6: 6px; --sp-8: 8px;
+  --sp-10: 10px; --sp-12: 12px; --sp-16: 16px; --sp-20: 20px;
+  --sp-24: 24px; --sp-28: 28px; --sp-32: 32px;
+
+  /* Radius */
+  --radius-6: 6px; --radius-8: 8px; --radius-10: 10px;
+  --radius-12: 12px; --radius-16: 16px; --radius-24: 24px; --radius-28: 28px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.06);
+  --shadow-md: 0 6px 18px rgba(0,0,0,.10);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.15);
+
+  /* Motion */
+  --ease: cubic-bezier(.2,.7,.2,1);
+  --fast: .15s var(--ease);
+  --normal: .25s var(--ease);
+
+  /* Focus ring */
+  --focus-ring: color-mix(in oklab, var(--primary) 65%, white);
+
+  /* (참고) 홈 배경에서 쓰던 그라디언트 토큰은 남겨둬도 되지만,
+     필요 없다면 아래 두 줄은 삭제해도 OK */
+  --brand-grad: radial-gradient(130% 100% at 50% 0%, var(--secondary) 0%, var(--primary) 60%, var(--primary) 100%);
+  --brand-radial-glow: radial-gradient(circle, rgba(255,120,200,.3) 0%, rgba(110,100,250,.25) 40%, rgba(120,220,255,.2) 70%, transparent 90%);
+}
+
+/* Dark theme */
+.theme-dark {
+  --text-strong: #EDEFF3;
+  --text: #E0E3EA;
+  --text-muted: #AAB1BD;
+  --border: #282C34;
+  --surface: #151A22;
+  --bg: #0F1218;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.35);
+  --shadow-md: 0 6px 18px rgba(0,0,0,.45);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.55);
+}
+
+/* ------------------------------
+   2) App shell (layout only)
+------------------------------ */
+body {
+  margin: 0 auto;
+  width: 100%;
+  max-width: var(--app-max-width);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  padding-bottom: var(--bottom-nav-height); /* reserve space for bottom nav */
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  padding: var(--sp-20);
+  padding-top: calc(var(--header-height) + var(--sp-12));
+  padding-bottom: calc(var(--bottom-nav-height) + var(--sp-12));
+}
+
+/* ------------------------------
+   3) Typography helpers
+------------------------------ */
+.h1 { font-size: var(--fs-28); font-weight: 700; }
+.h2 { font-size: var(--fs-22); font-weight: 700; }
+.h3 { font-size: var(--fs-20); font-weight: 700; }
+.subtle { color: var(--text-muted); }
+.brand-text { font-family: var(--font-brand); font-weight: 700; }
+
+/* ------------------------------
+   4) Generic components
+------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: var(--radius-8);
+  font-weight: 600;
+  transition: transform var(--fast), box-shadow var(--fast), background var(--fast);
+}
+.btn:active { transform: scale(.97); box-shadow: inset 0 2px 4px rgba(0,0,0,.2); }
+.btn--primary { background: var(--primary); color: #fff; box-shadow: var(--shadow-sm); }
+.btn--primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); background: var(--primary-600); }
+.btn--outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn--ghost { background: transparent; color: var(--text); }
+.btn--block { width: 100%; }
+
+.card {
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-24);
+  box-shadow: var(--shadow-md);
+  padding: 24px 28px;
+}
+.card--elevated { box-shadow: var(--shadow-lg); }
+
+.input, .select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-8);
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  transition: border-color var(--normal), box-shadow var(--normal);
+}
+.input:focus, .select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+/* Autofill normalization */
+.input:-webkit-autofill {
+  box-shadow: 0 0 0 1000px #fff inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
+/* Label + value 행 패턴(여러 페이지에서 재사용) */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: var(--fs-18);
+  border-bottom: 1px solid var(--border);
+}
+.info-row:last-child { border-bottom: 0; }
+.info-row > label { flex: 1; color: #999; font-weight: 700; }
+.info-row > .value { flex: 2; text-align: right; color: var(--text); }
+
+/* ------------------------------
+   5) Utilities
+------------------------------ */
+.container-narrow { width: 100%; max-width: var(--app-max-width); margin-inline: auto; }
+.center { display: grid; place-items: center; }
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-8 { gap: 8px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; }
+.mt-16 { margin-top: 16px; } .mb-16 { margin-bottom: 16px; }
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
