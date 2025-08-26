@@ -1,0 +1,170 @@
+/* =============================================================
+   AirBnG – Home Page Styles
+   File: src/styles/pages/home.css
+   Uses tokens from global.css
+   ============================================================= */
+
+/* ---------- 0) Keyframes (home 전용) ---------- */
+@keyframes float-circle{0%{transform:scale(1) translateY(0);opacity:.3}50%{transform:scale(1.1) translateY(-15px);opacity:.6}100%{transform:scale(1) translateY(0);opacity:.3}}
+@keyframes bell-pulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.05);opacity:.6}}
+@keyframes fade-slide-down{0%{opacity:0;transform:translateY(-20px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes shake-bell{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+@keyframes slideUpFade{0%{opacity:0;transform:translateY(15px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes fadeInScale{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+@keyframes fadeInOnly{0%{opacity:0}100%{opacity:1}}
+@keyframes headingPulse{0%,100%{transform:scale(1);color:#333;text-shadow:none}50%{transform:scale(1.04);color:#000;text-shadow:0 0 6px rgba(0,0,0,.15)}}
+@keyframes dot-disappear{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes dot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.1)}}
+
+/* ---------- 1) 상단 히어로 (TopBar + Greeting) ---------- */
+/* 흰 링을 배경 레이어로 직접 그려 왜곡 방지 */
+.top-section{
+  position:relative; z-index:1;
+  padding:44px 20px 236px;
+  background:
+    /* 왼쪽 큰 링 + 안쪽 링 */
+    radial-gradient(240px 240px at 24% 33%, rgba(255,255,255,.14) 0%, rgba(255,255,255,.08) 34%, transparent 36%),
+    radial-gradient(340px 340px at 22% 36%, rgba(255,255,255,.10) 0%, rgba(255,255,255,.05) 30%, transparent 32%),
+    /* 오른쪽 상단 링 2겹 */
+    radial-gradient(170px 170px at 88% 8%, rgba(255,255,255,.18) 0%, rgba(255,255,255,.10) 40%, transparent 58%),
+    radial-gradient(260px 260px at 90% -6%, rgba(255,255,255,.10) 0%, rgba(255,255,255,.05) 34%, transparent 52%),
+    /* 브랜드 배경 */
+    var(--brand-grad);
+  clip-path: ellipse(140% 95% at 50% 0%);
+  box-shadow:0 30px 40px rgba(0,0,0,.12);
+  border:0; overflow:hidden;
+}
+/* ⛔️ 이전 라디얼 글로우(::before)로 인한 왜곡 제거 */
+.top-section::before{ content:none !important; }
+
+.top-bar{
+  display:flex; justify-content:space-between; align-items:center;
+  position:relative; z-index:1; margin-bottom:18px;
+}
+.logo-group{ display:flex; align-items:center; gap:6px; }
+.brand-text{ font-family:var(--font-brand); font-size:18px; font-weight:700; color:#fff; line-height:18px; }
+.top-bar img{ height:24px }
+
+.bell-wrapper{ position:relative; display:inline-block; z-index:1 }
+.bell-wrapper::after{ content:""; animation: bell-pulse 6s ease-in-out infinite }
+.top-bar img[src*="bell"]{ animation: shake-bell 3s ease-in-out infinite; transform-origin:center }
+
+.greeting{
+  margin-top:8px;
+  font-size:var(--fs-28); font-weight:600; line-height:35px;
+  color:#fff; opacity:0; animation: fade-slide-down .6s ease-out .3s forwards;
+  pointer-events:none;
+}
+.greeting .nickname{ display:flex; font-weight:400; color:#fff }
+.greeting .hello{ display:inline-block; animation: slideUpFade 4s ease-in-out .3s infinite alternate; opacity:0 }
+
+/* (선택) 별도 ring 요소를 넣을 때 */
+.ring{ position:absolute; border-radius:50%; background:#fff; opacity:.08; pointer-events:none; z-index:0 }
+.ring--bell{ top:-80px; right:-60px; width:176px; height:176px; -webkit-mask-image:radial-gradient(circle,transparent 74px, black 76px); mask-image:radial-gradient(circle,transparent 74px, black 76px) }
+.ring--greeting{ top:-10px; left:-80px; width:206px; height:206px; opacity:.05; -webkit-mask-image:radial-gradient(circle,transparent 84px, black 83px); mask-image:radial-gradient(circle,transparent 84px, black 83px) }
+.ring--greeting-inner{ top:30px; left:-37px; width:120px; height:120px; opacity:.05; -webkit-mask-image:radial-gradient(circle,transparent 45px, black 55px); mask-image:radial-gradient(circle,transparent 45px, black 55px) }
+
+/* ---------- 2) 예약 카드 (InfoCard) ---------- */
+.info-card{
+  position:relative; top:-210px;
+  height:250px; margin:0 20px 16px;
+  background:var(--surface); color:var(--text);
+  border-radius:var(--radius-24); padding:24px 28px;
+  box-shadow:var(--shadow-lg);
+  display:flex; flex-direction:column; animation: fadeInOnly 1s ease-out forwards;
+  z-index:2;
+}
+.info-row-group{ flex:1; display:flex; flex-direction:column; justify-content:space-evenly; gap:8px }
+
+.info-card .info-row{ gap:10px }
+.info-card .info-row label{ flex:1; color:#999; font-weight:700 }
+.info-card .info-row input,
+.info-card .info-row select{
+  flex:2; padding:0; font-size:var(--fs-18);
+  border:0; background:transparent; color:var(--text-strong);
+  text-align:right; cursor:pointer; outline:none;
+  -webkit-appearance:none; appearance:none;
+}
+.info-card .info-row select{ background-image:none }
+
+.info-card .info-row input:-webkit-autofill{
+  box-shadow:0 0 0 1000px #fff inset !important;
+  -webkit-text-fill-color:var(--text) !important;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
+/* 날짜 커스텀 */
+.date-wrapper{
+  flex:2; display:flex; justify-content:flex-end; align-items:center;
+  position:relative; cursor:pointer; width:100%; white-space:nowrap;
+}
+.custom-date-display{
+  font-size:var(--fs-18); color:var(--text-strong); text-align:right;
+  z-index:1; width:100%; height:100%;
+  display:flex; justify-content:flex-end; align-items:center;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0;
+}
+.real-date{ position:absolute; inset:0; opacity:0; z-index:2; border:0; background:transparent; pointer-events:none }
+
+/* CTA */
+.find-button{
+  display:block; width:100%; padding:12px; margin-top:12px;
+  background:var(--primary); color:#fff; border-radius:var(--radius-8);
+  font-size:var(--fs-16); font-weight:700; box-shadow:var(--shadow-sm);
+  transition: transform var(--fast), box-shadow var(--fast), background var(--fast);
+}
+.find-button:hover{ transform:scale(1.02) }
+.find-button:active{ transform:scale(.97); box-shadow: inset 0 2px 4px rgba(0,0,0,.2) }
+
+/* ---------- 3) 카테고리 ---------- */
+.category-section{ padding:0 20px; margin-top:-190px }
+.category-section h3{
+  font-size:var(--fs-22); font-weight:700; line-height:22px; margin-bottom:20px;
+  color:var(--text); animation: headingPulse 4s ease-in-out infinite; pointer-events:none;
+}
+.category-grid{ display:grid; grid-template-columns:1fr 1fr; gap:25px }
+.category-card{
+  background:var(--surface); border-radius:var(--radius-10); padding:17px 25px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:10px;
+  transition: transform var(--normal), box-shadow var(--normal);
+  cursor:pointer; opacity:0; animation: fadeInOnly 1s ease-out forwards;
+}
+.category-card:hover{ transform:translateY(-4px); box-shadow:0 4px 12px rgba(0,0,0,.1) }
+.category-card img{ width:48px; height:48px }
+.category-card p{ font-weight:600; font-size:17px; line-height:20px; margin:0; text-align:left }
+.category-card small{ font-size:13px; color:var(--text-muted); margin-top:4px }
+.category-card:nth-child(1){ animation-delay:.1s }
+.category-card:nth-child(2){ animation-delay:.2s }
+.category-card:nth-child(3){ animation-delay:.3s }
+.category-card:nth-child(4){ animation-delay:.4s }
+
+/* ---------- 4) 인기 보관소 ---------- */
+.popular-section{ padding:24px 20px 20px; margin-top:10px }
+.popular-section h3{
+  font-size:var(--fs-22); font-weight:700; line-height:22px; margin-bottom:12px;
+  color:var(--text); animation: headingPulse 4s ease-in-out infinite; pointer-events:none;
+}
+.popular-list{ display:flex; flex-direction:column; gap:12px }
+.popular-item{
+  display:flex; align-items:center; background:var(--surface);
+  padding:12px; border-radius:12px; box-shadow:0 2px 4px rgba(0,0,0,.05);
+  transition: transform var(--fast), box-shadow var(--fast);
+  animation: fadeInScale 1s ease-out;
+}
+.popular-item:hover{ transform:translateY(-3px); box-shadow:0 4px 12px rgba(0,0,0,.1) }
+.popular-item:active{ transform:scale(.97); box-shadow: inset 0 2px 6px rgba(0,0,0,.15) }
+.popular-item .thumb{ width:47px; height:47px; background:#e0e0e0; border-radius:8px; margin-right:12px; overflow:hidden }
+.popular-item .thumb img{ width:100%; height:100%; border-radius:8px; object-fit:cover }
+.popular-item .locker-name{ font-size:16px; font-weight:600; color:var(--text); line-height:18px }
+.popular-item .locker-address{ font-size:13px; color:var(--text-muted); line-height:16px }
+
+/* ---------- 5) 알림/아이콘 유틸 ---------- */
+.notification-link{ position:relative; display:inline-block; text-decoration:none; z-index:9 }
+.notification-icon{ width:24px; height:24px; display:block; transition: transform var(--fast) }
+.notification-link:hover .notification-icon{ transform:scale(1.1) }
+
+/* 작은 화면 dot 보정 */
+@media (max-width:380px){
+  .notif-dot{ width:8px; height:8px; top:-3px; right:-3px; border-width:1px }
+}
