@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-// 이미지 import
+
 import gangnamImg from '../../assets/gangnam.jpg';
 import hongdaeImg from '../../assets/hongdae.jpg';
 import jamsilImg from '../../assets/jamsil.jpg';

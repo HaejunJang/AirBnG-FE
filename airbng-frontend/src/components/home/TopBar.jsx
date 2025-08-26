@@ -1,4 +1,3 @@
-// src/components/home/TopBar.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import logoImg from "../../assets/logo_ic.svg";
@@ -9,7 +8,6 @@ function TopBar() {
     <div className="top-bar">
       <div className="logo-group">
         <img src={logoImg} alt="로고" />
-        {/* <span className="brand-text">에어비앤짐</span> */}
       </div>
 
       <div className="bell-wrapper">

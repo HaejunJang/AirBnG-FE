@@ -14,7 +14,7 @@ import PopularSection from "../components/home/PopularSection";
 function HomePage() {
   const navigate = useNavigate();
 
-  // TODO: 실제 로그인 상태는 전역 상태(context/store)와 연결
+  // TODO: 실제 로그인 상태는 전역 상태(context)와 연결
   const isLoggedIn = false;
 
   // 짐 타입 카드 클릭

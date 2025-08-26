@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/layout/header.css";
 
 /**
- * AirBnG Header (react-router-dom v6)
+ * AirBnG Header
  *
  * props:
  * - headerTitle: string

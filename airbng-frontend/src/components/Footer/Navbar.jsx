@@ -8,7 +8,6 @@ import userIcon from '../../assets/user.svg';
 import "../../styles/layout/navigation.css";
 
 function Navbar({ active = "home" }) {
-  // active: "cart" | "chat" | "home" | "calendar" | "mypage"
   return (
     <nav className="bottom-nav">
       <a href="/page/lockers" className={`nav-item${active === "cart" ? " active" : ""}`}>
