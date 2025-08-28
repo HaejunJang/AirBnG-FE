@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 function Greeting() {
-  const [nickname] = useState("홍길동");
+  const [nickname] = useState("");
 
   return (
     <div className="greeting">
