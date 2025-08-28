@@ -6,7 +6,7 @@ import HomePage from "./pages/HomePage";
 
 function App() {
   function getActiveNav(pathname) {
-    if (pathname.startsWith("/page/lockers")) return "cart";
+    if (pathname.startsWith("/page/lockers")) return "locker";
     if (pathname.startsWith("/page/chatList")) return "chat";
     if (pathname.startsWith("/page/reservations")) return "calendar";
     if (pathname.startsWith("/page/mypage")) return "mypage";
