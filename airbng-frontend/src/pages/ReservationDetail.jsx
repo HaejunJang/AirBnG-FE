@@ -170,7 +170,7 @@ const ReservationDetail = ({ reservationData }) => {
         </div>
 
         <div className="notice">
-          <p>* 30분이내 수임하지 않으면 자동취소됩니다.</p>
+          <p>* 30분안에 승인하지 않으면 자동거절됩니다.</p>
         </div>
 
         <div className="action-buttons">
