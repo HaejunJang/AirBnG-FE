@@ -3,6 +3,7 @@ import Navbar from "./components/Footer/Navbar";
 import "./styles/App.css";
 
 import HomePage from "./pages/HomePage";
+import ReservationList from "./pages/ReservationList";
 
 function App() {
   function getActiveNav(pathname) {
@@ -22,6 +23,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/page/home" element={<HomePage />} />
+          <Route path="/page/reservations/list" element={<ReservationList />} />
         </Routes>
         <Navbar active={active} />
       </div>
