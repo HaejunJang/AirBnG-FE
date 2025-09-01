@@ -8,8 +8,6 @@ import ReservationFormPage from "./pages/ReservationFormPage";
 
 import "./styles/App.css";
 
-import "./styles/App.css";
-
 function App() {
   function getActiveNav(pathname) {
     if (pathname.startsWith("/page/lockers")) return "cart";
@@ -38,7 +36,7 @@ function App() {
       <div className="airbng-home">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/page/home" element={<HomePage />} 
+          <Route path="/page/home" element={<HomePage />} />
           <Route
             path="/page/reservations/detail/:id"
             element={<ReservationDetail />}
