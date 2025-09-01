@@ -1,5 +1,6 @@
 import React from 'react';
-
+import { useNavigate } from 'react-router-dom';
+// const navigate = useNavigate();
 // 기간 옵션 상수
 export const PERIOD_OPTIONS = [
     { value: 'ALL', label: '전체' },
@@ -23,17 +24,17 @@ export const getStatusText = (state) => {
 };
 
 // 예약 상세 페이지 이동
-export const goToReservationDetail = (contextPath, reservationId, role) => {
+export const goToReservationDetail = (navigate, reservationId, role) => {
     if (role === 'KEEPER') {
-        window.location.href = `${contextPath}/page/reservations/confirm?reservationId=${reservationId}`;
+        navigate(`/reservations/confirm?reservationId=${reservationId}`);
     } else {
-        window.location.href = `${contextPath}/page/reservations?id=${reservationId}`;
+        navigate(`/reservations?id=${reservationId}`);
     }
 };
 
 // 다시 예약
-export const reBooking = (contextPath, lockerId) => {
-    window.location.href = `${contextPath}/lockers/${lockerId}/reservation`;
+export const reBooking = (navigate, lockerId) => {
+    navigate(`/lockers/${lockerId}/reservation`);
 };
 
 // 짐 타입 텍스트 생성

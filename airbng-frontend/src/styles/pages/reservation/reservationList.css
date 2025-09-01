@@ -397,7 +397,6 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
         min-width: 0;
     }
 
@@ -454,7 +453,7 @@
         font-size: 13px;
     }
 
-    .action-buttons {
+    .actions-buttons {
         display: flex;
         gap: 8px;
         justify-content: center;

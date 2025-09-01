@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
-import { deleteReservationApi } from '../api/reservationApi';
+import { useState, useEffect, useCallback } from "react";
+import { getReservationList, deleteReservationApi } from "../api/reservationApi";
 
-const useReservationList = (memberId, contextPath) => {
-    // State 관리
-    const [currentStates, setCurrentStates] = useState(['CONFIRMED', 'PENDING']);
-    const [currentPeriod, setCurrentPeriod] = useState('ALL');
+const periodOptions = ["1W", "3M", "6M", "1Y", "2Y", "ALL"];
+
+const useReservationList = (memberId) => {
+    const [currentStates, setCurrentStates] = useState(["CONFIRMED", "PENDING"]);
+    const [currentPeriod, setCurrentPeriod] = useState("ALL");
     const [currentIsDropper, setCurrentIsDropper] = useState(true);
     const [nextCursorId, setNextCursorId] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -12,19 +13,11 @@ const useReservationList = (memberId, contextPath) => {
     const [reservations, setReservations] = useState([]);
     const [showEmpty, setShowEmpty] = useState(false);
 
-    // API URL 생성
-    const getApiUrl = useCallback(() => {
-        const baseUrl = `${contextPath}/reservations?isDropper=${currentIsDropper}&memberId=${memberId}`;
-        const statesParam = currentStates.map(s => `&state=${s}`).join('');
-        const shouldApplyPeriodFilter = (['COMPLETED', 'CANCELLED'].some(s => currentStates.includes(s)) && currentPeriod !== 'ALL');
-        const periodParam = shouldApplyPeriodFilter ? `&period=${currentPeriod}` : '';
-        const cursorParam = (nextCursorId !== null && nextCursorId !== -1) ? `&nextCursorId=${nextCursorId}` : '';
-        return baseUrl + statesParam + periodParam + cursorParam;
-    }, [currentIsDropper, currentStates, currentPeriod, nextCursorId, memberId, contextPath]);
-
-    // 예약 데이터 가져오기
+    //예약 가져오기
     const fetchReservations = useCallback(
         async (isFirst = false) => {
+            if (!memberId || memberId <= 0) return;
+            if (currentIsDropper === null || currentIsDropper === undefined) return;
             if (loading || (!hasNextPage && !isFirst)) return;
 
             setLoading(true);
@@ -33,20 +26,27 @@ const useReservationList = (memberId, contextPath) => {
                 const params = {
                     isDropper: currentIsDropper,
                     memberId,
-                    state: currentStates,
+                    // 여기서 isHistoryTab 제거
                 };
 
-                // 기간 필터는 COMPLETED, CANCELLED에서만 적용
-                const shouldApplyPeriodFilter =
+                if (currentStates?.length > 0) {
+                    params.state = currentStates;
+                }
+
+                // COMPLETED / CANCELLED 상태일 때만 period 세팅
+                if (
                     ["COMPLETED", "CANCELLED"].some((s) => currentStates.includes(s)) &&
-                    currentPeriod !== "ALL";
-                if (shouldApplyPeriodFilter) {
+                    currentPeriod !== "ALL" &&
+                    periodOptions.includes(currentPeriod)
+                ) {
                     params.period = currentPeriod;
                 }
 
                 if (nextCursorId !== null && nextCursorId !== -1) {
                     params.nextCursorId = nextCursorId;
                 }
+
+                console.log("Reservation API params:", params);
 
                 const response = await getReservationList(params);
                 const result = response.data?.result || {};
@@ -71,14 +71,12 @@ const useReservationList = (memberId, contextPath) => {
         [currentIsDropper, currentStates, currentPeriod, nextCursorId, hasNextPage, loading, memberId]
     );
 
-    // 예약 삭제
     const deleteReservation = async (reservationId) => {
         try {
             const response = await deleteReservationApi(reservationId);
             const data = response.data;
 
             if (data.code === 1000) {
-                // 목록 새로고침
                 setNextCursorId(null);
                 setHasNextPage(true);
                 setReservations([]);
@@ -88,16 +86,14 @@ const useReservationList = (memberId, contextPath) => {
                 return { success: false };
             }
         } catch (error) {
-            console.error('예약 삭제 오류:', error);
+            console.error("예약 삭제 오류:", error);
             return { success: false };
         }
     };
 
-    // 스크롤 이벤트 처리
     useEffect(() => {
         const handleScroll = () => {
             if (loading || !hasNextPage) return;
-
             const scrollTop = window.scrollY;
             const viewportHeight = window.innerHeight;
             const fullHeight = document.body.offsetHeight;
@@ -106,63 +102,47 @@ const useReservationList = (memberId, contextPath) => {
                 fetchReservations(false);
             }
         };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
     }, [fetchReservations, loading, hasNextPage]);
 
-    // 초기 데이터 로드
     useEffect(() => {
         fetchReservations(true);
     }, [currentStates, currentPeriod, currentIsDropper]);
 
-    // 탭 변경
-    const changeTab = (newStates) => {
-        if (loading) return;
-
-        setCurrentStates(newStates);
-        setCurrentPeriod('ALL');
-        setNextCursorId(null);
-        setHasNextPage(true);
-        setReservations([]);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // 토글 변경
-    const changeToggle = (isDropper) => {
-        if (loading) return;
-
-        setCurrentIsDropper(isDropper);
-        setNextCursorId(null);
-        setHasNextPage(true);
-        setReservations([]);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // 기간 선택
-    const selectPeriod = (period) => {
-        if (loading) return;
-
-        setCurrentPeriod(period);
-        setNextCursorId(null);
-        setHasNextPage(true);
-        setReservations([]);
-    };
-
     return {
-        // State
         currentStates,
         currentPeriod,
         currentIsDropper,
         loading,
         reservations,
         showEmpty,
-        // Actions
-        changeTab,
-        changeToggle,
-        selectPeriod,
+        changeTab: (newStates) => {
+            if (loading) return;
+            setCurrentStates(newStates);
+            setCurrentPeriod("ALL");
+            setNextCursorId(null);
+            setHasNextPage(true);
+            setReservations([]);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        },
+        changeToggle: (isDropper) => {
+            if (loading) return;
+            setCurrentIsDropper(isDropper);
+            setNextCursorId(null);
+            setHasNextPage(true);
+            setReservations([]);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        },
+        selectPeriod: (period) => {
+            if (loading) return;
+            setCurrentPeriod(period);
+            setNextCursorId(null);
+            setHasNextPage(true);
+            setReservations([]);
+        },
         deleteReservation,
-        fetchReservations
+        fetchReservations,
     };
 };
 

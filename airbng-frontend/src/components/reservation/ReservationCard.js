@@ -1,24 +1,25 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { formatDate, formatDateTime, formatDuration } from '../../utils/reservation/dateUtils';
 import { getStatusText, goToReservationDetail, reBooking, getJimTypesText } from '../../utils/reservation/reservationUtils';
 
 const ReservationCard = ({
                              reservation,
-                             contextPath,
                              currentIsDropper,
                              activeMoreMenu,
                              toggleMoreMenu,
                              onShowConfirmModal
                          }) => {
+    const navigate = useNavigate();
     const jimTypes = getJimTypesText(reservation.jimTypeResults);
 
     const renderActionButtons = () => {
         if (reservation.state === 'PENDING' && currentIsDropper === true) {
             return (
-                <div className="action-buttons">
+                <div className="actions-buttons">
                     <button
                         className="btn btn-cancel"
-                        onClick={() => goToReservationDetail(contextPath, reservation.reservationId, reservation.role)}
+                        onClick={() => goToReservationDetail(navigate, reservation.reservationId, reservation.role)}
                     >
                         취소 요청
                     </button>
@@ -31,7 +32,7 @@ const ReservationCard = ({
                 <div className="completed-actions">
                     <button
                         className="btn rebook-btn"
-                        onClick={() => reBooking(contextPath, reservation.lockerId || 1)}
+                        onClick={() => reBooking(navigate, reservation.lockerId || 1)}
                     >
                         다시 예약
                     </button>
@@ -58,10 +59,10 @@ const ReservationCard = ({
 
         if (reservation.state === 'CONFIRMED' && currentIsDropper === true) {
             return (
-                <div className="action-buttons">
+                <div className="actions-buttons">
                     <button
                         className="btn btn-cancel"
-                        onClick={() => goToReservationDetail(contextPath, reservation.reservationId, reservation.role)}
+                        onClick={() => goToReservationDetail(navigate, reservation.reservationId, reservation.role)}
                     >
                         취소 요청
                     </button>
@@ -94,7 +95,7 @@ const ReservationCard = ({
                     <div className="reservation-info-row">
                         <button
                             className="view-details"
-                            onClick={() => goToReservationDetail(contextPath, reservation.reservationId, reservation.role)}
+                            onClick={() => goToReservationDetail(navigate, reservation.reservationId, reservation.role)}
                         >
                             예약 상세 &gt;
                         </button>
@@ -102,7 +103,37 @@ const ReservationCard = ({
                     </div>
                 </div>
                 {renderReservationItem()}
-                {renderActionButtons()}
+                <div className="completed-actions">
+                    <button
+                        className="btn rebook-btn"
+                        onClick={() => {
+                            if (!reservation.lockerId) {
+                                alert("보관소 정보가 없어 다시 예약할 수 없습니다.");
+                                return;
+                            }
+                            reBooking(navigate, reservation.lockerId);
+                        }}
+                    >
+                        다시 예약
+                    </button>
+                    <div className="more-btn" onClick={() => toggleMoreMenu(reservation.reservationId)}>
+                        <svg className="more-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="19" cy="12" r="1"></circle>
+                            <circle cx="5" cy="12" r="1"></circle>
+                        </svg>
+                        {activeMoreMenu === reservation.reservationId && (
+                            <div className="more-menu show">
+                                <div
+                                    className="more-menu-item"
+                                    onClick={() => onShowConfirmModal(reservation.reservationId)}
+                                >
+                                    삭제
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         );
     }
@@ -149,7 +180,7 @@ const ReservationCard = ({
                 <div className="reservation-info-row">
                     <button
                         className="view-details"
-                        onClick={() => goToReservationDetail(contextPath, reservation.reservationId, reservation.role)}
+                        onClick={() => goToReservationDetail(navigate, reservation.reservationId, reservation.role)}
                     >
                         예약 상세 &gt;
                     </button>
