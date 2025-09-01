@@ -6,7 +6,7 @@ module.exports = function (app) {
     createProxyMiddleware({
       target: "https://www.airbng.store",
       changeOrigin: true,
-      logLevel: "debug",
+      logLevel: "debug"
     })
   );
 };
