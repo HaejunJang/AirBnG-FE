@@ -521,7 +521,7 @@ function ReservationFormPage() {
 
       <div className="content">
         {/* 보관소 정보 */}
-        <div className="locker-info">
+        <div id="lockerInfo">
           <div className="locker-info-content">
             <svg
               className="locker-icon"
