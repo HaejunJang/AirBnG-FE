@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { getReservationForm } from "../api/reservationApi";
-import { useSearchParams, useLocation } from "react-router-dom";
+import { getReservationForm, postReservation } from "../api/reservationApi";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/pages/reservationForm.css";
 import Header from "../components/Header/Header";
 
@@ -15,6 +15,8 @@ function useQueryParam(name) {
 
 function ReservationFormPage() {
   const lockerId = useQueryParam("lockerId");
+  const navigate = useNavigate();
+
   // State 관리
   const [selectedDateRange, setSelectedDateRange] = useState({
     startDate: -1,
@@ -440,6 +442,67 @@ function ReservationFormPage() {
     if (!validateForm()) {
       return;
     }
+
+    const startDateStr = dateArray[selectedDateRange.startDate];
+    const endDateStr = dateArray[selectedDateRange.endDate];
+
+    const requestData = {
+      dropperId: 2,
+      keeperId: 3,
+      lockerId: parseInt(lockerId),
+      startTime: `${startDateStr} ${selectedStartTime}:00`,
+      endTime: `${endDateStr} ${selectedEndTime}:00`,
+      jimTypeCounts: Object.entries(jimTypeCounts)
+        .filter(([_, count]) => count > 0)
+        .map(([jimTypeId, count]) => ({
+          jimTypeId: parseInt(jimTypeId),
+          count: parseInt(count),
+        })),
+    };
+
+    console.log("Request Data:", requestData);
+
+    postReservation(requestData)
+      .then((data) => {
+        if (data.code === 4000) {
+          ModalUtils.showSuccess("예약이 완료되었습니다!", "", () => {
+            const reservationId = data.result?.reservationId || 0;
+            if (reservationId === 0) {
+              navigate("/page/home");
+            } else {
+              sessionStorage.setItem("lockerId", lockerId);
+              navigate("/page/reservation?reservationId=" + reservationId);
+            }
+          });
+        } else if (data.code === 3005) {
+          ModalUtils.showWarning(
+            "보관소가 비활성화 되었습니다.",
+            "이용 불가",
+            () => {
+              navigate(-1);
+            }
+          );
+        } else if (data.code === 9002) {
+          ModalUtils.showError(
+            "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
+            "예약 실패",
+            () => {
+              navigate("/page/login");
+            }
+          );
+        } else {
+          ModalUtils.showError(data.message, "예약 실패", () => {
+            navigate(-1);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("API 요청 실패:", error);
+        ModalUtils.showError(
+          "예약 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.",
+          "예약 실패"
+        );
+      });
   };
 
   // 날짜 렌더링
