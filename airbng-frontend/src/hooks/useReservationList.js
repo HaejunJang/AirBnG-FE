@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { deleteReservationApi } from '../api/reservationApi';
 
 const useReservationList = (memberId, contextPath) => {
     // State 관리
@@ -22,42 +23,59 @@ const useReservationList = (memberId, contextPath) => {
     }, [currentIsDropper, currentStates, currentPeriod, nextCursorId, memberId, contextPath]);
 
     // 예약 데이터 가져오기
-    const fetchReservations = useCallback(async (isFirst = false) => {
-        if (loading || (!hasNextPage && !isFirst)) return;
+    const fetchReservations = useCallback(
+        async (isFirst = false) => {
+            if (loading || (!hasNextPage && !isFirst)) return;
 
-        setLoading(true);
+            setLoading(true);
 
-        try {
-            const response = await fetch(getApiUrl());
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            try {
+                const params = {
+                    isDropper: currentIsDropper,
+                    memberId,
+                    state: currentStates,
+                };
 
-            const data = await response.json();
-            const newReservations = data.result.reservations || [];
+                // 기간 필터는 COMPLETED, CANCELLED에서만 적용
+                const shouldApplyPeriodFilter =
+                    ["COMPLETED", "CANCELLED"].some((s) => currentStates.includes(s)) &&
+                    currentPeriod !== "ALL";
+                if (shouldApplyPeriodFilter) {
+                    params.period = currentPeriod;
+                }
 
-            setNextCursorId(data.result.nextCursorId);
-            setHasNextPage(data.result.hasNextPage);
+                if (nextCursorId !== null && nextCursorId !== -1) {
+                    params.nextCursorId = nextCursorId;
+                }
 
-            if (isFirst) {
-                setReservations(newReservations);
-                setShowEmpty(newReservations.length === 0);
-            } else {
-                setReservations(prev => [...prev, ...newReservations]);
+                const response = await getReservationList(params);
+                const result = response.data?.result || {};
+
+                const newReservations = result.reservations || [];
+                setNextCursorId(result.nextCursorId);
+                setHasNextPage(result.hasNextPage);
+
+                if (isFirst) {
+                    setReservations(newReservations);
+                    setShowEmpty(newReservations.length === 0);
+                } else {
+                    setReservations((prev) => [...prev, ...newReservations]);
+                }
+            } catch (error) {
+                console.error("예약 조회 오류:", error);
+                if (isFirst) setShowEmpty(true);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Fetch 오류:', error);
-            if (isFirst) setShowEmpty(true);
-        } finally {
-            setLoading(false);
-        }
-    }, [getApiUrl, loading, hasNextPage]);
+        },
+        [currentIsDropper, currentStates, currentPeriod, nextCursorId, hasNextPage, loading, memberId]
+    );
 
     // 예약 삭제
     const deleteReservation = async (reservationId) => {
         try {
-            const response = await fetch(`${contextPath}/reservations/delete?reservationId=${reservationId}`, {
-                method: 'POST'
-            });
-            const data = await response.json();
+            const response = await deleteReservationApi(reservationId);
+            const data = response.data;
 
             if (data.code === 1000) {
                 // 목록 새로고침
@@ -70,7 +88,7 @@ const useReservationList = (memberId, contextPath) => {
                 return { success: false };
             }
         } catch (error) {
-            console.error('삭제 오류:', error);
+            console.error('예약 삭제 오류:', error);
             return { success: false };
         }
     };
@@ -111,10 +129,10 @@ const useReservationList = (memberId, contextPath) => {
     };
 
     // 토글 변경
-    const changeToggle = (newIsDropper) => {
+    const changeToggle = (isDropper) => {
         if (loading) return;
 
-        setCurrentIsDropper(newIsDropper);
+        setCurrentIsDropper(isDropper);
         setNextCursorId(null);
         setHasNextPage(true);
         setReservations([]);
@@ -122,10 +140,10 @@ const useReservationList = (memberId, contextPath) => {
     };
 
     // 기간 선택
-    const selectPeriod = (newPeriod) => {
+    const selectPeriod = (period) => {
         if (loading) return;
 
-        setCurrentPeriod(newPeriod);
+        setCurrentPeriod(period);
         setNextCursorId(null);
         setHasNextPage(true);
         setReservations([]);

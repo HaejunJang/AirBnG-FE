@@ -1,7 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/layout/header.css";
-
+import arrowLeftIcon from "../../assets/arrow-left.svg";
+import homeIcon from "../../assets/home.svg";
 /**
  * AirBnG Header
  *
@@ -44,7 +45,7 @@ export default function Header({
           aria-label="뒤로가기"
           onClick={handleBack}
         >
-          <img src="../../assets/arrow-left.svg" alt="" aria-hidden="true" />
+          <img src={arrowLeftIcon} alt="" aria-hidden="true" />
         </button>
       ) : (
         <div className="back-spacer" aria-hidden="true" />
@@ -59,7 +60,7 @@ export default function Header({
           aria-label="홈으로"
           onClick={handleHome}
         >
-          <img src="../../assets/home.svg" alt="" aria-hidden="true" />
+          <img src={homeIcon} alt="" aria-hidden="true" />
         </button>
       ) : (
         <div className="header-spacer" aria-hidden="true" />
