@@ -27,7 +27,7 @@ const ReservationCard = ({
             );
         }
 
-        if (reservation.state === 'COMPLETED') {
+        if (reservation.state === 'COMPLETED' && currentIsDropper === true) {
             return (
                 <div className="completed-actions">
                     <button
@@ -88,51 +88,60 @@ const ReservationCard = ({
     );
 
     if (reservation.state === 'COMPLETED') {
+        const hasActions = currentIsDropper; // 버튼이 있는 경우만 true
         return (
-            <div className={`reservation-card completed`}>
+            <div className={`reservation-card completed ${hasActions ? 'has-actions' : 'no-actions'}`}>
                 <div className="reservation-header">
                     <div className="reservation-info-row">
                         <button
                             className="view-details"
-                            onClick={() => goToReservationDetail(navigate, reservation.reservationId, reservation.role)}
+                            onClick={() =>
+                                goToReservationDetail(navigate, reservation.reservationId, reservation.role)
+                            }
                         >
                             예약 상세 &gt;
                         </button>
                         {getStatusText(reservation.state)}
                     </div>
                 </div>
+
+                {/* 보관소 이미지 + 정보 */}
                 {renderReservationItem()}
-                <div className="completed-actions">
-                    <button
-                        className="btn rebook-btn"
-                        onClick={() => {
-                            if (!reservation.lockerId) {
-                                alert("보관소 정보가 없어 다시 예약할 수 없습니다.");
-                                return;
-                            }
-                            reBooking(navigate, reservation.lockerId);
-                        }}
-                    >
-                        다시 예약
-                    </button>
-                    <div className="more-btn" onClick={() => toggleMoreMenu(reservation.reservationId)}>
-                        <svg className="more-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="1"></circle>
-                            <circle cx="19" cy="12" r="1"></circle>
-                            <circle cx="5" cy="12" r="1"></circle>
-                        </svg>
-                        {activeMoreMenu === reservation.reservationId && (
-                            <div className="more-menu show">
-                                <div
-                                    className="more-menu-item"
-                                    onClick={() => onShowConfirmModal(reservation.reservationId)}
-                                >
-                                    삭제
+
+                {/* 버튼 영역 (있으면 렌더링) */}
+                {hasActions && (
+                    <div className="completed-actions">
+                        <button
+                            className="btn rebook-btn"
+                            onClick={() => {
+                                if (!reservation.lockerId) {
+                                    alert("보관소 정보가 없어 다시 예약할 수 없습니다.");
+                                    return;
+                                }
+                                reBooking(navigate, reservation.lockerId);
+                            }}
+                        >
+                            다시 예약
+                        </button>
+                        <div className="more-btn" onClick={() => toggleMoreMenu(reservation.reservationId)}>
+                            <svg className="more-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="19" cy="12" r="1"></circle>
+                                <circle cx="5" cy="12" r="1"></circle>
+                            </svg>
+                            {activeMoreMenu === reservation.reservationId && (
+                                <div className="more-menu show">
+                                    <div
+                                        className="more-menu-item"
+                                        onClick={() => onShowConfirmModal(reservation.reservationId)}
+                                    >
+                                        삭제
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         );
     }
