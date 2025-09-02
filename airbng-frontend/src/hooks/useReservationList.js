@@ -53,7 +53,6 @@ const useReservationList = (memberId) => {
                 let backendMsg = "";
 
 
-
                 if (response.data.code == 4015) {
                     // 백엔드가 "예약 내역 없음"이라고 보냈을 때
                     newReservations = [];

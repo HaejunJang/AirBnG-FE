@@ -26,7 +26,6 @@ const ReservationList = () => {
     // const modalHook = useModal();
     // const dropdownHook = useDropdown();
 
-
     const {
         currentStates,
         currentPeriod,

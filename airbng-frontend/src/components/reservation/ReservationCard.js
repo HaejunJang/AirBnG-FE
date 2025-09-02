@@ -53,6 +53,7 @@ const ReservationCard = ({
                             </div>
                         )}
                     </div>
+
                 </div>
             );
         }

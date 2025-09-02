@@ -1,6 +1,7 @@
 import React from 'react';
 import { PERIOD_OPTIONS } from '../../utils/reservation/reservationUtils';
 
+
 const FilterSection = ({
                            currentStates,
                            currentPeriod,
