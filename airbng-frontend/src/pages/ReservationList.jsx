@@ -62,7 +62,7 @@ const ReservationList = () => {
         setDropdownOpen
     } = useDropdown();
 
-    if (!memberId) return <div>로그인 후 확인 가능합니다.</div>;
+    if (!1) return <div>로그인 후 확인 가능합니다.</div>;
 
     // 예약 삭제 처리
     const handleDeleteReservation = async (reservationId) => {

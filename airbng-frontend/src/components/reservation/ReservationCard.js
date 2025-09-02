@@ -69,7 +69,6 @@ const ReservationCard = ({
                 </div>
             );
         }
-
         return null;
     };
 
