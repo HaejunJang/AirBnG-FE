@@ -42,6 +42,7 @@ function App() {
           <Route path="/page/home" element={<HomePage />} />
           <Route path="/page/reservations/list" element={<ReservationList />} />
           <Route path="/page/home" element={<HomePage />} />
+          <Route path="/page/home" element={<HomePage />} />
           <Route
             path="/page/reservations/detail/:id"
             element={<ReservationDetail />}
