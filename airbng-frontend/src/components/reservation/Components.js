@@ -16,6 +16,7 @@ const EmptyAndLoading = ({ showEmpty, loading }) => {
                     <p>로딩 중...</p>
                 </div>
             )}
+
         </>
     );
 };

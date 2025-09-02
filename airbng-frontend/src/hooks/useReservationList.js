@@ -46,7 +46,6 @@ const useReservationList = (memberId) => {
                 }
 
                 console.log("Reservation API params:", params);
-
                 const response = await getReservationList(params);
 
                 let newReservations = [];

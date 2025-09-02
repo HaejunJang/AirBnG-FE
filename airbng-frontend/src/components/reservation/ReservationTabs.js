@@ -26,7 +26,6 @@ const ReservationTabs = ({ currentStates, changeTab, loading }) => {
                     취소됨
                 </button>
             </div>
-
         </div>
     );
 };

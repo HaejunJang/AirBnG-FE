@@ -19,7 +19,6 @@ const ToggleSection = ({ currentIsDropper, changeToggle, loading }) => {
                 </div>
             </div>
         </div>
-
     );
 };
 
