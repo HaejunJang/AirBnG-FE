@@ -246,17 +246,12 @@
     .reservation-list {
         padding: 219px 15px 15px 15px;
         position: relative;
-        margin-top: 150px; /* 헤더/탭/필터 영역만큼 띄우기 */
-        padding: 15px;     /* 카드 좌우 여백만 */
-        height: calc(100vh - 219px); /* 화면에서 위쪽 영역을 뺀 만큼만 높이 */
-        overflow-y: auto;  /* 내부 스크롤 */
-        /*flex: 1;               !* 위/아래 남은 공간 자동 계산 *!*/
-        /*overflow-y: auto;  !*스크롤할 영역에 스크롤 주기*!*/
-        /*padding: 0.5rem 1rem;*/
-        /*box-sizing: border-box;*/
-        padding-bottom: 60px;
-
-
+        margin-top: 160px;
+        margin-bottom: 40px;
+        padding: 15px;
+        height: calc(100vh - 219px);
+        overflow-y: auto;
+        padding-bottom: 80px;
     }
 
     .reservation-card {

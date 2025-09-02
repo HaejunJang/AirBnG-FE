@@ -1,20 +1,23 @@
 import qs from "qs";
 import { httpAuth, httpPublic } from "./http";
 
-// params 객체를 받아 백엔드 쿼리 파라미터로 전달
 export const getReservationList = ({ isDropper, memberId, state, nextCursorId, period }) => {
-    return httpAuth.get("/reservations", {
+    // 프론트에서 안전하게 전처리
+    const safeState = state ? state.map((s) => s.toUpperCase()) : undefined;
+    const safePeriod = period ? period.toUpperCase() : undefined;
+
+    return httpPublic.get("/reservations", {
         params: {
             isDropper,
             memberId,
-            state,       // 배열이면 Axios가 자동으로 쿼리스트링으로 변환
+            state: safeState,
             nextCursorId,
-            period
+            period: safePeriod,
         },
         paramsSerializer: (params) =>
-            qs.stringify(params, { arrayFormat: "repeat", skipNulls: true })
+            qs.stringify(params, { arrayFormat: "repeat", skipNulls: true }),
     });
-}
+};
 
 // 예약 폼 가져오기
     export const getReservationForm = async (lockerId) => {
