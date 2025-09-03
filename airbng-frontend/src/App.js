@@ -5,8 +5,8 @@ import "./styles/App.css";
 import ReservationDetail from "./pages/ReservationDetail";
 import HomePage from "./pages/HomePage";
 import ReservationFormPage from "./pages/ReservationFormPage";
-
-import "./styles/App.css";
+import MyPage from "./pages/MyPage";
+import SignupPage from "./pages/SignupPage";
 
 import "./styles/App.css";
 import ReservationList from "./pages/ReservationList";
@@ -17,7 +17,6 @@ function App() {
     if (pathname.startsWith("/page/chatList")) return "chat";
     if (pathname.startsWith("/page/reservations")) return "calendar";
     if (pathname.startsWith("/page/mypage")) return "mypage";
-    return "home";
   }
 
   function MainContent() {
@@ -40,8 +39,8 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/page/home" element={<HomePage />} />
-          <Route path="/page/reservations/list" element={<ReservationList />} />
           <Route path="/page/home" element={<HomePage />} />
+          <Route path="/page/reservations/list" element={<ReservationList />} />
           <Route
             path="/page/reservations/detail/:id"
             element={<ReservationDetail />}
@@ -50,6 +49,8 @@ function App() {
             path="/page/reservations/form"
             element={<ReservationFormPage />}
           />
+          <Route path="/page/mypage" element={<MyPage />} />
+          <Route path="/page/signup" element={<SignupPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
