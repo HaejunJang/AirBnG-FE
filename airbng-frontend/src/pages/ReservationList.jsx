@@ -22,9 +22,6 @@ const ReservationList = () => {
     // const { member } = useContext(AuthContext);
     // const memberId = member?.memberId;
     const memberId = 1;
-    // const reservationHook = useReservationList(memberId);
-    // const modalHook = useModal();
-    // const dropdownHook = useDropdown();
 
 
     const {
@@ -78,64 +75,8 @@ const ReservationList = () => {
     const shouldShowFilter = ['COMPLETED', 'CANCELLED'].some(s => currentStates.includes(s));
 
 
-//더미 데이터 -> 나중에 삭제
-//     const dummyReservations = [
-//         {
-//             reservationId: 1,
-//             lockerId: 101,
-//             lockerName: '강남역 1번 출구 보관소',
-//             lockerImage: 'https://via.placeholder.com/80',
-//             durationHours: 5,
-//             jimTypeResults: ['가방', '박스'],
-//             dateOnly: new Date(),
-//             startTime: new Date(),
-//             endTime: new Date(Date.now() + 5 * 3600 * 1000),
-//             state: 'PENDING',
-//             role: 'DROPPER',
-//         },
-//         {
-//             reservationId: 2,
-//             lockerId: 102,
-//             lockerName: '홍대입구역 보관소',
-//             lockerImage: '',
-//             durationHours: 2,
-//             jimTypeResults: ['가방'],
-//             dateOnly: new Date(),
-//             startTime: '2025/07/11',
-//             endTime: new Date(Date.now() + 2 * 3600 * 1000),
-//             state: 'CONFIRMED',
-//             role: 'DROPPER',
-//         },
-//         {
-//             reservationId: 3,
-//             lockerId: 103,
-//             lockerName: '서울역 보관소',
-//             lockerImage: 'https://via.placeholder.com/80',
-//             durationHours: 10,
-//             jimTypeResults: ['박스', '짐가방'],
-//             dateOnly: '2025/02/11',
-//             startTime: '2025/02/11',
-//             endTime: '2025/02/11',
-//             state: 'COMPLETED',
-//             role: 'DROPPER',
-//         },
-//         {
-//             reservationId: 4,
-//             lockerId: 104,
-//             lockerName: '신촌역 보관소',
-//             lockerImage: '',
-//             durationHours: 3,
-//             jimTypeResults: ['가방'],
-//             dateOnly: '2025/02/01',
-//             startTime: '2025/02/01',
-//             endTime: '2025/02/01',
-//             state: 'CANCELLED',
-//             role: 'DROPPER',
-//         },
-//     ];
-
     //필터링
-    const filteredReservations = reservations.filter(reservation => {  // 실제 구현은 dummyReservations 대신 reservations 넣기
+    const filteredReservations = reservations.filter(reservation => {
         // 1) role 필터링
         const roleMatches = currentIsDropper ? reservation.role === 'DROPPER' : reservation.role === 'KEEPER';
 

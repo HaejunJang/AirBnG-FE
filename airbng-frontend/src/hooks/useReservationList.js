@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { getReservationList, deleteReservationApi } from "../api/reservationApi";
+import { getReservationList, deleteReservationApi, cancelReservationApi} from "../api/reservationApi";
 
 const periodOptions = ["1W", "3M", "6M", "1Y", "2Y", "ALL"];
 
@@ -79,6 +79,7 @@ const useReservationList = (memberId) => {
         [currentIsDropper, currentStates, currentPeriod, nextCursorId, hasNextPage, loading, memberId]
     );
 
+    //삭제
     const deleteReservation = async (reservationId) => {
         try {
             const response = await deleteReservationApi(reservationId);
@@ -98,6 +99,29 @@ const useReservationList = (memberId) => {
             return { success: false };
         }
     };
+
+    // //예약상세보기
+    // const goToReservationDetail = async (navigate, reservationId, memberId) => {
+    //     await getReservationDetailApi(reservationId, memberId);
+    // };
+    //
+    // // 다시 예약 (예약 폼 페이지로 이동)
+    // const reBooking = async (navigate, lockerId) => {
+    //     await getReservationForm(lockerId);
+    // };
+
+    // 예약 취소 (API 호출 후 목록으로 이동)
+     const cancelReservation = async (navigate, reservationId, memberId) => {
+        try {
+            await cancelReservationApi(reservationId, memberId);
+            alert("예약이 취소되었습니다.");
+            navigate("/reservations");
+        } catch (err) {
+            console.error("예약 취소 실패:", err);
+            alert("예약 취소에 실패했습니다.");
+        }
+    };
+
 
     useEffect(() => {
         if (memberId) fetchReservations(true);
@@ -136,6 +160,7 @@ const useReservationList = (memberId) => {
             setReservations([]);
         },
         deleteReservation,
+        cancelReservation,
         fetchReservations,
         hasNextPage,
         setReservations,

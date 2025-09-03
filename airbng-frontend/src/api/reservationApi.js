@@ -20,6 +20,18 @@ export const getReservationList = ({ isDropper, memberId, state, nextCursorId, p
 };
 
 
+
+// 예약 상세 조회
+export const getReservationDetailApi = (reservationId, memberId) => {
+    return httpAuth.get(`/reservations/${reservationId}/members/${memberId}/detail`);
+};
+
+// 예약 취소
+export const cancelReservationApi = (reservationId, memberId) => {
+    return httpAuth.post(`/reservations/${reservationId}/members/${memberId}/cancel`);
+};
+
+
 // 예약 폼 가져오기
     export const getReservationForm = async (lockerId) => {
         const response = await httpPublic.get(
