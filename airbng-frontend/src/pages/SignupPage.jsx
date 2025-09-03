@@ -346,7 +346,8 @@ function SignUpPage() {
 
       if (result.code === 1000) {
         showModal("success", "회원가입 완료!", "", () => {
-          navigate(`/page/login?redirect=${redirectUrl}`, { replace: true });
+          // navigate(`/page/login?redirect=${redirectUrl}`, { replace: true });
+          navigate("/page/login");
         });
       } else {
         showModal(

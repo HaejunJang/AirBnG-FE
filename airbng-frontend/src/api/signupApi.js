@@ -1,11 +1,11 @@
-import { http } from "./http";
+import { httpPublic } from "./http";
 
 export const signupApi = {
   // 이메일 중복 확인
   checkEmailDuplicate: async (email) => {
     try {
       console.log("메서드 호출");
-      const response = await http.get(
+      const response = await httpPublic.get(
         `/members/check-email?email=${encodeURIComponent(email)}`
       );
       return response.data;
@@ -18,7 +18,7 @@ export const signupApi = {
   // 닉네임 중복 확인
   checkNicknameDuplicate: async (nickname) => {
     try {
-      const response = await http.get(
+      const response = await httpPublic.get(
         `/members/check-nickname?nickname=${encodeURIComponent(nickname)}`
       );
       return response.data;
@@ -48,7 +48,7 @@ export const signupApi = {
         formData.append("profileImage", profileImage);
       }
 
-      const response = await http.post("/members/signup", formData, {
+      const response = await httpPublic.post("/members/signup", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
