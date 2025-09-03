@@ -9,8 +9,6 @@ import SignupPage from "./pages/SignupPage";
 
 import "./styles/App.css";
 
-import "./styles/App.css";
-
 function App() {
   function getActiveNav(pathname) {
     if (pathname.startsWith("/page/lockers")) return "cart";

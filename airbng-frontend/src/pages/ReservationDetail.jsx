@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { http } from '../api/http';
 import '../styles/pages/ReservationDetail.css';
+import { httpPublic } from "../api/http";
 
 import RotateIcon from '../assets/3d-rotate.svg';
 import BoxIcon from '../assets/box.svg';
@@ -24,10 +24,10 @@ const ReservationDetail = () => {
       const apiUrl = `/AirBnG/reservations/${testReservationId}/members/${testMemberId}/detail`;
       console.log('API 호출 URL:', apiUrl);
       
-      const response = await http.get(apiUrl);
       console.log('API 응답 성공:', response);
       console.log('응답 데이터:', response.data);
       
+      const response = await httpPublic.get(apiUrl);
       setReservationData(response.data);
     } catch (err) {
       console.error('API 호출 에러 상세:', err);
