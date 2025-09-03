@@ -23,19 +23,22 @@ export const getStatusText = (state) => {
     return <span className={`status-text ${s.class}`}>{s.text}</span>;
 };
 
-// 예약 상세 페이지 이동
-export const goToReservationDetail = (navigate, reservationId, role) => {
-    if (role === 'KEEPER') {
-        navigate(`/reservations/confirm?reservationId=${reservationId}`);
-    } else {
-        navigate(`/reservations?id=${reservationId}`);
-    }
+
+//예약 상세 보기
+export const goToReservationDetail = (navigate, reservationId, memberId) => {
+    navigate(`/reservations/${reservationId}/members/${memberId}/detail`);
 };
 
-// 다시 예약
+//다시 예약
 export const reBooking = (navigate, lockerId) => {
-    navigate(`/lockers/${lockerId}/reservation`);
+    navigate(`/reservations/form?lockerId=${lockerId}`);
 };
+
+//예약 취소하기
+export const reservationCancel = (navigate, reservationId, memberId) => {
+    navigate(`/reservations/${reservationId}/members/${memberId}/cancel`);
+};
+
 
 // 짐 타입 텍스트 생성
 export const getJimTypesText = (jimTypeResults) => {
