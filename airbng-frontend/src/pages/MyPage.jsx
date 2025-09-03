@@ -28,37 +28,120 @@ const MyPage = () => {
     animatePageElements();
   }, [sessionData.isLoggedIn]);
 
+  // JWT 토큰 디코딩 함수
+  const decodeJWT = (token) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('JWT 디코딩 실패:', error);
+      return null;
+    }
+  };
+
+  // JWT 토큰 만료 확인
+  const isTokenExpired = (token) => {
+    try {
+      const decoded = decodeJWT(token);
+      if (!decoded || !decoded.exp) return true;
+      
+      const currentTime = Math.floor(Date.now() / 1000);
+      return decoded.exp < currentTime;
+    } catch (error) {
+      return true;
+    }
+  };
+
+  // Authorization 헤더에서 토큰 추출
+  const getAuthToken = () => {
+    return localStorage.getItem('accessToken');
+  };
+
+  // 토큰 저장
+  const setAuthToken = (token) => {
+    localStorage.setItem('accessToken', token);
+  };
+
+  // 토큰 제거
+  const removeAuthToken = () => {
+    localStorage.removeItem('accessToken');
+  };
+
   // 마이페이지 초기화
   const initializeMyPage = () => {
     checkLoginStatus();
     setupEventListeners();
   };
 
-  // 로그인 상태 확인 (실제 서버 API 호출)
+  // 로그인 상태 확인 (JWT 토큰 기반)
   const checkLoginStatus = async () => {
     try {
-      const response = await fetch('/AirBnG/members/session', {
+      const token = getAuthToken();
+      
+      if (!token) {
+        setSessionData(prev => ({ ...prev, isLoggedIn: false }));
+        return;
+      }
+
+      // 토큰 만료 확인
+      if (isTokenExpired(token)) {
+        console.log('토큰이 만료되었습니다.');
+        removeAuthToken();
+        setSessionData(prev => ({ ...prev, isLoggedIn: false }));
+        return;
+      }
+
+      // 토큰에서 사용자 정보 추출
+      const decoded = decodeJWT(token);
+      if (!decoded) {
+        removeAuthToken();
+        setSessionData(prev => ({ ...prev, isLoggedIn: false }));
+        return;
+      }
+
+      // 서버에 토큰 검증 요청 (선택적)
+      const response = await fetch('/AirBnG/members/verify', {
         method: 'GET',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
       if (response.ok) {
         const data = await response.json();
         if (data.code === 2000 && data.data) {
           setSessionData({
-            memberId: data.data.memberId,
+            memberId: data.data.memberId || decoded.id,
             nickname: data.data.nickname,
             email: data.data.email,
             isLoggedIn: true
           });
         } else {
+          // 서버에서 토큰이 유효하지 않다고 응답
+          removeAuthToken();
           setSessionData(prev => ({ ...prev, isLoggedIn: false }));
         }
-      } else {
+      } else if (response.status === 401) {
+        // 토큰이 유효하지 않음
+        removeAuthToken();
         setSessionData(prev => ({ ...prev, isLoggedIn: false }));
+      } else {
+        // 기타 오류 - 토큰이 있고 만료되지 않았다면 로그인 상태로 유지
+        setSessionData({
+          memberId: decoded.id,
+          nickname: '', // 서버에서 받아올 수 없으면 빈값
+          email: '',
+          isLoggedIn: true
+        });
       }
     } catch (error) {
-      console.error('세션 확인 실패:', error);
+      console.error('로그인 상태 확인 실패:', error);
+      removeAuthToken();
       setSessionData(prev => ({ ...prev, isLoggedIn: false }));
     }
   };
@@ -188,50 +271,54 @@ const MyPage = () => {
     }, 300);
   };
 
-  // 로그아웃
+  // 로그아웃 (JWT 방식)
   const logout = () => {
     showConfirmModal('로그아웃', '정말로 로그아웃하시겠습니까?', async () => {
       closeModal();
       showLoadingAnimation();
 
       try {
-        const response = await fetch('/AirBnG/members/logout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        });
-
-        const data = await response.json();
-        console.log('서버 응답 데이터:', data);
-
-        if (data.code === 2000) {
-          // 로그아웃 성공
-          console.log('서버 로그아웃 성공:', data.message);
-          
-          // 세션 데이터 초기화
-          setSessionData({
-            memberId: '',
-            nickname: '',
-            email: '',
-            isLoggedIn: false
+        const token = getAuthToken();
+        
+        if (token) {
+          // 서버에 로그아웃 요청 (토큰 무효화)
+          const response = await fetch('/AirBnG/members/logout', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
           });
 
-          setTimeout(() => {
-            hideLoadingAnimation();
-            console.log('로그아웃 완료');
-          }, 500);
+          const data = await response.json();
+          console.log('서버 응답 데이터:', data);
 
-        } else {
-          console.error('로그아웃 실패:', data.message);
-          hideLoadingAnimation();
-          showErrorModal('로그아웃 실패', data.message || '로그아웃 중 오류가 발생했습니다.');
+          if (data.code === 2000) {
+            console.log('서버 로그아웃 성공:', data.message);
+          } else {
+            console.error('서버 로그아웃 실패:', data.message);
+          }
         }
+
+        // 클라이언트 토큰 제거 및 상태 초기화
+        removeAuthToken();
+        setSessionData({
+          memberId: '',
+          nickname: '',
+          email: '',
+          isLoggedIn: false
+        });
+
+        setTimeout(() => {
+          hideLoadingAnimation();
+          console.log('로그아웃 완료');
+        }, 500);
+
       } catch (error) {
         console.error('로그아웃 API 요청 실패:', error);
         
         // 네트워크 오류 등으로 실패해도 클라이언트 정리는 수행
+        removeAuthToken();
         setSessionData({
           memberId: '',
           nickname: '',
@@ -408,9 +495,6 @@ const MyPage = () => {
     <div className="container">
       {/* 헤더 */}
       <header className="header">
-        <div className="header-content">
-          <h1>마이페이지</h1>
-        </div>
       </header>
 
       {/* 메인 컨텐츠 */}
