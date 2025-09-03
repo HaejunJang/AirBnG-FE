@@ -5,6 +5,7 @@ import "./styles/App.css";
 import ReservationDetail from "./pages/ReservationDetail";
 import HomePage from "./pages/HomePage";
 import ReservationFormPage from "./pages/ReservationFormPage";
+import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
 
 import "./styles/App.css";
@@ -45,6 +46,7 @@ function App() {
             path="/page/reservations/form"
             element={<ReservationFormPage />}
           />
+          <Route path="/page/mypage" element={<MyPage />} />
           <Route path="/page/signup" element={<SignupPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
