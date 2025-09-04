@@ -34,7 +34,7 @@
   box-shadow:0 30px 40px rgba(0,0,0,.12);
   border:0; overflow:hidden;
 }
-/* ⛔️ 이전 라디얼 글로우(::before)로 인한 왜곡 제거 */
+/* 이전 라디얼 글로우(::before)로 인한 왜곡 제거 */
 .top-section::before{ content:none !important; }
 
 .top-bar{
