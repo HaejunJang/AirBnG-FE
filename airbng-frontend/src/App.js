@@ -10,13 +10,11 @@ import LockerRootPage from "./pages/LockerRootPage";
 import ReservationFormPage from "./pages/ReservationFormPage";
 import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
-
-import "./styles/App.css";
 import ReservationList from "./pages/ReservationList";
 
 function App() {
   function getActiveNav(pathname) {
-    if (pathname.startsWith("/page/lockers")) return "locker";
+    if (pathname.startsWith("/page/lockers")) return "cart";
     if (pathname.startsWith("/page/chatList")) return "chat";
     if (pathname.startsWith("/page/reservations")) return "calendar";
     if (pathname.startsWith("/page/mypage")) return "mypage";
