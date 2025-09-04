@@ -1,0 +1,709 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+}
+
+body {
+    margin: 0;
+    background-color: #f5f5f5;
+    /*max-width: 412px;*/
+    margin: auto;
+    padding-bottom: 80px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    /*min-height: 100vh;*/
+    max-width: 412px;
+    margin: 0 auto;
+    overflow: hidden;      /* 전체 스크롤 막기 */
+    background-color: #ffffff;
+}
+
+/*.header {*/
+/*    position: fixed;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    right: 0;*/
+/*    max-width: 412px;*/
+/*    margin: 0 auto;*/
+/*    z-index: 1000;*/
+/*    height: var(--header-height);*/
+/*    background: white;*/
+/*    padding: 0 20px;*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    border-bottom: 1px solid #eee;*/
+/*}*/
+
+.back-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+/*.header-title {*/
+/*    font-size: 18px;*/
+/*    font-weight: 600;*/
+/*}*/
+
+.tab-container {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    max-width: 412px;
+    margin: 0 auto;
+    background: white;
+    z-index: 100;
+    border-bottom: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.tabs {
+    display: flex;
+    position: sticky;
+}
+
+.tab {
+    flex: 1;
+    padding: 15px 20px;
+    text-align: center;
+    background: none;
+    border: none;
+    color: #666;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.tab.active {
+    color: #4561DB;
+    border-bottom-color: #4561DB;
+    font-weight: 600;
+}
+
+.tab:hover {
+    color: #4561DB;
+    transform: translateY(-2px);
+}
+
+.toggle-section {
+    /*padding: 10px 20px 15px 20px;*/
+    /*background: white;*/
+    /*border-bottom: none;*/
+    /*display: flex;*/
+    /*margin-top: calc(var(--header-height) + 60px + 20px);*/
+    position: fixed;
+    top: calc(var(--header-height) + 60px); /* header + tab 높이 */
+    left: 0;
+    right: 0;
+    max-width: 412px;
+    margin: 0 auto;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /*justify-content: center;*/
+    gap: 10px;
+    padding: 30px 20px 30px;
+    z-index: 90; /* header, tab보다는 낮게 */
+}
+
+.toggle-container {
+    display: flex;
+    position: relative;
+    width: 160px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50px;
+    border: 0.5px solid #E5E5E5;
+    background: #FFF;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.10);
+    padding: 0;
+}
+
+.toggle-option {
+    flex: 1;
+    height: 28px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 13px;
+    transition: all 0.3s;
+    color: #D5D5D5;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+}
+
+.toggle-option.active {
+    color: #FFF;
+    background: #4561DB;
+    box-shadow: none;
+}
+
+.filter-section {
+    /*display: flex;*/
+    /*justify-content: flex-end;*/
+    /*background: white;*/
+    /*padding: 0 20px;*/
+    /*position: fixed;*/
+    top: calc(var(--header-height) + 60px + 60px); /* header + tab + toggle */
+    left: 0;
+    right: 0;
+    max-width: 412px;
+    /*margin: 0 auto;*/
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    /*padding: 0 20px;*/
+    background: white;
+    z-index: 80;
+}
+
+.filter-section.show {
+    display: flex;
+}
+
+.period-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    border-radius: 5px;
+    border: 0.5px solid #ccc;
+    padding: 5px 13px;
+    gap: 3px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    cursor: pointer;
+}
+
+.dropdown-arrow {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.3s;
+}
+
+.dropdown-btn.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+    z-index: 1000;
+    display: none;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 14px;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.reservation-list {
+    padding: 15px;
+    position: relative;
+    margin-top: 212px;
+    /*margin-bottom: 80px;*/
+    height: 620px;
+    /*padding: 15px;*/
+    /*height: calc(100vh - 219px);*/
+    overflow-y: auto;
+    /*padding-bottom: 80px;*/
+}
+
+.reservation-card {
+    background: white;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: all 0.3s;
+    max-width: 372px;
+    height: auto;
+}
+
+/* 버튼 있는 completed 카드 */
+.reservation-card.completed.has-actions {
+    min-height: 250px;
+}
+
+/* 버튼 없는 completed 카드 */
+.reservation-card.completed.no-actions {
+    min-height: 0;
+}
+.reservation-card.cancelled-state {
+    min-height: 220px;
+}
+
+.reservation-card.cancelled .reservation-body {
+    opacity: 0.5;
+}
+
+.status-text.cancelled {
+    opacity: 0.5;
+    font-size: 14px;
+    margin-left: 4px;
+}
+
+.reservation-card.cancelled .reservation-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    margin-bottom: 4px;
+}
+
+.reservation-card.cancelled .more-btn.always-visible {
+    opacity: 1;
+    background: none;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reservation-card.cancelled .more-btn.always-visible .more-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.reservation-header {
+    margin-bottom: 20px;
+}
+
+.reservation-date {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.reservation-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row-reverse;
+    margin: 15px 0;
+    position: relative;
+}
+
+.view-details {
+    color: #4561DB;
+    text-decoration: none;
+    background: none;
+    border: none;
+    font-size: 13px;
+    font-weight: 580;
+    padding-bottom: 2px;
+    cursor: pointer;
+    background-image: linear-gradient(#4561DB, #4561DB);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.2s ease-in-out;
+}
+
+.view-details:hover {
+    background-size: 100% 1px;
+}
+
+.status-text {
+    font-size: 13px;
+    letter-spacing: 0.7px;
+    font-weight: 600;
+}
+
+.status-text.confirmed {
+    color: #28a776;
+}
+
+.status-text.pending {
+    color: #ffc107;
+}
+
+.status-text.completed {
+    color: #6c757d;
+}
+
+.status-text.cancelled {
+    color: #dc3545;
+}
+
+.reservation-item {
+    display: flex;
+    background-color: white;
+    padding: 20px 12px;
+    gap: 12px;
+    border-top: 1px solid #eee;
+}
+
+.item-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: cover;
+    background-color: #f8f9fa;
+}
+
+.item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.item-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/*.item-time {*/
+/*    font-size: 13px;*/
+/*    color: #666;*/
+/*    margin-bottom: 2px;*/
+/*}*/
+
+.item-types {
+    font-size: 13px;
+    color: #666;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+
+.item-date-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    gap: 20px;
+}
+
+.item-date-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    color: #444;
+    width: 50%;
+}
+
+.item-date-col .label {
+    font-weight: 500;
+    color: #999;
+    margin-bottom: 4px;
+    font-size: 12px;
+    text-align: left;
+}
+
+.item-date-col .value {
+    font-weight: 600;
+    color: #222;
+    font-size: 13px;
+}
+
+.actions-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 0;
+}
+
+.btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    flex: 1;
+    text-align: center;
+    height: 35px;
+}
+
+.btn-cancel, .rebook-btn {
+    background: #f1f3f5;
+    color: #495057;
+    border: 1px solid #e1e1e1;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+    text-align: center;
+}
+
+.btn-cancel:hover, .rebook-btn:hover {
+    background: #e9ecef;
+    border-color: #4561DB;
+    box-shadow: 0 0 0 3px rgba(69, 97, 219, 0.1);
+}
+
+.completed-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.more-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    background: #f1f3f5;
+    border: 1px solid #e1e1e1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+    transition: all 0.2s;
+}
+
+.more-btn:hover {
+    background: #e9ecef;
+    border-color: #4561DB;
+    box-shadow: 0 0 0 3px rgba(69, 97, 219, 0.1);
+}
+
+.more-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.more-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    background: #f1f3f5;
+    border: 1px solid #e1e1e1;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    min-width: 80px;
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+}
+
+.more-menu.show {
+    display: block;
+}
+
+.more-menu-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 14px;
+    color: #dc3545;
+    text-align: center;
+    font-weight: 500;
+}
+
+.more-menu-item:hover {
+    background-color: #f1f1f1;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+/*.modal-overlay {*/
+/*    position: fixed;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    right: 0;*/
+/*    bottom: 0;*/
+/*    background: rgba(0, 0, 0, 0.5);*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    z-index: 9999;*/
+/*}*/
+
+/*.modal {*/
+/*    height: 100%;*/
+/*    background: white;*/
+/*    border-radius: 12px;*/
+/*    max-width: 320px;*/
+/*    width: 90%;*/
+/*    overflow: hidden;*/
+/*}*/
+
+
+/*.modal-contentr {*/
+/*    padding: 40px 20px 20px;*/
+/*    text-align: center;*/
+/*    height: 100%;*/
+/*}*/
+
+.modal-overlay {
+    display: flex;
+    align-items: flex-start; /* center에서 flex-start로 변경 */
+    justify-content: center;
+    padding-top: 30vh; /* 화면 높이의 20% 지점에서 시작 */
+    /* 기존 overlay 스타일들... */
+}
+
+.modal-contentr {
+    padding: 40px 20px 20px;
+    text-align: center;
+    background: white;
+    border-radius: 12px;
+    max-width: 320px;
+    width: 90%;
+}
+
+.modal-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 24px;
+    color: white;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.modal-message {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    border-top: 1px solid #eee;
+    display: flex;
+}
+
+.modal-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #4561DB;
+    transition: background-color 0.2s;
+}
+
+.modal-btn:hover {
+    background: #f8f9fa;
+}
+
+.modal-icon.success-rotate {
+    background: linear-gradient(135deg, rgba(69, 97, 219, 0.4) 0%, rgba(59, 130, 246, 0.3) 30%, rgba(139, 92, 246, 0.4) 70%, rgba(69, 97, 219, 0.5) 100%);
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 900;
+    font-size: 28px;
+    animation: successGlassSpin 1s ease-out;
+}
+
+.modal-icon.confirm-bounce {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.4) 0%, rgba(251, 191, 36, 0.3) 30%, rgba(245, 158, 11, 0.4) 70%, rgba(217, 119, 6, 0.5) 100%);
+    animation: confirmBounceIn 0.8s ease-out;
+}
+
+.modal-icon.error-shake {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.4) 0%, rgba(239, 68, 68, 0.3) 30%, rgba(220, 53, 69, 0.4) 70%, rgba(185, 28, 28, 0.5) 100%);
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 900;
+    font-size: 28px;
+    animation: errorShake 0.5s ease-out;
+}
+
+@keyframes successGlassSpin {
+    0% { transform: rotateY(0deg) scale(0.4); opacity: 0; }
+    30% { transform: rotateY(108deg) scale(1.1); opacity: 0.8; }
+    60% { transform: rotateY(216deg) scale(0.95); opacity: 1; }
+    85% { transform: rotateY(340deg) scale(1.05); opacity: 1; }
+    100% { transform: rotateY(360deg) scale(1); opacity: 1; }
+}
+
+@keyframes confirmBounceIn {
+    0% { transform: scale(0.3) translateY(20px); opacity: 0; }
+    20% { transform: scale(1.2) translateY(-10px); opacity: 0.8; }
+    40% { transform: scale(0.9) translateY(5px); opacity: 1; }
+    60% { transform: scale(1.1) translateY(-3px); opacity: 1; }
+    80% { transform: scale(0.95) translateY(2px); opacity: 1; }
+    100% { transform: scale(1) translateY(0px); opacity: 1; }
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-4px); }
+    20% { transform: translateX(4px); }
+    30% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    50% { transform: translateX(-3px); }
+    60% { transform: translateX(3px); }
+    70% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+    90% { transform: translateX(-1px); }
+}

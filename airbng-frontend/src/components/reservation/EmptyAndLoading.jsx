@@ -1,0 +1,26 @@
+import React from 'react';
+
+const EmptyAndLoading = ({ data, loading, message }) => {
+    // 데이터가 없고 로딩이 끝났을 때만 빈 상태
+    const isEmpty = !loading && (!data || data.length === 0);
+    // 예약 내역이 있으면 loading도 표시하지 않음
+    const shouldShowLoading = loading && (!data || data.length === 0);
+
+    return (
+        <div className="reservation-list">
+            {shouldShowLoading && (
+                <div className="loading">
+                    <p>로딩 중...</p>
+                </div>
+            )}
+
+            {isEmpty && (
+                <div className="empty-state">
+                    <p>{message || "예약 내역이 없습니다."}</p>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default EmptyAndLoading;
