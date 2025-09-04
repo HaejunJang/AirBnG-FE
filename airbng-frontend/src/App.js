@@ -3,6 +3,9 @@ import Navbar from "./components/Footer/Navbar";
 import "./styles/App.css";
 
 import HomePage from "./pages/HomePage";
+import LockerManagePage from "./pages/LockerManagePage";
+import LockerRegisterPage from "./pages/LockerRegisterPage";
+import LockerRootPage from "./pages/LockerRootPage";
 
 function App() {
   function getActiveNav(pathname) {
@@ -22,8 +25,12 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/page/home" element={<HomePage />} />
+          <Route path="/page/lockers" element={<LockerRootPage />} />
+          <Route path="/page/lockers/manage" element={<LockerManagePage />} />
+          <Route path="/page/lockers/register" element={<LockerRegisterPage />} />
         </Routes>
         <Navbar active={active} />
+        
       </div>
     );
   }
