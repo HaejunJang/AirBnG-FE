@@ -2,9 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/index.css';
 import App from './App';
-import "./styles/global.css"; // 전역 한 번만
+import "./styles/global.css";
+import { AuthProvider } from './context/AuthContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    <App />
+    <AuthProvider>
+        <App />
+    </AuthProvider>
 );

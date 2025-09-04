@@ -2,9 +2,19 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Footer/Navbar";
 import "./styles/App.css";
 
+import ReservationDetail from "./pages/ReservationDetail";
 import HomePage from "./pages/HomePage";
 import SearchPage from "./pages/SearchPage";
 import SearchFilterPage from "./pages/SearchFilterPage";
+import LockerManagePage from "./pages/LockerManagePage";
+import LockerRegisterPage from "./pages/LockerRegisterPage";
+import LockerRootPage from "./pages/LockerRootPage";
+import ReservationFormPage from "./pages/ReservationFormPage";
+import MyPage from "./pages/MyPage";
+import SignupPage from "./pages/SignupPage";
+
+import "./styles/App.css";
+import ReservationList from "./pages/ReservationList";
 
 function App() {
   function getActiveNav(pathname) {
@@ -19,15 +29,40 @@ function App() {
     const location = useLocation();
     const active = getActiveNav(location.pathname);
 
+    // 네비바를 숨길 페이지들 정의
+    const hideNavbarPaths = [
+      "/page/reservations/detail",
+      "/page/reservations/form",
+    ];
+
+    // 현재 경로가 네비바를 숨겨야 하는 경로인지 확인
+    const shouldHideNavbar = hideNavbarPaths.some((path) =>
+      location.pathname.startsWith(path)
+    );
+
     return (
-      <div>
+      <div className="airbng-home">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/page/home" element={<HomePage />} />
           <Route path="/page/lockerSearchDetails" element={<SearchPage />} />
           <Route path="/page/lockerSearch" element={<SearchFilterPage />} />
+          <Route path="/page/lockers" element={<LockerRootPage />} />
+          <Route path="/page/lockers/manage" element={<LockerManagePage />} />
+          <Route path="/page/lockers/register" element={<LockerRegisterPage />} />
+          <Route path="/page/reservations/list" element={<ReservationList />} />
+          <Route
+            path="/page/reservations/detail/:id"
+            element={<ReservationDetail />}
+          />
+          <Route
+            path="/page/reservations/form"
+            element={<ReservationFormPage />}
+          />
+          <Route path="/page/mypage" element={<MyPage />} />
+          <Route path="/page/signup" element={<SignupPage />} />
         </Routes>
-        <Navbar active={active} />
+        {!shouldHideNavbar && <Navbar active={active} />}
       </div>
     );
   }
