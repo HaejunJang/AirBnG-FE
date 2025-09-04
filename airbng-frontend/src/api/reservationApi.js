@@ -19,13 +19,6 @@ export const getReservationList = ({ isDropper, memberId, state, nextCursorId, p
     });
 };
 
-
-
-// 예약 상세 조회
-export const getReservationDetailApi = (reservationId, memberId) => {
-    return httpAuth.get(`/reservations/${reservationId}/members/${memberId}/detail`);
-};
-
 // 예약 취소
 export const cancelReservationApi = (reservationId, memberId) => {
     return httpAuth.post(`/reservations/${reservationId}/members/${memberId}/cancel`);
@@ -33,18 +26,20 @@ export const cancelReservationApi = (reservationId, memberId) => {
 
 
 // 예약 폼 가져오기
-    export const getReservationForm = async (lockerId) => {
-        const response = await httpPublic.get(
-            "/reservations/form?lockerId=" + lockerId
-        );
-        return response.data;
-    };
+export const getReservationForm = async (lockerId) => {
+    const response = await httpPublic.get(
+        "/reservations/form?lockerId=" + lockerId
+    );
+    return response.data;
+};
 
-    export const deleteReservationApi = (reservationId) => {
-        return httpAuth.post(`/reservations/delete`, null, {
-            params: {reservationId},
-        });
-    }
+//예약 삭제
+export const deleteReservationApi = (reservationId) => {
+    return httpAuth.post(`/reservations/delete`, null, {
+        params: {reservationId},
+    });
+
+}
 
 // 예약 post
     export const postReservation = async (req) => {

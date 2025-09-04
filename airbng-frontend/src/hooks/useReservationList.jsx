@@ -100,16 +100,6 @@ const useReservationList = (memberId) => {
         }
     };
 
-    // //예약상세보기
-    // const goToReservationDetail = async (navigate, reservationId, memberId) => {
-    //     await getReservationDetailApi(reservationId, memberId);
-    // };
-    //
-    // // 다시 예약 (예약 폼 페이지로 이동)
-    // const reBooking = async (navigate, lockerId) => {
-    //     await getReservationForm(lockerId);
-    // };
-
     // 예약 취소 (API 호출 후 목록으로 이동)
      const cancelReservation = async (navigate, reservationId, memberId) => {
         try {

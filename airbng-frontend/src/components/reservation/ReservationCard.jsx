@@ -12,12 +12,14 @@ import {
 const ReservationCard = ({
                              reservation,
                              currentIsDropper,
+                             memberId,
                              activeMoreMenu,
                              toggleMoreMenu,
                              onShowConfirmModal
                          }) => {
     const navigate = useNavigate();
     const jimTypes = getJimTypesText(reservation.jimTypeResults);
+
 
     const renderActionButtons = () => {
         if (reservation.state === 'PENDING' && currentIsDropper === true) {
