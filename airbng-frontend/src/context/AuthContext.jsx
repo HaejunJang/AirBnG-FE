@@ -23,6 +23,7 @@ export function AuthProvider({ children }) {
     (async () => {
       const t = getAccessToken();
       if (t && !isExpired(t)) {
+        console.log('JWT payload: ', decodeJwt(t));
         setUser(buildUser(t));
         setReady(true);
         return;
