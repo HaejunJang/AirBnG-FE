@@ -1,11 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, formatDateTime, formatDuration } from '../../utils/reservation/dateUtils';
-import { getStatusText, goToReservationDetail, reBooking, getJimTypesText } from '../../utils/reservation/reservationUtils';
+import {
+    getStatusText,
+    goToReservationDetail,
+    reBooking,
+    getJimTypesText,
+    reservationCancel
+} from '../../utils/reservation/reservationUtils';
 
 const ReservationCard = ({
                              reservation,
                              currentIsDropper,
+                             memberId,
                              activeMoreMenu,
                              toggleMoreMenu,
                              onShowConfirmModal
@@ -13,13 +20,14 @@ const ReservationCard = ({
     const navigate = useNavigate();
     const jimTypes = getJimTypesText(reservation.jimTypeResults);
 
+
     const renderActionButtons = () => {
         if (reservation.state === 'PENDING' && currentIsDropper === true) {
             return (
                 <div className="actions-buttons">
                     <button
                         className="btn btn-cancel"
-                        onClick={() => goToReservationDetail(navigate, reservation.reservationId, reservation.role)}
+                        onClick={() => reservationCancel(navigate, reservation.reservationId, memberId)}
                     >
                         취소 요청
                     </button>
@@ -62,7 +70,7 @@ const ReservationCard = ({
                 <div className="actions-buttons">
                     <button
                         className="btn btn-cancel"
-                        onClick={() => goToReservationDetail(navigate, reservation.reservationId, reservation.role)}
+                        onClick={() => reservationCancel(navigate, reservation.reservationId, memberId)}
                     >
                         취소 요청
                     </button>
@@ -96,7 +104,7 @@ const ReservationCard = ({
                         <button
                             className="view-details"
                             onClick={() =>
-                                goToReservationDetail(navigate, reservation.reservationId, reservation.role)
+                                goToReservationDetail(navigate, reservation.reservationId, memberId)
                             }
                         >
                             예약 상세 &gt;
@@ -188,7 +196,7 @@ const ReservationCard = ({
                 <div className="reservation-info-row">
                     <button
                         className="view-details"
-                        onClick={() => goToReservationDetail(navigate, reservation.reservationId, reservation.role)}
+                        onClick={() => goToReservationDetail(navigate, reservation.reservationId, memberId)}
                     >
                         예약 상세 &gt;
                     </button>
