@@ -4,6 +4,9 @@ import "./styles/App.css";
 
 import ReservationDetail from "./pages/ReservationDetail";
 import HomePage from "./pages/HomePage";
+import LockerManagePage from "./pages/LockerManagePage";
+import LockerRegisterPage from "./pages/LockerRegisterPage";
+import LockerRootPage from "./pages/LockerRootPage";
 import ReservationFormPage from "./pages/ReservationFormPage";
 import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
@@ -39,7 +42,9 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/page/home" element={<HomePage />} />
-          <Route path="/page/home" element={<HomePage />} />
+          <Route path="/page/lockers" element={<LockerRootPage />} />
+          <Route path="/page/lockers/manage" element={<LockerManagePage />} />
+          <Route path="/page/lockers/register" element={<LockerRegisterPage />} />
           <Route path="/page/reservations/list" element={<ReservationList />} />
           <Route
             path="/page/reservations/detail/:id"

@@ -24,15 +24,19 @@ export default function Header({
   showHomeButton = false,
   homeUrl = "/",
   className = "",
+  onBack,
+  onHome,
 }) {
   const navigate = useNavigate();
 
   const handleBack = () => {
+    if (onBack) return onBack();
     if (backUrl) navigate(backUrl);
     else navigate(-1);
   };
 
   const handleHome = () => {
+    if (onHome) return onHome();
     navigate(homeUrl);
   };
 

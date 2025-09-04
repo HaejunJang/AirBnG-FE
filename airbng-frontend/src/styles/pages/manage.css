@@ -1,0 +1,220 @@
+/* ===========================
+   Locker Manage (React)
+   =========================== */
+
+.airbng-manage {
+  /* app-content가 패딩을 주므로 배경/폰트만 */
+  background: var(--bg, #f5f5f5);
+  color: var(--text, #333);
+  font-family: var(--font-sans, 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif);
+  min-height: 100dvh;
+  overflow: auto;
+}
+
+.airbng-manage .manage-container {
+  width: 100%;
+  max-width: var(--app-max-width, 412px);
+  margin-inline: auto;
+  background: #fff;
+  padding: calc(var(--header-height, 60px) + 12px) 20px 
+           calc(var(--bottom-nav-height, 80px) + 12px);
+  border-radius: 0;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,.06));
+  position: relative;
+}
+
+/* header는 공통 Header 컴포넌트 사용 */
+
+/* ---------- form ---------- */
+.airbng-manage .form-group {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.airbng-manage .form-group > label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text, #333);
+}
+
+.airbng-manage input[type="text"],
+.airbng-manage input[type="number"] {
+  width: 100%;
+  height: 44px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #E0E0E0);
+  background: #fff;
+  font-size: 15px;
+  transition: border-color .15s;
+}
+.airbng-manage input[type="text"]:focus,
+.airbng-manage input[type="number"]:focus {
+  outline: none;
+  border-color: var(--primary, #4561DB);
+}
+
+/* 주소 입력(아이콘 포함) - AddressPicker와 동일 클래스 네이밍 */
+.airbng-manage .input-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  border: 1px solid var(--border, #E0E0E0);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+}
+
+.airbng-manage .input-with-icon .location-icon {
+  width: 20px;
+  height: 20px;
+  opacity: .7;
+  flex: 0 0 auto;
+}
+
+.airbng-manage .input-with-icon input.address-field {
+  flex: 1;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #333;
+}
+
+.airbng-manage #detailAddress,
+.airbng-manage .detail-address {
+  margin-bottom: 24px; 
+  height: 44px;
+  border: 1px solid #D5D5D5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #fff;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ---------- images ---------- */
+.airbng-manage .row-helper {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.airbng-manage .image-upload-area { display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+.airbng-manage .image-upload-box img {
+  width: 100px; height: 100px; border: 1px solid #D5D5D5; border-radius: 6px; background: #fff; cursor: pointer;
+}
+.airbng-manage .preview-list { display: flex; gap: 8px; }
+.airbng-manage .preview-item {
+  position: relative; width: 70px; height: 70px; flex: 0 0 auto;
+  border: 1px solid #ddd; border-radius: 6px; overflow: hidden; background: #fff;
+}
+.airbng-manage .preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ---------- jim part ---------- */
+.airbng-manage .condition-row {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 1.5px solid #E5E5E5;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  background: #FFF;
+  height: 48px;
+  transition: all .2s ease;
+}
+.airbng-manage .condition-row.selected {
+  background: rgba(69, 97, 219, .10);
+  border-color: var(--primary, #4561DB);
+}
+.airbng-manage .condition-row > span {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  min-width: 90px;
+  margin-left: 6px;
+  margin-right: auto; /* 가격박스와 간격 유연 */
+}
+
+.airbng-manage .input-wrapper {
+  width: 80px; height: 34px;
+  display: grid; place-items: center;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+  background: #fff;
+  margin-right: 10px;
+}
+.airbng-manage .condition-row.selected .input-wrapper {
+  border-color: var(--primary, #4561DB);
+}
+.airbng-manage .price-display {
+  font-size: 15px;
+  color: #BDBDBD;
+  transition: color .2s;
+}
+.airbng-manage .condition-row.selected .price-display {
+  color: var(--primary, #4561DB);
+}
+
+.airbng-manage .check-btn {
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+}
+.airbng-manage .check-btn img {
+  width: 22px; height: 22px; opacity: .65; transition: opacity .2s;
+}
+.airbng-manage .condition-row.selected .check-btn img { opacity: 1; }
+
+/* ---------- page actions ---------- */
+.airbng-manage .form-actions { margin-top: 24px; }
+.airbng-manage .save-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--primary, #4561DB);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 10px;
+  transition: background .15s;
+}
+.airbng-manage .save-btn:hover { background: #3b57ef; }
+
+/* 하단 토글/삭제 버튼 묶음 */
+.airbng-manage .locker-action-buttons {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.airbng-manage .toggle-btn {
+  width: 100%;
+  padding: 12px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.airbng-manage .btn-stop { background: #ffe5e5; color: #c62828; }
+.airbng-manage .btn-stop:hover { background: #ffcccc; }
+.airbng-manage .btn-restart { background: #e8fbe8; color: #2e7d32; }
+.airbng-manage .btn-restart:hover { background: #d0f0d0; }
+
+.airbng-manage .delete-locker-btn {
+  background: #f44336;
+  color: #fff;
+  font-weight: 700;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+}
+.airbng-manage .delete-locker-btn:hover { background: #d32f2f; }
