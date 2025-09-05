@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import backIcon from '../../../assets/arrow-back.svg';
 import searchIcon from '../../../assets/Group 2.svg';
 import "../../../styles/pages/search.css";
+import {useNavigate} from "react-router-dom";
 
 
-const SearchControls = ({ address, reservationDate, jimTypeId, onBagTypeChange, currentBagType, contextPath }) => {
+const SearchControls = ({ address, reservationDate, jimTypeId, onBagTypeChange, currentBagType }) => {
+    const navigate = useNavigate();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const typeMap = {
@@ -27,13 +29,13 @@ const SearchControls = ({ address, reservationDate, jimTypeId, onBagTypeChange, 
                 className="back-icon"
                 src={backIcon}
                 alt="뒤로가기"
-                onClick={() => window.location.href = `${contextPath}/page/home`}
+                onClick={() => navigate(`/page/home`)}
             />
             {/* 검색바 */}
             <div className="search-container">
                 <form
                     className="search-form"
-                    action={`${contextPath}/search`}
+                    action={`/search`}
                     method="get"
                 >
                     <input
