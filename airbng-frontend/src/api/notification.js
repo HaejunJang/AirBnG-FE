@@ -1,4 +1,4 @@
-import { httpPublic } from "./http";
+import { httpPublic, httpAuth } from "./http";
 
 
 export const getNotification = () => {

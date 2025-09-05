@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getNotification } from '../api/notification'; // 아까 작성한 axios 호출
+import React, { useState, useCallback, useEffect } from 'react';
+import { useSSE } from '../context/SseContext'; // SSEProvider에서 제공
+import { getNotification } from '../api/notification';
 import '../styles/pages/notification.css';
 
-// SSE Manager Mock (실제 구현 시 외부 파일로 분리)
-const getSSEManager = () => ({
-    addEventListener: (event, callback) => {
-        // 실제 SSE 구현
-    },
-    init: () => {
-        // SSE 초기화
-    }
-});
+// // SSE Manager Mock (실제 구현 시 외부 파일로 분리)
+// const getSSEManager = () => ({
+//     addEventListener: (event, callback) => {
+//         // 실제 SSE 구현
+//     },
+//     init: () => {
+//         // SSE 초기화
+//     }
+// });
 
 // Header 컴포넌트
 const Header = ({ title, showBackButton, backUrl }) => (
@@ -179,14 +180,12 @@ const NotificationApp = () => {
         }
     ]);
     const [deletedNotificationIds, setDeletedNotificationIds] = useState(new Map());
-    const [sseManager, setSseManager] = useState(null);
+    const { subscribeToAlarms } = useSSE();
 
-    // 알림의 고유 키 생성
     const getAlarmKey = useCallback((alarmData) => {
         return `${alarmData.id}|${alarmData.message}|${alarmData.type}|${alarmData.reservationId}`;
     }, []);
 
-    // 날짜 포맷팅
     const formatDateTime = useCallback((date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -198,124 +197,17 @@ const NotificationApp = () => {
         return `${year}-${month}-${day} ${ampm} ${String(hours).padStart(2, '0')}:${minutes}`;
     }, []);
 
-    // 로컬 스토리지 저장
-    const saveToStorage = useCallback(() => {
-        if (!memberId) return;
-
-        const notificationsJson = JSON.stringify(notifications);
-        const deletedJson = JSON.stringify([...deletedNotificationIds.entries()]);
-
-        try {
-            localStorage.setItem(`alarmHistory_${memberId}`, notificationsJson);
-            localStorage.setItem(`deletedAlarms_${memberId}`, deletedJson);
-        } catch (error) {
-            console.error('저장 실패:', error);
-        }
-    }, [memberId, notifications, deletedNotificationIds]);
-
-    // 로컬 스토리지 로드
-    const loadFromStorage = useCallback(() => {
-        if (!memberId) return;
-
-        try {
-            // 삭제된 알림 기록 로드
-            const deletedData = localStorage.getItem(`deletedAlarms_${memberId}`);
-            if (deletedData) {
-                const deletedArray = JSON.parse(deletedData);
-                setDeletedNotificationIds(new Map(deletedArray));
-            }
-
-            // 알림 목록 로드
-            const notificationsData = localStorage.getItem(`alarmHistory_${memberId}`);
-            if (notificationsData) {
-                const savedNotifications = JSON.parse(notificationsData);
-                const now = Date.now();
-
-                const filteredNotifications = savedNotifications
-                    .filter(n => {
-                        const alarmKey = getAlarmKey(n);
-                        const deletedAt = deletedNotificationIds.get(alarmKey);
-                        return !(deletedAt && (now - deletedAt < 23 * 60 * 60 * 1000));
-                    })
-                    .map(n => {
-                        if (n.receivedAt && n.receivedAt.includes('.')) {
-                            const date = new Date(n.receivedAt.replace(/\./g, '-').replace(' ', 'T'));
-                            if (!isNaN(date.getTime())) {
-                                n.receivedAt = formatDateTime(date);
-                            }
-                        }
-                        return n;
-                    });
-
-                setNotifications(filteredNotifications);
-            }
-        } catch (error) {
-            console.error('로드 실패:', error);
-            setNotifications([]);
-            setDeletedNotificationIds(new Map());
-        }
-    }, [memberId, getAlarmKey, formatDateTime, deletedNotificationIds]);
-
-    // 만료된 삭제 기록 정리
-    const cleanExpiredDeletions = useCallback(() => {
-        const now = Date.now();
-        setDeletedNotificationIds(prevDeleted => {
-            const newDeleted = new Map();
-            for (const [key, deletedAt] of prevDeleted.entries()) {
-                if (now - deletedAt <= 23 * 60 * 60 * 1000) {
-                    newDeleted.set(key, deletedAt);
-                }
-            }
-            return newDeleted;
-        });
-    }, []);
-
-    // 브라우저 알림 표시
-    const showBrowserNotification = useCallback((alarmData) => {
-        if ('Notification' in window && Notification.permission === 'granted') {
-            const notification = new Notification('새 알림', {
-                body: alarmData.message,
-                icon: '/images/favicon.svg'
-            });
-            setTimeout(() => notification.close(), 5000);
-        }
-    }, []);
-
-    // 새 알림 추가 버튼 (데모용)
-    const addDemoNotification = () => {
-        const demoNotifications = [
-            {
-                id: `n${Date.now()}`,
-                message: '새로운 예약 요청이 도착했습니다.',
-                type: 'STATE_CHANGE',
-                reservationId: `RES${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
-                nickName: '홍길동',
-                receivedAt: formatDateTime(new Date())
-            },
-            {
-                id: `n${Date.now() + 1}`,
-                message: '10분 후 예약이 시작됩니다.',
-                type: 'REMINDER',
-                reservationId: `RES${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
-                nickName: '강감찬',
-                receivedAt: formatDateTime(new Date())
-            }
-        ];
-
-        const randomNotification = demoNotifications[Math.floor(Math.random() * demoNotifications.length)];
-        handleNotification(randomNotification);
-    };
-
+    // SSE 알람 처리
     const handleNotification = useCallback((alarmData) => {
         const now = Date.now();
-        const alarmKey = getAlarmKey(alarmData);
+        const key = getAlarmKey(alarmData);
 
-        // 삭제 기록 확인
-        const deletedAt = deletedNotificationIds.get(alarmKey);
-        if (deletedAt && (now - deletedAt) < 23 * 60 * 60 * 1000) return;
+        // 삭제된 알림 확인
+        const deletedAt = deletedNotificationIds.get(key);
+        if (deletedAt && now - deletedAt < 23 * 60 * 60 * 1000) return;
 
         // 중복 확인
-        const isDuplicate = notifications.some(n => getAlarmKey(n) === alarmKey);
+        const isDuplicate = notifications.some(n => getAlarmKey(n) === key);
         if (isDuplicate) return;
 
         const newNotification = {
@@ -325,20 +217,24 @@ const NotificationApp = () => {
 
         setNotifications(prev => {
             const updated = [newNotification, ...prev];
-            return updated.length > 50 ? updated.slice(0, 50) : updated;
+            return updated.slice(0, 50); // 최대 50개
         });
+    }, [notifications, deletedNotificationIds, getAlarmKey, formatDateTime]);
 
-        showBrowserNotification(alarmData);
-    }, [notifications, deletedNotificationIds, getAlarmKey, formatDateTime, showBrowserNotification]);
+    // 알람 구독
+    useEffect(() => {
+        if (!memberId) return;
+        const unsubscribe = subscribeToAlarms(handleNotification);
+        return unsubscribe;
+    }, [subscribeToAlarms, handleNotification, memberId]);
 
-    // 개별 알림 삭제
+    // 알림 삭제
     const removeNotification = useCallback((id, message, type, reservationId) => {
         const key = `${id}|${message}|${type}|${reservationId}`;
         setNotifications(prev => prev.filter(n => getAlarmKey(n) !== key));
         setDeletedNotificationIds(prev => new Map(prev).set(key, Date.now()));
     }, [getAlarmKey]);
 
-    // 전체 알림 삭제
     const clearAllNotifications = useCallback(() => {
         const now = Date.now();
         setDeletedNotificationIds(prev => {
@@ -351,69 +247,19 @@ const NotificationApp = () => {
         setNotifications([]);
     }, [notifications, getAlarmKey]);
 
-    // SSE 초기화
+    // 서버에서 알림 읽음 처리
     useEffect(() => {
         if (!memberId) return;
-
-        const manager = getSSEManager();
-        manager.addEventListener('alarm', handleNotification);
-        manager.init();
-        setSseManager(manager);
-
-        return () => {
-            // 정리 작업
-        };
-    }, [memberId, handleNotification]);
-
-    // 컴포넌트 마운트 시 초기화
-    // useEffect(() => {
-    //     if (!memberId) {
-    //         console.warn('알림 기능 비활성화: 로그인하지 않은 사용자');
-    //         return;
-    //     }
-    //
-    //     loadFromStorage();
-    //     cleanExpiredDeletions();
-    // }, [memberId, loadFromStorage, cleanExpiredDeletions]);
-    useEffect(() => {
-        if (!memberId) return;
-
-        // 서버에 알림 읽음 처리 요청
         getNotification()
-            .then(() => {
-                console.log(`서버에서 알림 읽음 처리 완료 (memberId=${memberId})`);
-                // 필요한 경우, 서버에서 받은 알림 데이터를 setNotifications로 상태에 반영 가능
-            })
+            .then(() => console.log(`서버에서 알림 읽음 처리 완료 (memberId=${memberId})`))
             .catch(err => console.error(err));
     }, [memberId]);
-
-    // 데이터 변경 시 저장
-    useEffect(() => {
-        saveToStorage();
-    }, [saveToStorage]);
 
     return (
         <div className="app-container">
             <div className="app-content">
                 <div className="main-content">
-                    <Header
-                        title="알림"
-                        showBackButton={true}
-                        backUrl="/page/home"
-                    />
-
-                    {/* 데모용 새 알림 추가 버튼 */}
-                    <div className="demo-section">
-                        <button
-                            onClick={addDemoNotification}
-                            className="demo-button"
-                        >
-                            🔔 새 알림 받기 (데모)
-                        </button>
-                        <span className="demo-text">
-              실제 서비스에서는 SSE를 통해 자동으로 알림이 옵니다
-            </span>
-                    </div>
+                    <Header title="알림" showBackButton={true} backUrl="/page/home" />
 
                     {!memberId ? (
                         <div className="welcome-wrapper">
