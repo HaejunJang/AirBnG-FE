@@ -30,12 +30,17 @@ export const updateLocker = ({ lockerId, locker, images = [] }) => {
   images.forEach((f) => fd.append("images", f));
   return httpAuth.post(`/lockers/update/${lockerId}`, fd);
 };
-
 // 내가 보유한 보관소 존재 여부
 export const hasMyLocker = () => httpAuth.get("/lockers/me/exist");
 
+// 보관소 검색
+export const searchLockers = ({ address, jimTypeId }) => {
+    return httpPublic.get("/lockers", {
+        params: { address, jimTypeId },
+    });
+};
 // 상세
-export const getMyLocker = () => httpAuth.get("/lockers/me");            
+export const getMyLocker = () => httpAuth.get("/lockers/me");
 
 // 수정용
-// export const getMyLockerForUpdate = () => httpAuth.get("/lockers/me/update"); 
+// export const getMyLockerForUpdate = () => httpAuth.get("/lockers/me/update");
