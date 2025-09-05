@@ -9,7 +9,6 @@ const BottomSheet = ({
                          onToggle,
                          selectedLockerId,
                          onLockerSelect,
-                         contextPath
                      }) => {
     const sheetRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -102,7 +101,6 @@ const BottomSheet = ({
                     lockers={lockers}
                     selectedLockerId={selectedLockerId}
                     onLockerSelect={onLockerSelect}
-                    contextPath={contextPath}
                     isSheetFixed={isFixed}
                 />
             </div>
