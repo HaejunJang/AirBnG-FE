@@ -7,7 +7,6 @@ const LockerList = ({
                         lockers,
                         selectedLockerId,
                         onLockerSelect,
-                        contextPath,
                         isSheetFixed
                     }) => {
     const handleLockerClick = (locker) => {
@@ -35,7 +34,6 @@ const LockerList = ({
                     locker={locker}
                     isSelected={selectedLockerId === locker.lockerId}
                     onClick={() => handleLockerClick(locker)}
-                    contextPath={contextPath}
                 />
             ))}
         </div>

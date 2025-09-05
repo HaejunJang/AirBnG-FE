@@ -1,13 +1,15 @@
 import React from 'react';
+import {useNavigate} from "react-router-dom";
 
-const LockerItem = ({ locker, isSelected, onClick, contextPath }) => {
-    const imageUrl = locker.url || `${contextPath}/images/default.jpg`;
+const LockerItem = ({ locker, isSelected, onClick }) => {
+    const navigate = useNavigate();
+    const imageUrl = locker.url || `/images/default.jpg`;
     const isDisabled = locker.isAvailable === 'NO';
 
     const handleButtonClick = (e) => {
         if (isSelected) {
             e.stopPropagation();
-            window.location.href = `${contextPath}/page/lockerDetails?lockerId=${encodeURIComponent(locker.lockerId)}`;
+            navigate(`/page/lockerDetails?lockerId=${encodeURIComponent(locker.lockerId)}`);
         }
     };
 
