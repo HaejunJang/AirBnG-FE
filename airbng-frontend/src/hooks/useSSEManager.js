@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import NotificationApp from "../pages/notification";
+const DEL_STORAGE_KEY = 'deletedNotifications';
 
 export const useSSEManager = (memberId = null) => {
     const [isConnected, setIsConnected] = useState(false);
@@ -9,8 +11,11 @@ export const useSSEManager = (memberId = null) => {
     const reconnectAttemptsRef = useRef(0);
     const listenersRef = useRef(new Map());
     const connectionStatusCallbacksRef = useRef([]);
-    const isInitializedRef = useRef(false);
     const maxReconnectAttempts = 5;
+    const isInitializedRef = useRef(false);
+    const connectionTimeoutRef = useRef(null); // 연결 타임아웃 추가
+    const STORAGE_KEY = `airbng_alarms_${memberId}`;
+
 
     // memberId 자동 감지
     const resolvedMemberId = memberId ||
@@ -21,10 +26,10 @@ export const useSSEManager = (memberId = null) => {
 
     // 연결 상태 업데이트
     const updateConnectionStatus = useCallback((connected, error = null) => {
+        console.log('[SSE Hook] 연결 상태 변경:', connected, error);
         setIsConnected(connected);
         setConnectionError(error);
 
-        // DOM 업데이트 (기존 코드와 호환성을 위해)
         if (typeof document !== 'undefined') {
             const indicator = document.getElementById('connectionIndicator');
             if (indicator) {
@@ -33,97 +38,65 @@ export const useSSEManager = (memberId = null) => {
             }
         }
 
-        // 콜백 실행
         connectionStatusCallbacksRef.current.forEach(callback => {
             try {
                 callback(connected);
-            } catch (error) {
-                console.error('연결 상태 콜백 오류:', error);
+            } catch (err) {
+                console.error('[SSE Hook] 연결 상태 콜백 오류:', err);
             }
         });
     }, []);
 
     // 알림 이벤트 처리
     const handleAlarmEvent = useCallback((alarmData) => {
+        console.log('[SSE Hook] 알림 이벤트 처리:', alarmData);
+
+        // 기존 알림 불러오기
+        let existingAlarms = [];
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) existingAlarms = JSON.parse(stored);
+        } catch (e) {
+            console.warn('[SSE] LocalStorage 파싱 오류:', e);
+        }
+
+        // 최신순으로 새 알림 앞에 추가
+        const newAlarms = [alarmData.id, ...existingAlarms.filter(id => id !== alarmData.id)];
+
+        // LocalStorage에 저장
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(newAlarms));
+        } catch (e) {
+            console.warn('[SSE] LocalStorage 저장 오류:', e);
+        }
+
+        // 전역 브라우저 알림 띄우기
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+            new Notification('예약 알림', { body: alarmData.message });
+        }
+
+        // 기존 이벤트 리스너 실행
         const alarmListeners = listenersRef.current.get('alarm') || [];
-        alarmListeners.forEach(listener => {
+        alarmListeners.forEach((listener, index) => {
             try {
                 listener(alarmData);
-            } catch (error) {
-                console.error('알림 리스너 실행 오류:', error);
+            } catch (err) {
+                console.error('[SSE Hook] 알림 리스너 실행 오류:', err);
             }
         });
+
     }, []);
-
-    // 재연결 시도
-    const attemptReconnect = useCallback(() => {
-        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-            const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
-            reconnectAttemptsRef.current++;
-
-            setTimeout(() => {
-                if (!isConnected) {
-                    console.log(`재연결 시도 ${reconnectAttemptsRef.current}/${maxReconnectAttempts}`);
-                    disconnect();
-                    connect();
-                }
-            }, delay);
-        } else {
-            console.error('최대 재연결 시도 횟수 초과');
-            updateConnectionStatus(false, '최대 재연결 시도 횟수 초과');
-        }
-    }, [isConnected]);
-
-    // 연결
-    const connect = useCallback(() => {
-        if (isConnected || isConnecting || !resolvedMemberId) return;
-
-        setIsConnecting(true);
-        setConnectionError(null);
-
-        try {
-            eventSourceRef.current = new EventSource(`/AirBnG/alarms/reservations/alarms`);
-
-            eventSourceRef.current.addEventListener('connect', (event) => {
-                console.log('SSE 연결 성공:', event.data);
-                updateConnectionStatus(true);
-                reconnectAttemptsRef.current = 0;
-                setIsConnecting(false);
-            });
-
-            eventSourceRef.current.addEventListener('alarm', (event) => {
-                try {
-                    const alarmData = JSON.parse(event.data);
-                    console.log('알림 수신:', alarmData);
-                    handleAlarmEvent(alarmData);
-                } catch (e) {
-                    console.error('알림 데이터 파싱 오류:', e);
-                }
-            });
-
-            eventSourceRef.current.onopen = () => {
-                console.log('SSE 연결 열림');
-                updateConnectionStatus(true);
-                reconnectAttemptsRef.current = 0;
-                setIsConnecting(false);
-            };
-
-            eventSourceRef.current.onerror = (error) => {
-                console.error('SSE 연결 오류:', error);
-                updateConnectionStatus(false, 'SSE 연결 오류');
-                setIsConnecting(false);
-                attemptReconnect();
-            };
-
-        } catch (error) {
-            console.error('SSE 연결 설정 오류:', error);
-            updateConnectionStatus(false, 'SSE 연결 설정 오류');
-            setIsConnecting(false);
-        }
-    }, [isConnected, isConnecting, resolvedMemberId, updateConnectionStatus, handleAlarmEvent, attemptReconnect]);
 
     // 연결 해제
     const disconnect = useCallback(() => {
+        console.log('[SSE Hook] 연결 해제 중...');
+
+        // 타임아웃 클리어
+        if (connectionTimeoutRef.current) {
+            clearTimeout(connectionTimeoutRef.current);
+            connectionTimeoutRef.current = null;
+        }
+
         if (eventSourceRef.current) {
             eventSourceRef.current.close();
             eventSourceRef.current = null;
@@ -133,34 +106,154 @@ export const useSSEManager = (memberId = null) => {
         reconnectAttemptsRef.current = 0;
     }, [updateConnectionStatus]);
 
-    // 이벤트 리스너 추가
+    // 재연결 시도
+    const attemptReconnect = useCallback(() => {
+        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+            reconnectAttemptsRef.current++;
+
+            console.log(`[SSE Hook] ${delay}ms 후 재연결 시도 ${reconnectAttemptsRef.current}/${maxReconnectAttempts}`);
+            setTimeout(() => {
+                if (!isConnected && resolvedMemberId) { // resolvedMemberId 체크 추가
+                    disconnect();
+                    connect();
+                }
+            }, delay);
+        } else {
+            console.error('[SSE Hook] 최대 재연결 시도 초과');
+            updateConnectionStatus(false, '최대 재연결 시도 초과');
+        }
+    }, [isConnected, resolvedMemberId, updateConnectionStatus]);
+
+    // 연결
+    const connect = useCallback(() => {
+        if (isConnected || isConnecting || !resolvedMemberId) {
+            console.log('[SSE Hook] 연결 스킵:', { isConnected, isConnecting, resolvedMemberId });
+            return;
+        }
+
+        console.log('[SSE Hook] 연결 시도 중... memberId:', resolvedMemberId);
+        setIsConnecting(true);
+        setConnectionError(null);
+
+        // 연결 타임아웃 설정 (10초)
+        connectionTimeoutRef.current = setTimeout(() => {
+            console.warn('[SSE Hook] 연결 타임아웃');
+            if (isConnecting) {
+                disconnect();
+                updateConnectionStatus(false, '연결 타임아웃');
+                attemptReconnect();
+            }
+        }, 10000);
+
+        try {
+            eventSourceRef.current = new EventSource(`http://localhost:9000/AirBnG/alarms/reservations/alarms`);
+
+            // 서버에서 보내는 'connect' 이벤트로만 연결 완료 판단
+            eventSourceRef.current.addEventListener('connect', (event) => {
+                console.log('[SSE Hook] 서버 연결 확인:', event.data);
+
+                // 타임아웃 클리어
+                if (connectionTimeoutRef.current) {
+                    clearTimeout(connectionTimeoutRef.current);
+                    connectionTimeoutRef.current = null;
+                }
+
+                updateConnectionStatus(true);
+                reconnectAttemptsRef.current = 0;
+                setIsConnecting(false);
+            });
+
+            // alarm 이벤트 리스너
+            eventSourceRef.current.addEventListener('alarm', (event) => {
+                try {
+                    const alarmData = JSON.parse(event.data);
+                    console.log('[SSE Hook] 알림 수신:', alarmData);
+                    handleAlarmEvent(alarmData);
+                } catch (e) {
+                    console.error('[SSE Hook] 알림 데이터 파싱 오류:', e, 'Raw data:', event.data);
+                }
+            });
+
+
+            // // Notification 권한 요청
+            // useEffect(() => {
+            //     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+            //         Notification.requestPermission();
+            //     }
+            // }, []);
+
+            // onopen은 단순히 HTTP 연결만 확인 (실제 연결 완료가 아님)
+            eventSourceRef.current.onopen = () => {
+                console.log('[SSE Hook] HTTP 연결 열림 (아직 서버 준비 대기중)');
+                // updateConnectionStatus는 여기서 호출하지 않음
+            };
+
+            eventSourceRef.current.onerror = (error) => {
+                console.error('[SSE Hook] 연결 오류:', error);
+                console.log('[SSE Hook] EventSource readyState:', eventSourceRef.current?.readyState);
+
+                // 타임아웃 클리어
+                if (connectionTimeoutRef.current) {
+                    clearTimeout(connectionTimeoutRef.current);
+                    connectionTimeoutRef.current = null;
+                }
+
+                updateConnectionStatus(false, 'SSE 연결 오류');
+                setIsConnecting(false);
+
+                // EventSource가 자동으로 재연결을 시도하지 않는 경우에만 수동 재연결
+                setTimeout(() => {
+                    if (eventSourceRef.current?.readyState === EventSource.CLOSED) {
+                        attemptReconnect();
+                    }
+                }, 1000);
+            };
+
+        } catch (error) {
+            console.error('[SSE Hook] 연결 설정 오류:', error);
+
+            // 타임아웃 클리어
+            if (connectionTimeoutRef.current) {
+                clearTimeout(connectionTimeoutRef.current);
+                connectionTimeoutRef.current = null;
+            }
+
+            updateConnectionStatus(false, 'SSE 연결 설정 오류');
+            setIsConnecting(false);
+            attemptReconnect();
+        }
+    }, [isConnected, isConnecting, resolvedMemberId, handleAlarmEvent, attemptReconnect, updateConnectionStatus]);
+
+    // 이벤트 리스너 추가/제거
     const addEventListener = useCallback((eventType, callback) => {
+        console.log('[SSE Hook] 이벤트 리스너 추가:', eventType);
         if (!listenersRef.current.has(eventType)) {
             listenersRef.current.set(eventType, []);
         }
         const callbacks = listenersRef.current.get(eventType);
         if (!callbacks.includes(callback)) {
             callbacks.push(callback);
+            console.log('[SSE Hook] 리스너 등록 완료, 총 개수:', callbacks.length);
         }
     }, []);
 
-    // 이벤트 리스너 제거
     const removeEventListener = useCallback((eventType, callback) => {
+        console.log('[SSE Hook] 이벤트 리스너 제거:', eventType);
         if (listenersRef.current.has(eventType)) {
             const listeners = listenersRef.current.get(eventType);
             const index = listeners.indexOf(callback);
             if (index > -1) {
                 listeners.splice(index, 1);
+                console.log('[SSE Hook] 리스너 제거 완료, 남은 개수:', listeners.length);
             }
         }
     }, []);
 
-    // 연결 상태 변경 콜백 추가
     const onConnectionStatusChange = useCallback((callback) => {
         connectionStatusCallbacksRef.current.push(callback);
     }, []);
 
-    // 브라우저 알림 권한 요청
     const requestNotificationPermission = useCallback(() => {
         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
             return Notification.requestPermission();
@@ -173,18 +266,21 @@ export const useSSEManager = (memberId = null) => {
         if (isInitializedRef.current) return;
         isInitializedRef.current = true;
 
-        // 브라우저 알림 권한 요청
+        console.log('[SSE Hook] 초기화, resolvedMemberId:', resolvedMemberId);
+
+        // 알림 권한 요청
         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission().then(permission => {
-                console.log('브라우저 알림 권한:', permission);
+                console.log('[SSE Hook] 브라우저 알림 권한:', permission);
             });
         }
 
-        // 로그인된 사용자만 연결
         if (resolvedMemberId && resolvedMemberId !== 'null' && resolvedMemberId !== '') {
-            connect();
+            console.log('[SSE Hook] 자동 연결 시작');
+            // 약간의 지연을 두고 연결 (서버 준비 시간 확보)
+            setTimeout(() => connect(), 500);
         } else {
-            console.warn('SSE 비활성화: 로그인하지 않은 사용자');
+            console.warn('[SSE Hook] SSE 비활성화: 로그인하지 않은 사용자');
         }
     }, [resolvedMemberId, connect]);
 
@@ -192,7 +288,8 @@ export const useSSEManager = (memberId = null) => {
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (!document.hidden && !isConnected && resolvedMemberId) {
-                connect();
+                console.log('[SSE Hook] 탭 재활성화 - 재연결 시도');
+                setTimeout(() => connect(), 1000); // 1초 지연
             }
         };
 
@@ -202,21 +299,19 @@ export const useSSEManager = (memberId = null) => {
         }
     }, [isConnected, resolvedMemberId, connect]);
 
-    // 컴포넌트 언마운트 시 연결 해제
+    // 언마운트 시 연결 해제
     useEffect(() => {
         return () => {
+            console.log('[SSE Hook] 컴포넌트 언마운트 - 연결 해제');
             disconnect();
         };
     }, [disconnect]);
 
     return {
-        // 상태
         isConnected,
         isConnecting,
         connectionError,
         memberId: resolvedMemberId,
-
-        // 메서드
         connect,
         disconnect,
         addEventListener,
@@ -224,4 +319,25 @@ export const useSSEManager = (memberId = null) => {
         onConnectionStatusChange,
         requestNotificationPermission
     };
+};
+
+
+//삭제
+export const loadDeletedIds = () => {
+    try {
+        const data = localStorage.getItem(DEL_STORAGE_KEY);
+        return data ? new Set(JSON.parse(data)) : new Set();
+    } catch (e) {
+        console.error('삭제 알림 로딩 실패', e);
+        return new Set();
+    }
+};
+
+//삭제된 알림 저장
+export const saveDeletedIds = (deletedIdsSet) => {
+    try {
+        localStorage.setItem(DEL_STORAGE_KEY, JSON.stringify([...deletedIdsSet]));
+    } catch (e) {
+        console.error('삭제 알림 저장 실패', e);
+    }
 };
