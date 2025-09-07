@@ -10,9 +10,8 @@ import LockerRootPage from "./pages/LockerRootPage";
 import ReservationFormPage from "./pages/ReservationFormPage";
 import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
-
-import "./styles/App.css";
 import ReservationList from "./pages/ReservationList";
+import LoginPage from "./pages/LoginPage";
 
 function App() {
   function getActiveNav(pathname) {
@@ -56,6 +55,7 @@ function App() {
           />
           <Route path="/page/mypage" element={<MyPage />} />
           <Route path="/page/signup" element={<SignupPage />} />
+          <Route path="/page/login" element={<LoginPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
