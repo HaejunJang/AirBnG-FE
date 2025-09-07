@@ -1,4 +1,3 @@
-// src/api/http.ts
 import axios from 'axios';
 import { getAccessToken, setAccessToken, clearTokens, isExpired } from '../utils/jwtUtil';
 
@@ -7,7 +6,6 @@ const baseURL = process.env.REACT_APP_API_BASE_URL || '';
 export const httpPublic = axios.create({
   baseURL,
   withCredentials: true,
-  // 중요: 4xx/5xx도 reject하지 않음 → 호출부에서 res.status로 분기
   validateStatus: () => true,
 });
 
