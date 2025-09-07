@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
-  // ★ 로그인 표준화
+  // 로그인
   const login = useCallback(async (credentials) => {
     const res = await httpPublic.post('/login', credentials, { withCredentials: true });
 

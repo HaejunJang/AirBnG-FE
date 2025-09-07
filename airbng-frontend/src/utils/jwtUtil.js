@@ -31,7 +31,7 @@ export function setAccessToken(token) {
 
 export function clearTokens() {
   sessionStorage.removeItem(ACCESS_KEY);
-  sessionStorage.removeItem('jwtToken'); // 레거시 제거(선택)
+  sessionStorage.removeItem('jwtToken'); // 레거시 제거
   sessionStorage.removeItem(PROFILE_KEY); // 저장된 프로필도 같이 제거
 }
 
