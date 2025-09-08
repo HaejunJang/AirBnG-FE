@@ -1,9 +1,11 @@
 import React from 'react';
 import {useNavigate} from "react-router-dom";
+import imgUpload from "../../../assets/img_upload_ic.svg";
+
 
 const LockerItem = ({ locker, isSelected, onClick }) => {
     const navigate = useNavigate();
-    const imageUrl = locker.url || `/images/default.jpg`;
+    const imageUrl = locker.url || imgUpload;
     const isDisabled = locker.isAvailable === 'NO';
 
     const handleButtonClick = (e) => {

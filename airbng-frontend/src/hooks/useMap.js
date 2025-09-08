@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import {useState, useEffect, useRef, useCallback} from 'react';
+import markerAvailable from '../assets/marker-available.svg';
+import markerUnavailable from '../assets/marker-unavailable.svg';
 
 export const useMap = () => {
     const mapRef = useRef(null);
@@ -73,10 +75,10 @@ export const useMap = () => {
     // 마커 이미지 생성
     const createMarkerImage = useCallback((isAvailable) => {
         const imageSrc = isAvailable === 'YES'
-            ? `/assets/marker-available.svg`
-            : `/assets/marker-unavailable.svg`;
+            ? markerAvailable
+            : markerUnavailable;
 
-        const imageSize = new window.kakao.maps.Size(28, 32);
+        const imageSize = new window.kakao.maps.Size(35, 39);
         const imageOption = { offset: new window.kakao.maps.Point(12, 35) };
 
         return new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);

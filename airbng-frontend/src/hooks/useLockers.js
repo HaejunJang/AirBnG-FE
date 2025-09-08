@@ -6,12 +6,12 @@ export const useLockers = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const fetchLockers = async ({ address, jimTypeId, lockerName }) => {
+    const fetchLockers = async ({ address, lockerName, jimTypeId }) => {
         setLoading(true);
         setError(null);
 
         try {
-            const { data } = await searchLockers({ address, jimTypeId, lockerName });
+            const { data } = await searchLockers({ address, lockerName, jimTypeId });
 
             if (data.code === 3001 || !data.result?.lockers?.length) {
                 setLockers([]);
