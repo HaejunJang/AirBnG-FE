@@ -1,44 +1,43 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/** {*/
+/*    margin: 0;*/
+/*    padding: 0;*/
+/*    box-sizing: border-box;*/
+/*}*/
 
-html, body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-}
+/*html, body {*/
+/*    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*    margin: 0;*/
+/*    padding: 0;*/
+/*    background-color: #f8f9fa;*/
+/*    overflow: hidden;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*}*/
 
 
-.page-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    max-width: 412px;
-    width: 100%;
-    background-color: #ffffff;
-}
+/*.page-container {*/
+/*    position: relative;*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    height: 100%;*/
+/*    max-width: 412px;*/
+/*    width: 100%;*/
+/*    background-color: #ffffff;*/
+/*}*/
 
 
 /* 기존 CSS는 그대로 유지하고 아래 스타일들을 추가하세요 */
 
 /* 헤더 스타일 */
-.header {
+.filter-header {
     display: flex;
     align-items: center;
     padding: 16px 20px;
     margin-top: 60px;
     background-color: #ffffff;
     position: relative;
-    gap: 144px;
 }
 
 .back-button {
@@ -68,41 +67,41 @@ html, body {
 
 /* 검색 필터 컨테이너 */
 .search-filter-container {
-    margin : 20px auto;
+    margin: 20px auto;
     padding: 8px 20px 4px 20px;
-        width: fixed 372px;
-        height: fixed 168px;
-        flex-shrink: 0;
-        border-radius: 10px;
-        border: 2px solid #4561DB;
-        background: #FFF;
-        overflow: visible;
-
+    width: fixed 372px;
+    height: fixed 168px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    border: 2px solid #4561DB;
+    background: #FFF;
+    overflow: visible;
+    top: 60px;
 }
 
 .searchFilter-input-wrapper {
     display: flex;
-        align-items: center;
-        border-radius: 12px;
-        padding: 16px;
-        border: none;
+    align-items: center;
+    border-radius: 12px;
+    padding: 16px;
+    border: none;
     gap: 15px;
 }
 
 .searchFilter-icon {
     width: 17px;
     height: 17px;
-        left: 12px;
-        color: #888;
+    left: 12px;
+    color: #888;
 }
 
 .searchFilter-input {
     width: 100%;
-        padding: 0px;
-        border: none;
-        font-size: 15px;
-        cursor: pointer;
-        outline: none;
+    padding: 0px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
 }
 
 .filter-row {
@@ -113,15 +112,15 @@ html, body {
 
 .filter-item {
     display: flex;
-        align-items: center;
-        padding: 15px;
-        cursor: pointer;
-        color: #333;
-        font-size: 16px;
-        font-style: normal;
-        font-weight: 500;
-        line-height: 16px;
-        min-width: 120px;
+    align-items: center;
+    padding: 15px;
+    cursor: pointer;
+    color: #333;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+    min-width: 120px;
 }
 
 .filter-icon {
@@ -172,52 +171,52 @@ html, body {
 
 /*애니메이션 효과*/
 .ranking-number-container {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  transform-style: preserve-3d;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    transform-style: preserve-3d;
 }
 
 .ranking-number {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #333;
-  text-align: center;
-  font-size: 17px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    text-align: center;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 17px;
 }
 
 .ranking-location-container {
-  position: relative;
-  width: 80px;
-  height: 30px;
-  transform-style: preserve-3d;
+    position: relative;
+    width: 80px;
+    height: 30px;
+    transform-style: preserve-3d;
 }
 
 .ranking-location {
-  color: #333;
-  font-size: 17px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 17px;
+    color: #333;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 17px;
 }
 
 /* 4면 정육면체 스타일 */
 .cube-face {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  font-weight: 500;
-  color: #333;
-  background-color: #f8f9fa;
-  backface-visibility: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 500;
+    color: #333;
+    background-color: #f8f9fa;
+    backface-visibility: hidden;
 }
 
 .cube-face.front  { transform: translateZ(15px); }
@@ -228,73 +227,73 @@ html, body {
 /* 애니메이션 적용 - 전체 16초 주기 (각 항목당 4초씩) */
 .ranking-number-container,
 .ranking-location-container {
-  animation: rotate90Degree 4s ease-in-out infinite;
+    animation: rotate90Degree 4s ease-in-out infinite;
 }
 
 /* 각 항목별 애니메이션 지연 시간 */
 .ranking-item:nth-child(1) .ranking-number-container,
 .ranking-item:nth-child(1) .ranking-location-container {
-  animation-delay: 0s;
+    animation-delay: 0s;
 }
 
 .ranking-item:nth-child(2) .ranking-number-container,
 .ranking-item:nth-child(2) .ranking-location-container {
-  animation-delay: 1s;
+    animation-delay: 1s;
 }
 
 .ranking-item:nth-child(3) .ranking-number-container,
 .ranking-item:nth-child(3) .ranking-location-container {
-  animation-delay: 2s;
+    animation-delay: 2s;
 }
 
 .ranking-item:nth-child(4) .ranking-number-container,
 .ranking-item:nth-child(4) .ranking-location-container {
-  animation-delay: 3s;
+    animation-delay: 3s;
 }
 
 /* 90도 회전 애니메이션 - 각 항목이 16초 중 2초만 천천히 90도 회전 */
 @keyframes rotate90Degree {
-  0%, 12.5% {
-    transform: rotateX(0deg);
-  }
-  25% {
-    transform: rotateX(90deg);
-  }
-  25.1%, 100% {
-    transform: rotateX(90deg);
-  }
+    0%, 12.5% {
+        transform: rotateX(0deg);
+    }
+    25% {
+        transform: rotateX(90deg);
+    }
+    25.1%, 100% {
+        transform: rotateX(90deg);
+    }
 }
 
 /* 각 순위별 색상 */
 .ranking-item:nth-child(1) .cube-face {
-  background: linear-gradient(45deg, white, white);
-  color: black;
+    background: linear-gradient(45deg, white, white);
+    color: black;
 }
 
 .ranking-item:nth-child(2) .cube-face {
-  background: linear-gradient(45deg, white, white);
-  color: black;
+    background: linear-gradient(45deg, white, white);
+    color: black;
 }
 
 .ranking-item:nth-child(3) .cube-face {
-  background: linear-gradient(45deg, white, white);
-  color: black;
+    background: linear-gradient(45deg, white, white);
+    color: black;
 }
 
 .ranking-item:nth-child(4) .cube-face {
-  background: linear-gradient(45deg, white, white);
-  color: black;
+    background: linear-gradient(45deg, white, white);
+    color: black;
 }
 
 /* 데모용 추가 스타일 */
 .demo-info {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #e3f2fd;
-  border-radius: 8px;
-  color: #1565c0;
-  font-size: 14px;
-  text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e3f2fd;
+    border-radius: 8px;
+    color: #1565c0;
+    font-size: 14px;
+    text-align: center;
 }
 
 
@@ -576,43 +575,43 @@ html, body {
 
 /* 드롭다운 스타일 */
 .custom-dropdown {
-  position: relative;
-  width: 120px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: white;
+    position: relative;
+    width: 120px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: white;
 }
 
 .custom-dropdown .selected {
-  padding: 10px;
+    padding: 10px;
 }
 
 .custom-dropdown .dropdown-options {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  border-top: none;
-  display: none;
-  background-color: white;
-  z-index: 1000;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-top: none;
+    display: none;
+    background-color: white;
+    z-index: 1000;
 }
 
 .custom-dropdown .dropdown-options li {
-  padding: 10px;
-  cursor: pointer;
+    padding: 10px;
+    cursor: pointer;
 }
 
 .custom-dropdown .dropdown-options li:hover {
-  background-color: #f0f0f0;
+    background-color: #f0f0f0;
 }
 
 .custom-dropdown.open .dropdown-options {
-  display: block;
+    display: block;
 }
 
 .filter-divider {
