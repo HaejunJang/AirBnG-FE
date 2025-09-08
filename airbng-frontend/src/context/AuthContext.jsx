@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useState, useCallback } 
 import { httpPublic, setOnUnauthorized } from '../api/http';
 import {
   getAccessToken, setAccessToken, clearTokens, decodeJwt, isExpired,
-  isLoggedIn as _isLoggedIn, setUserProfile, getUserProfile, clearUserProfile
+  setUserProfile, getUserProfile, clearUserProfile,
+  getRememberMe, setRememberMe, clearRememberMe,
 } from '../utils/jwtUtil';
 
 const AuthContext = createContext(null);
@@ -24,6 +25,8 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     (async () => {
       const t = getAccessToken();
+
+      // 1) 유효한 access token이면 바로 로그인 상태
       if (t && !isExpired(t)) {
         const u = buildUser(t) || {};
         const saved = getUserProfile();
@@ -35,32 +38,44 @@ export function AuthProvider({ children }) {
         setReady(true);
         return;
       }
-      try {
-        const res = await httpPublic.post('/reissue', null, { withCredentials: true });
-        const authHeader = res.headers['authorization'] || res.headers['Authorization'];
-        if (authHeader?.startsWith('Bearer ')) {
-          const newToken = authHeader.slice('Bearer '.length).trim();
-          setAccessToken(newToken);
-          const u = buildUser(newToken) || {};
-          const saved = getUserProfile();
-          setUser({
-            id: u.id ?? saved?.id ?? null,
-            name: u.name || saved?.name || '',
-            roles: (u.roles && u.roles.length ? u.roles : (saved?.roles || [])),
-          });
-        } else {
+
+      // 2) rememberMe가 '켜져 있을 때만' 조용히 재발급
+      if (getRememberMe()) {
+        try {
+          const res = await httpPublic.post('/reissue', null, { withCredentials: true });
+          const authHeader = res.headers['authorization'] || res.headers['Authorization'];
+          if (authHeader?.startsWith('Bearer ')) {
+            const newToken = authHeader.slice('Bearer '.length).trim();
+            setAccessToken(newToken);
+            const u = buildUser(newToken) || {};
+            const saved = getUserProfile();
+            setUser({
+              id: u.id ?? saved?.id ?? null,
+              name: u.name || saved?.name || '',
+              roles: (u.roles && u.roles.length ? u.roles : (saved?.roles || [])),
+            });
+          } else {
+            clearTokens(); setUser(null);
+          }
+        } catch {
           clearTokens(); setUser(null);
+        } finally {
+          setReady(true);
         }
-      } catch {
-        clearTokens(); setUser(null);
-      } finally {
-        setReady(true);
+        return;
       }
+
+      // 3) rememberMe가 꺼져 있으면 즉시 비로그인
+      clearTokens();
+      clearUserProfile();
+      setUser(null);
+      setReady(true);
     })();
   }, [buildUser]);
 
   useEffect(() => {
     setOnUnauthorized(() => {
+      // 401 글로벌 처리: 진짜 로그아웃인 경우만 실행되도록 사용처에서 호출됨
       clearTokens();
       clearUserProfile();
       setUser(null);
@@ -68,7 +83,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   // 로그인
-  const login = useCallback(async (credentials) => {
+  const login = useCallback(async (credentials, opts = {}) => {
+    const remember = credentials?.remember ?? opts?.remember ?? false; // remember 받기
     const res = await httpPublic.post('/login', credentials, { withCredentials: true });
 
     const body = res.data?.result ?? res.data?.data ?? res.data;
@@ -76,19 +92,10 @@ export function AuthProvider({ children }) {
     const remainFromBody = Number(body?.remainSeconds ?? 0);
     const retryAfter = Number(retryAfterHeader ?? remainFromBody ?? 0);
 
-    // 실패 응답은 그대로 반환 (페이지에서 status/code/retryAfter로 분기)
     if (!(res.status >= 200 && res.status < 300)) {
-      return {
-        ok: false,
-        status: res.status,
-        code: res.data?.code,
-        message: res.data?.message ?? body?.message,
-        retryAfter,
-        data: body,
-      };
+      return { ok: false, status: res.status, code: res.data?.code, message: res.data?.message ?? body?.message, retryAfter, data: body };
     }
 
-    // 성공 → 토큰 필수
     const authHeader = res.headers['authorization'] || res.headers['Authorization'];
     if (!authHeader?.startsWith('Bearer ')) {
       return { ok: false, status: res.status, message: '로그인 응답에 토큰이 없습니다.' };
@@ -97,9 +104,7 @@ export function AuthProvider({ children }) {
     const token = authHeader.slice('Bearer '.length).trim();
     setAccessToken(token);
 
-    // 1차 토큰
     const baseUser = buildUser(token) || {};
-    // 2차 바디로 보강
     const nextUser = {
       id: body?.memberId ?? body?.id ?? baseUser.id ?? null,
       name: body?.nickname ?? baseUser.name ?? '',
@@ -109,6 +114,9 @@ export function AuthProvider({ children }) {
     setUserProfile(nextUser);
     setUser(nextUser);
 
+    // ✅ rememberMe 저장
+    setRememberMe(!!remember);
+
     return { ok: true, status: res.status, data: body };
   }, [buildUser]);
 
@@ -116,13 +124,17 @@ export function AuthProvider({ children }) {
     try { await httpPublic.post('/logout', null, { withCredentials: true }); } catch {}
     clearTokens();
     clearUserProfile();
+    clearRememberMe();        // 자동로그인 해제
     setUser(null);
   }, []);
 
   const value = useMemo(() => ({
     user,
     ready,
-    isLoggedIn: !!user && _isLoggedIn(),
+    isLoggedIn: Boolean(user?.id) && (() => {
+      const t = getAccessToken();
+      return Boolean(t) && !isExpired(t);
+    })(),
     login,
     logout,
   }), [user, ready, login, logout]);
