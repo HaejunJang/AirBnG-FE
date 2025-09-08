@@ -13,6 +13,9 @@ import SignupPage from "./pages/SignupPage";
 import ReservationList from "./pages/ReservationList";
 import Notification from "./pages/nofication";
 import LoginPage from "./pages/LoginPage";
+import Notification from "./pages/notification";
+import { SSEProvider } from "./context/SseContext";
+import {useAuth} from "./context/AuthContext";
 
 function App() {
   function getActiveNav(pathname) {
@@ -58,16 +61,24 @@ function App() {
           <Route path="/page/signup" element={<SignupPage />} />
           <Route path="/page/notification" element={<Notification/>} />
           <Route path="/page/login" element={<LoginPage />} />
+          <Route path="/page/notification" element={<Notification />} />
+
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
     );
   }
 
+  const user = useAuth();
+
   return (
-    <BrowserRouter>
-      <MainContent />
-    </BrowserRouter>
+      <BrowserRouter>
+          {/* 앱 전체 SSEProvider 적용 */}
+          {/*<SSEProvider memberId={user?.id || null}> ->  실제 로그인 사용자별 알림 코드*/}
+          <SSEProvider memberId = "3">
+            <MainContent />
+          </SSEProvider>
+      </BrowserRouter>
   );
 }
 

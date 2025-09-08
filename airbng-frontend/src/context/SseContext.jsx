@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useCallback } from 'react';
-import { useSSEManager } from './useSSEManager';
+
+import React, {createContext, useContext, useCallback, useRef, useState, useEffect} from 'react';
+import { useSSEManager } from '../hooks/useSSEManager';
 
 // SSE Context 생성
 const SseContext = createContext(null);
@@ -7,16 +8,101 @@ const SseContext = createContext(null);
 // SSE Provider 컴포넌트
 export const SSEProvider = ({ children, memberId }) => {
     const sseManager = useSSEManager(memberId);
+    const callbackRefMap = useRef(new Map()); // 콜백 참조 저장
+    const [alarms, setAlarms] = useState([]); // 알림 저장소
+
+    const STORAGE_KEY = `airbng_alarms_${memberId}`;
+
+    // LocalStorage에서 알림 불러오기
+    useEffect(() => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                setAlarms(JSON.parse(saved));
+            } catch {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        }
+    }, [STORAGE_KEY]);
+
+    // alarms가 바뀔 때마다 LocalStorage에 저장
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(alarms));
+    }, [alarms, STORAGE_KEY]);
+
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then((permission) => {
+                    console.log('[SSE Context] Notification 권한 상태:', permission);
+                });
+            } else {
+                console.log('[SSE Context] 이미 권한 상태:', Notification.permission);
+            }
+        }
+    }, []);
+
+
+    // 알림 권한 요청 메서드 추가
+    const requestNotificationPermission = useCallback(async () => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            if (Notification.permission === 'default') {
+                const permission = await Notification.requestPermission();
+                console.log('[SSE Context] 권한 요청 결과:', permission);
+                return permission;
+            }
+            return Notification.permission;
+        }
+        return 'denied';
+    }, []);
 
     const contextValue = {
         ...sseManager,
-        // 추가적인 헬퍼 메서드들
+        alarms, // NotificationPage에서 읽을 수 있음
+        setAlarms,
+        requestNotificationPermission,
+
         subscribeToAlarms: useCallback((callback) => {
-            sseManager.addEventListener('alarm', callback);
-            return () => sseManager.removeEventListener('alarm', callback);
+            console.log('[SSE Context] 알림 구독 추가');
+
+            // 실제 리스너 함수 생성 (클로저로 callback을 감싼다)
+            const wrappedCallback = (data) => {
+                // 알림 ID만 LocalStorage에 저장
+                setAlarms((prev) => {
+                    const newIds = [data.id, ...prev.filter(id => id !== data.id)];
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(newIds));
+                    return newIds;
+                });
+
+                console.log('[DEBUG] subscribeToAlarms 수신 데이터:', data);
+                // 전역 브라우저 알림
+                sseManager.showNotification('예약 알림', data.message);
+
+                callback?.(data);
+            };
+
+
+
+                // wrappedCallback을 저장해서 나중에 제거할 수 있도록 함
+            callbackRefMap.current.set(callback, wrappedCallback);
+
+            // 실제 이벤트 리스너 등록
+            sseManager.addEventListener('alarm', wrappedCallback);
+
+            // 구독 해제 함수 반환
+            return () => {
+                console.log('[SSE Context] 알림 구독 제거');
+                const storedCallback = callbackRefMap.current.get(callback);
+                if (storedCallback) {
+                    sseManager.removeEventListener('alarm', storedCallback);
+                    callbackRefMap.current.delete(callback);
+                }
+            };
         }, [sseManager]),
 
         showNotification: useCallback((title, message, options = {}) => {
+            console.log('[SSE Context] 브라우저 알림 생성:', title, message);
             if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
                 const notification = new Notification(title, {
                     body: message,
@@ -24,12 +110,15 @@ export const SSEProvider = ({ children, memberId }) => {
                     tag: options.tag || 'sse-notification',
                     ...options
                 });
+                console.log('[DEBUG] 생성된 알림 객체:', notification);
 
                 if (options.autoClose !== false) {
                     setTimeout(() => notification.close(), options.duration || 5000);
                 }
 
                 return notification;
+            } else {
+                console.warn('[SSE Context] 브라우저 알림 권한이 없거나 지원하지 않음');
             }
             return null;
         }, [])
@@ -57,6 +146,7 @@ export const useAlarmSubscription = (callback, dependencies = []) => {
 
     React.useEffect(() => {
         if (callback && typeof callback === 'function') {
+            console.log('[SSE Hook] useAlarmSubscription 구독 시작');
             const unsubscribe = subscribeToAlarms(callback);
             return unsubscribe;
         }
@@ -72,7 +162,7 @@ export const useNotification = () => {
         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
             const permission = await requestNotificationPermission();
             if (permission !== 'granted') {
-                console.warn('알림 권한이 거부되었습니다.');
+                console.warn('[SSE Hook] 알림 권한이 거부되었습니다.');
                 return null;
             }
         }
