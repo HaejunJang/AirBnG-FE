@@ -10,12 +10,11 @@ import LockerRootPage from "./pages/LockerRootPage";
 import ReservationFormPage from "./pages/ReservationFormPage";
 import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
-
-import "./styles/App.css";
 import ReservationList from "./pages/ReservationList";
 import Notification from "./pages/notification";
 import { SSEProvider } from "./context/SseContext";
 import {useAuth} from "./context/AuthContext";
+import LoginPage from "./pages/LoginPage";
 
 function App() {
   function getActiveNav(pathname) {
@@ -61,6 +60,7 @@ function App() {
           <Route path="/page/signup" element={<SignupPage />} />
           <Route path="/page/notification" element={<Notification />} />
 
+          <Route path="/page/login" element={<LoginPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
