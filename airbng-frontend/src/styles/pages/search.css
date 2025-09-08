@@ -133,18 +133,19 @@ html, body {
 
 /* InfoWindow 스타일 */
 .info-window {
-    width: 280px;
-    height: 220px;
+    width: 230px;
+    height: 200px;
     padding: 0;
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     position: relative;
     z-index: 9999;
+    /*border-radius: 10px;*/
 }
 
 .info-window-image {
     width: 100%;
-    height: 110px;
+    height: 90px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -189,6 +190,13 @@ html, body {
     border-radius: 12px;
     font-size: 11px;
     font-weight: bold;
+}
+
+.info-window-availability.available {
+    background: #4CAF50;
+}
+.info-window-availability.waiting {
+    background: #ff9800;
 }
 
 .info-window-content {
