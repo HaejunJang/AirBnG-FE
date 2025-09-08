@@ -8,6 +8,7 @@ import InfoCard from "../components/home/InfoCard";
 import CategorySection from "../components/home/CategorySection";
 import PopularSection from "../components/home/PopularSection";
 import { getPopularTop5 } from "../api/lockerApi";
+import { SSEProvider } from '../context/SseContext';
 
 function HomePage() {
   const navigate = useNavigate();
