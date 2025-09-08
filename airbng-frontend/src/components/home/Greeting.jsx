@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 function Greeting() {
-  const [nickname] = useState("홍길동");
+  const { user } = useAuth();
+  const nickname = user?.name || '';
 
   return (
     <div className="greeting">

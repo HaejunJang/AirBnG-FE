@@ -1,23 +1,41 @@
 // src/pages/HomePage.jsx
-import React from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-
 import "../styles/pages/home.css";
-
-// 홈 섹션 컴포넌트
-import TopBar from "../components/home/TopBar";
+import TopBar from "../components/home/TopBar"
 import Greeting from "../components/home/Greeting";
 import InfoCard from "../components/home/InfoCard";
 import CategorySection from "../components/home/CategorySection";
 import PopularSection from "../components/home/PopularSection";
+import { getPopularTop5 } from "../api/lockerApi";
 
 function HomePage() {
   const navigate = useNavigate();
-
-  // TODO: 실제 로그인 상태는 전역 상태(context)와 연결
   const isLoggedIn = false;
 
-  // 짐 타입 카드 클릭
+  // 인기 보관소 상태
+  const [popular, setPopular] = useState([]);
+  const [loadingPopular, setLoadingPopular] = useState(true);
+
+  const loadPopular = useCallback(async () => {
+    try {
+      const { data } = await getPopularTop5();
+      if (data?.code === 1000 && data?.result?.lockers) {
+        setPopular(data.result.lockers);
+      } else {
+        setPopular([]);
+        console.warn("Unexpected response:", data);
+      }
+    } catch (e) {
+      console.error("TOP5 fetch failed:", e);
+      setPopular([]);
+    } finally {
+      setLoadingPopular(false);
+    }
+  }, []);
+
+  useEffect(() => { loadPopular(); }, [loadPopular]);
+
   const handleCategoryClick = (index) => {
     if (!isLoggedIn) {
       if (window.confirm("로그인이 필요합니다. 로그인 페이지로 이동할까요?")) {
@@ -25,24 +43,12 @@ function HomePage() {
       }
       return;
     }
-
-    // index → jimTypeId 매핑
     const jimTypeIdMap = { 0: 1, 1: 2, 2: 4, 3: 5 };
-
-    if (index === 1) {
-      // 캐리어: 소형/대형 선택 모달 예정
-      // e.g. navigate(`/page/lockerSearch?jimTypeId=2`);
-      // e.g. navigate(`/page/lockerSearch?jimTypeId=3`);
-      return;
-    }
-
+    if (index === 1) return; // 캐리어 모달 예정
     const jimTypeId = jimTypeIdMap[index];
-    if (jimTypeId) {
-      navigate(`/page/lockerSearch?jimTypeId=${jimTypeId}`);
-    }
+    if (jimTypeId) navigate(`/page/lockerSearch?jimTypeId=${jimTypeId}`);
   };
 
-  // 인기 보관소 클릭
   const handlePopularClick = (lockerId) => {
     navigate(`/page/lockers/${lockerId}`);
   };
@@ -57,14 +63,15 @@ function HomePage() {
         <Greeting />
       </div>
 
-      {/* 지역 기본값은 필요 시 props로 교체 */}
       <InfoCard locationName="강남구" />
-
-      {/* 카테고리/인기 섹션 */}
       <CategorySection onCategoryClick={handleCategoryClick} />
-      <PopularSection onPopularClick={handlePopularClick} />
+      
+      <PopularSection
+        items={popular}
+        loading={loadingPopular}
+        onPopularClick={handlePopularClick}
+      />
     </>
   );
 }
-
 export default HomePage;
