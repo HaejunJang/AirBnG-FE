@@ -1,4 +1,5 @@
 
+
 import React, {createContext, useContext, useCallback, useRef, useState, useEffect} from 'react';
 import { useSSEManager } from '../hooks/useSSEManager';
 
@@ -8,43 +9,171 @@ const SseContext = createContext(null);
 // SSE Provider 컴포넌트
 export const SSEProvider = ({ children, memberId }) => {
     const sseManager = useSSEManager(memberId);
-    const callbackRefMap = useRef(new Map()); // 콜백 참조 저장
-    const [alarms, setAlarms] = useState([]); // 알림 저장소
+    const [alarms, setAlarms] = useState([]); // 전체 알림 객체 저장소
+    const globalListenerRef = useRef(null); // 전역 리스너 참조
 
     const STORAGE_KEY = `airbng_alarms_${memberId}`;
 
+    // 시간 포맷팅 함수
+    const formatDateTime = useCallback((date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? '오후' : '오전';
+        hours = hours % 12 || 12;
+        return `${year}-${month}-${day} ${ampm} ${String(hours).padStart(2, '0')}:${minutes}`;
+    }, []);
+
     // LocalStorage에서 알림 불러오기
     useEffect(() => {
+        if (!memberId) return;
+
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
             try {
-                setAlarms(JSON.parse(saved));
-            } catch {
+                const parsedAlarms = JSON.parse(saved);
+                if (Array.isArray(parsedAlarms)) {
+                    console.log('[SSE Context] 저장된 알림 불러오기 성공:', parsedAlarms.length + '개');
+                    setAlarms(parsedAlarms);
+                } else {
+                    localStorage.removeItem(STORAGE_KEY);
+                    setAlarms([]);
+                }
+            } catch (error) {
+                console.error('[SSE Context] 알림 로딩 실패:', error);
                 localStorage.removeItem(STORAGE_KEY);
+                setAlarms([]);
             }
         }
-    }, [STORAGE_KEY]);
+    }, [STORAGE_KEY, memberId]);
 
     // alarms가 바뀔 때마다 LocalStorage에 저장
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(alarms));
-    }, [alarms, STORAGE_KEY]);
+        if (!memberId) return;
 
+        if (alarms.length >= 0) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(alarms));
+            console.log('[SSE Context] 알림 저장 완료:', alarms.length + '개');
+        }
+    }, [alarms, STORAGE_KEY, memberId]);
 
+    // 브라우저 알림 권한 요청
     useEffect(() => {
         if (typeof window !== 'undefined' && 'Notification' in window) {
             if (Notification.permission === 'default') {
                 Notification.requestPermission().then((permission) => {
                     console.log('[SSE Context] Notification 권한 상태:', permission);
                 });
-            } else {
-                console.log('[SSE Context] 이미 권한 상태:', Notification.permission);
             }
         }
     }, []);
 
+    // 브라우저 알림 표시 함수
+    const showNotification = useCallback((title, message, options = {}) => {
+        console.log('[SSE Context] 브라우저 알림 생성 시도:', title, message);
 
-    // 알림 권한 요청 메서드 추가
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            console.log('[SSE Context] 현재 알림 권한:', Notification.permission);
+
+            if (Notification.permission === 'granted') {
+                try {
+                    const notification = new Notification(title, {
+                        body: message,
+                        icon: options.icon || '/favicon.ico',
+                        tag: options.tag || 'sse-notification',
+                        requireInteraction: false,
+                        ...options
+                    });
+
+                    console.log('[SSE Context] 브라우저 알림 생성 성공');
+
+                    if (options.autoClose !== false) {
+                        setTimeout(() => {
+                            try {
+                                notification.close();
+                            } catch (e) {
+                                // 이미 닫힌 경우 무시
+                            }
+                        }, options.duration || 5000);
+                    }
+
+                    return notification;
+                } catch (error) {
+                    console.error('[SSE Context] 브라우저 알림 생성 실패:', error);
+                }
+            } else if (Notification.permission === 'default') {
+                console.log('[SSE Context] 알림 권한 요청 중...');
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        // 권한을 받은 후 다시 알림 시도
+                        const notification = new Notification(title, {
+                            body: message,
+                            icon: options.icon || '/favicon.ico',
+                            tag: options.tag || 'sse-notification',
+                            ...options
+                        });
+
+                        if (options.autoClose !== false) {
+                            setTimeout(() => {
+                                try {
+                                    notification.close();
+                                } catch (e) {
+                                    // 이미 닫힌 경우 무시
+                                }
+                            }, options.duration || 5000);
+                        }
+                    }
+                });
+            } else {
+                console.warn('[SSE Context] 브라우저 알림 권한이 거부됨');
+            }
+        }
+        return null;
+    }, []);
+
+    // 전역 알림 핸들러 등록 (SSE 연결 후)
+    useEffect(() => {
+        if (!sseManager.isConnected || !memberId || globalListenerRef.current) return;
+
+        console.log('[SSE Context] 전역 알림 리스너 등록');
+
+        const globalAlarmHandler = (data) => {
+            console.log('[SSE Context] 전역 알림 수신:', data);
+
+            // 알림 객체에 수신 시간 추가
+            const alarmWithTime = {
+                ...data,
+                receivedAt: formatDateTime(new Date())
+            };
+
+            // 전역 알림 상태 업데이트 (모든 페이지에서 공유)
+            setAlarms((prevAlarms) => {
+                console.log('[SSE Context] 이전 알림 개수:', prevAlarms.length);
+                const newAlarms = [alarmWithTime, ...prevAlarms].slice(0, 100);
+                console.log('[SSE Context] 업데이트된 알림 개수:', newAlarms.length);
+                return newAlarms;
+            });
+
+            // 브라우저 알림 표시 (모든 페이지에서)
+            showNotification('예약 알림', data.message);
+        };
+
+        // 전역 리스너 등록
+        sseManager.addEventListener('alarm', globalAlarmHandler);
+        globalListenerRef.current = globalAlarmHandler;
+
+        return () => {
+            if (globalListenerRef.current) {
+                console.log('[SSE Context] 전역 알림 리스너 제거');
+                sseManager.removeEventListener('alarm', globalListenerRef.current);
+                globalListenerRef.current = null;
+            }
+        };
+    }, [sseManager.isConnected, sseManager, memberId, formatDateTime, showNotification]);
+
+    // 알림 권한 요청 메서드
     const requestNotificationPermission = useCallback(async () => {
         if (typeof window !== 'undefined' && 'Notification' in window) {
             if (Notification.permission === 'default') {
@@ -59,69 +188,36 @@ export const SSEProvider = ({ children, memberId }) => {
 
     const contextValue = {
         ...sseManager,
-        alarms, // NotificationPage에서 읽을 수 있음
+        alarms,
         setAlarms,
         requestNotificationPermission,
+        showNotification,
 
+        // 개별 컴포넌트용 구독 (선택사항)
         subscribeToAlarms: useCallback((callback) => {
-            console.log('[SSE Context] 알림 구독 추가');
+            console.log('[SSE Context] 개별 알림 구독 추가');
 
-            // 실제 리스너 함수 생성 (클로저로 callback을 감싼다)
             const wrappedCallback = (data) => {
-                // 알림 ID만 LocalStorage에 저장
-                setAlarms((prev) => {
-                    const newIds = [data.id, ...prev.filter(id => id !== data.id)];
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(newIds));
-                    return newIds;
-                });
-
-                console.log('[DEBUG] subscribeToAlarms 수신 데이터:', data);
-                // 전역 브라우저 알림
-                sseManager.showNotification('예약 알림', data.message);
-
-                callback?.(data);
+                if (callback && typeof callback === 'function') {
+                    try {
+                        const alarmWithTime = {
+                            ...data,
+                            receivedAt: formatDateTime(new Date())
+                        };
+                        callback(alarmWithTime);
+                    } catch (error) {
+                        console.error('[SSE Context] 개별 콜백 실행 오류:', error);
+                    }
+                }
             };
 
-
-
-                // wrappedCallback을 저장해서 나중에 제거할 수 있도록 함
-            callbackRefMap.current.set(callback, wrappedCallback);
-
-            // 실제 이벤트 리스너 등록
             sseManager.addEventListener('alarm', wrappedCallback);
 
-            // 구독 해제 함수 반환
             return () => {
-                console.log('[SSE Context] 알림 구독 제거');
-                const storedCallback = callbackRefMap.current.get(callback);
-                if (storedCallback) {
-                    sseManager.removeEventListener('alarm', storedCallback);
-                    callbackRefMap.current.delete(callback);
-                }
+                console.log('[SSE Context] 개별 알림 구독 제거');
+                sseManager.removeEventListener('alarm', wrappedCallback);
             };
-        }, [sseManager]),
-
-        showNotification: useCallback((title, message, options = {}) => {
-            console.log('[SSE Context] 브라우저 알림 생성:', title, message);
-            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-                const notification = new Notification(title, {
-                    body: message,
-                    icon: options.icon || '/favicon.ico',
-                    tag: options.tag || 'sse-notification',
-                    ...options
-                });
-                console.log('[DEBUG] 생성된 알림 객체:', notification);
-
-                if (options.autoClose !== false) {
-                    setTimeout(() => notification.close(), options.duration || 5000);
-                }
-
-                return notification;
-            } else {
-                console.warn('[SSE Context] 브라우저 알림 권한이 없거나 지원하지 않음');
-            }
-            return null;
-        }, [])
+        }, [sseManager, formatDateTime])
     };
 
     return (
@@ -140,7 +236,7 @@ export const useSSE = () => {
     return context;
 };
 
-// 개별 컴포넌트에서 알림을 쉽게 구독할 수 있는 Hook
+// 개별 컴포넌트에서 알림을 쉽게 구독할 수 있는 Hook (선택사항)
 export const useAlarmSubscription = (callback, dependencies = []) => {
     const { subscribeToAlarms } = useSSE();
 
@@ -158,7 +254,6 @@ export const useNotification = () => {
     const { showNotification, requestNotificationPermission } = useSSE();
 
     const notify = useCallback(async (title, message, options = {}) => {
-        // 권한이 없으면 자동으로 요청
         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
             const permission = await requestNotificationPermission();
             if (permission !== 'granted') {
