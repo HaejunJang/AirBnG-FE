@@ -1,7 +1,7 @@
-
-
 import React, {createContext, useContext, useCallback, useRef, useState, useEffect} from 'react';
 import { useSSEManager } from '../hooks/useSSEManager';
+// import {useAuth} from "./AuthContext";
+
 
 // SSE Context 생성
 const SseContext = createContext(null);
@@ -188,6 +188,7 @@ export const SSEProvider = ({ children, memberId }) => {
 
     const contextValue = {
         ...sseManager,
+        memberId,
         alarms,
         setAlarms,
         requestNotificationPermission,

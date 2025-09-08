@@ -11,10 +11,6 @@ import ReservationFormPage from "./pages/ReservationFormPage";
 import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
 import ReservationList from "./pages/ReservationList";
-import Notification from "./pages/notification";
-import { SSEProvider } from "./context/SseContext";
-import {useAuth} from "./context/AuthContext";
-import Notification from "./pages/nofication";
 import LoginPage from "./pages/LoginPage";
 import Notification from "./pages/notification";
 import { SSEProvider } from "./context/SseContext";
@@ -62,9 +58,6 @@ function App() {
           />
           <Route path="/page/mypage" element={<MyPage />} />
           <Route path="/page/signup" element={<SignupPage />} />
-          <Route path="/page/notification" element={<Notification />} />
-
-          <Route path="/page/notification" element={<Notification/>} />
           <Route path="/page/login" element={<LoginPage />} />
           <Route path="/page/notification" element={<Notification />} />
 
@@ -78,9 +71,7 @@ function App() {
 
   return (
       <BrowserRouter>
-          {/* 앱 전체 SSEProvider 적용 */}
-          {/*<SSEProvider memberId={user?.id || null}> ->  실제 로그인 사용자별 알림 코드*/}
-          <SSEProvider memberId = "3">
+          <SSEProvider memberId={user?.id || null}>
             <MainContent />
           </SSEProvider>
       </BrowserRouter>
