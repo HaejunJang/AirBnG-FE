@@ -1,5 +1,6 @@
+//
 // import { useState, useEffect, useRef, useCallback } from 'react';
-// import NotificationApp from "../pages/notification";
+//
 // const DEL_STORAGE_KEY = 'deletedNotifications';
 //
 // export const useSSEManager = (memberId = null) => {
@@ -14,8 +15,6 @@
 //     const maxReconnectAttempts = 5;
 //     const isInitializedRef = useRef(false);
 //     const connectionTimeoutRef = useRef(null); // 연결 타임아웃 추가
-//     const STORAGE_KEY = `airbng_alarms_${memberId}`;
-//
 //
 //     // memberId 자동 감지
 //     const resolvedMemberId = memberId ||
@@ -47,35 +46,11 @@
 //         });
 //     }, []);
 //
-//     // 알림 이벤트 처리
+//     // 알림 이벤트 처리 (SseContext에서 처리하도록 단순화)
 //     const handleAlarmEvent = useCallback((alarmData) => {
 //         console.log('[SSE Hook] 알림 이벤트 처리:', alarmData);
 //
-//         // 기존 알림 불러오기
-//         let existingAlarms = [];
-//         try {
-//             const stored = localStorage.getItem(STORAGE_KEY);
-//             if (stored) existingAlarms = JSON.parse(stored);
-//         } catch (e) {
-//             console.warn('[SSE] LocalStorage 파싱 오류:', e);
-//         }
-//
-//         // 최신순으로 새 알림 앞에 추가
-//         const newAlarms = [alarmData.id, ...existingAlarms.filter(id => id !== alarmData.id)];
-//
-//         // LocalStorage에 저장
-//         try {
-//             localStorage.setItem(STORAGE_KEY, JSON.stringify(newAlarms));
-//         } catch (e) {
-//             console.warn('[SSE] LocalStorage 저장 오류:', e);
-//         }
-//
-//         // 전역 브라우저 알림 띄우기
-//         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-//             new Notification('예약 알림', { body: alarmData.message });
-//         }
-//
-//         // 기존 이벤트 리스너 실행
+//         // 기존 이벤트 리스너 실행 (SseContext의 wrappedCallback이 호출됨)
 //         const alarmListeners = listenersRef.current.get('alarm') || [];
 //         alarmListeners.forEach((listener, index) => {
 //             try {
@@ -84,7 +59,6 @@
 //                 console.error('[SSE Hook] 알림 리스너 실행 오류:', err);
 //             }
 //         });
-//
 //     }, []);
 //
 //     // 연결 해제
@@ -175,14 +149,6 @@
 //                 }
 //             });
 //
-//
-//             // // Notification 권한 요청
-//             // useEffect(() => {
-//             //     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-//             //         Notification.requestPermission();
-//             //     }
-//             // }, []);
-//
 //             // onopen은 단순히 HTTP 연결만 확인 (실제 연결 완료가 아님)
 //             eventSourceRef.current.onopen = () => {
 //                 console.log('[SSE Hook] HTTP 연결 열림 (아직 서버 준비 대기중)');
@@ -261,6 +227,27 @@
 //         return Promise.resolve(typeof window !== 'undefined' ? Notification.permission : 'denied');
 //     }, []);
 //
+//     const showNotification = useCallback((title, message, options = {}) => {
+//         console.log('[SSE Hook] 브라우저 알림 생성:', title, message);
+//         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+//             const notification = new Notification(title, {
+//                 body: message,
+//                 icon: options.icon || '/favicon.ico',
+//                 tag: options.tag || 'sse-notification',
+//                 ...options
+//             });
+//
+//             if (options.autoClose !== false) {
+//                 setTimeout(() => notification.close(), options.duration || 5000);
+//             }
+//
+//             return notification;
+//         } else {
+//             console.warn('[SSE Hook] 브라우저 알림 권한이 없거나 지원하지 않음');
+//         }
+//         return null;
+//     }, []);
+//
 //     // 초기화 및 자동 연결
 //     useEffect(() => {
 //         if (isInitializedRef.current) return;
@@ -317,31 +304,43 @@
 //         addEventListener,
 //         removeEventListener,
 //         onConnectionStatusChange,
-//         requestNotificationPermission
+//         requestNotificationPermission,
+//         showNotification
 //     };
 // };
 //
-//
-// //삭제
+// //삭제된 알림 ID 로딩
 // export const loadDeletedIds = () => {
 //     try {
 //         const data = localStorage.getItem(DEL_STORAGE_KEY);
-//         return data ? new Set(JSON.parse(data)) : new Set();
+//         if (data) {
+//             const parsedData = JSON.parse(data);
+//             // 배열 형식이면 Map으로 변환 (이전 버전 호환성)
+//             if (Array.isArray(parsedData)) {
+//                 const map = new Map();
+//                 parsedData.forEach(key => map.set(key, Date.now()));
+//                 return map;
+//             }
+//             // 객체 형식이면 Map으로 변환
+//             return new Map(Object.entries(parsedData));
+//         }
+//         return new Map();
 //     } catch (e) {
 //         console.error('삭제 알림 로딩 실패', e);
-//         return new Set();
+//         return new Map();
 //     }
 // };
 //
-// //삭제된 알림 저장
-// export const saveDeletedIds = (deletedIdsSet) => {
+// //삭제된 알림 저장 (Map을 객체로 변환하여 저장)
+// export const saveDeletedIds = (deletedIdsMap) => {
 //     try {
-//         localStorage.setItem(DEL_STORAGE_KEY, JSON.stringify([...deletedIdsSet]));
+//         const obj = Object.fromEntries(deletedIdsMap);
+//         localStorage.setItem(DEL_STORAGE_KEY, JSON.stringify(obj));
+//         console.log('[Storage] 삭제 알림 저장 완료:', obj);
 //     } catch (e) {
 //         console.error('삭제 알림 저장 실패', e);
 //     }
 // };
-
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
@@ -653,10 +652,11 @@ export const useSSEManager = (memberId = null) => {
     };
 };
 
-//삭제된 알림 ID 로딩
-export const loadDeletedIds = () => {
+// 삭제된 알림 ID 로딩 - memberId 매개변수 추가
+export const loadDeletedIds = (memberId) => {
     try {
-        const data = localStorage.getItem(DEL_STORAGE_KEY);
+        const storageKey = `${DEL_STORAGE_KEY}_${memberId || 'default'}`;
+        const data = localStorage.getItem(storageKey);
         if (data) {
             const parsedData = JSON.parse(data);
             // 배열 형식이면 Map으로 변환 (이전 버전 호환성)
@@ -675,11 +675,12 @@ export const loadDeletedIds = () => {
     }
 };
 
-//삭제된 알림 저장 (Map을 객체로 변환하여 저장)
-export const saveDeletedIds = (deletedIdsMap) => {
+// 삭제된 알림 저장 - memberId 매개변수 추가
+export const saveDeletedIds = (deletedIdsMap, memberId) => {
     try {
+        const storageKey = `${DEL_STORAGE_KEY}_${memberId || 'default'}`;
         const obj = Object.fromEntries(deletedIdsMap);
-        localStorage.setItem(DEL_STORAGE_KEY, JSON.stringify(obj));
+        localStorage.setItem(storageKey, JSON.stringify(obj));
         console.log('[Storage] 삭제 알림 저장 완료:', obj);
     } catch (e) {
         console.error('삭제 알림 저장 실패', e);
