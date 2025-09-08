@@ -34,11 +34,16 @@ export const updateLocker = ({ lockerId, locker, images = [] }) => {
 export const hasMyLocker = () => httpAuth.get("/lockers/me/exist");
 
 // 보관소 검색
-export const searchLockers = ({ address, jimTypeId }) => {
-    return httpPublic.get("/lockers", {
-        params: { address, jimTypeId },
+export const searchLockers = ({ address, lockerName, jimTypeId }) => {
+    return httpPublic.get('/lockers', {
+        params: {
+            address: address || '',
+            lockerName: lockerName || '',
+            jimTypeId: jimTypeId || null
+        }
     });
 };
+
 // 상세
 export const getMyLocker = () => httpAuth.get("/lockers/me");
 
