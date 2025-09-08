@@ -38,4 +38,4 @@ export const hasMyLocker = () => httpAuth.get("/lockers/me/exist");
 export const getMyLocker = () => httpAuth.get("/lockers/me");            
 
 // 수정용
-// export const getMyLockerForUpdate = () => httpAuth.get("/lockers/me/update"); 
+// export const getMyLockerForUpdate = () => httpAuth.get("/lockers/me/update");
