@@ -9,3 +9,7 @@ export const getNotification = () => {
 export const hasUnreadAlarm = async () => {
     return httpPublic.get("/alarms/unread",{ withCredentials: true });
 };
+
+export const hasreadAlarm = async () => {
+    return httpPublic.get("/alarms/read",{ withCredentials: true });
+};

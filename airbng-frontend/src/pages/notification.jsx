@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSSE } from '../context/SseContext';
 import { loadDeletedIds, saveDeletedIds } from '../hooks/useSSEManager';
+import {getNotification, hasreadAlarm} from '../api/notification';
 import '../styles/pages/notification.css';
+import {useDot} from "../hooks/useDot";
 
 const Header = ({ title, showBackButton, backUrl }) => (
     <div className="header">
@@ -133,6 +135,7 @@ const NotificationList = ({ notifications, deletedNotificationIds, onRemove, onC
 const NotificationApp = () => {
 
     const { alarms, isConnected, memberId } = useSSE(); // 전역 알림 상태
+    const { hideDot } = useDot(memberId); // DOT 상태 관리
     const [deletedRef, setDeletedRef] = useState(() => loadDeletedIds(memberId));
 
     // 23시간 밀리초
@@ -272,6 +275,21 @@ const NotificationApp = () => {
             return newMap;
         });
     }, [alarms, getAlarmKey, TWENTY_THREE_HOURS, memberId]);
+
+    // 알림 페이지 진입 시 읽음 처리
+    useEffect(() => {
+        const markRead = async () => {
+            if (!memberId) return;
+            try {
+                await hasreadAlarm(); // 서버에서 markAllAsRead 수행
+                hideDot();               // DOT 숨김
+                window.dispatchEvent(new CustomEvent('alarmRead', { detail: { readMemberId: memberId } }));
+            } catch (e) {
+                console.error('[NotificationApp] 알림 읽음 처리 실패', e);
+            }
+        };
+        markRead();
+    }, [memberId, hideDot]);
 
     console.log('[NotificationApp] 렌더링 - 연결상태:', isConnected, '총 알림:', alarms?.length || 0);
 
