@@ -9,15 +9,15 @@ import CategorySection from "../components/home/CategorySection";
 import PopularSection from "../components/home/PopularSection";
 import { getPopularTop5 } from "../api/lockerApi";
 import {useDot} from "../hooks/useDot";
-import {useAuth} from "../context/AuthContext";
+import { getUserProfile } from '../utils/jwtUtil';
 
 function HomePage() {
   const navigate = useNavigate();
   const isLoggedIn = false;
 
-  const { user } = useAuth();
-  const memberId = user?.id;
-  const { hasDot } = useDot(memberId);
+    const profile = getUserProfile();
+    const resolvedMemberId =  profile?.id || null;
+    const { hasDot } = useDot(resolvedMemberId);
 
   // 인기 보관소 상태
   const [popular, setPopular] = useState([]);

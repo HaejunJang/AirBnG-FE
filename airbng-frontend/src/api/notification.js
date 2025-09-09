@@ -7,5 +7,5 @@ export const getNotification = () => {
 };
 
 export const hasUnreadAlarm = async () => {
-    return httpPublic.get("/api/alarms/unread");
+    return httpPublic.get("/alarms/unread",{ withCredentials: true });
 };

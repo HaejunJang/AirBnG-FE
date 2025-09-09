@@ -122,7 +122,8 @@ export const useSSEManager = (memberId) => {
         }, 10000);
 
         try {
-            eventSourceRef.current = new EventSource(`http://localhost:9000/AirBnG/alarms/reservations/alarms`,{withCredentials:true});
+            const baseURL = "http://localhost:9000";
+            eventSourceRef.current = new EventSource(`${baseURL}/AirBnG/alarms/reservations/alarms`,{withCredentials:true});
 
             // 서버에서 보내는 'connect' 이벤트로만 연결 완료 판단
             eventSourceRef.current.addEventListener('connect', (event) => {

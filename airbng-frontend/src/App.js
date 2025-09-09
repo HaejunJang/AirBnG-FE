@@ -14,7 +14,7 @@ import ReservationList from "./pages/ReservationList";
 import LoginPage from "./pages/LoginPage";
 import Notification from "./pages/notification";
 import { SSEProvider } from "./context/SseContext";
-import {useAuth} from "./context/AuthContext";
+import { getUserProfile } from './utils/jwtUtil';
 
 function App() {
   function getActiveNav(pathname) {
@@ -67,11 +67,11 @@ function App() {
     );
   }
 
-  const { user } = useAuth();
+  const profile = getUserProfile();
 
   return (
       <BrowserRouter>
-          <SSEProvider memberId={user?.id || null}>
+          <SSEProvider memberId={profile?.id || null}>
             <MainContent />
           </SSEProvider>
       </BrowserRouter>
