@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 const DEL_STORAGE_KEY = 'deletedNotifications';
 
-export const useSSEManager = (memberId = null) => {
+export const useSSEManager = (memberId) => {
     const [isConnected, setIsConnected] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
     const [connectionError, setConnectionError] = useState(null);
@@ -16,11 +16,11 @@ export const useSSEManager = (memberId = null) => {
     const connectionTimeoutRef = useRef(null); // 연결 타임아웃 추가
 
     // memberId 자동 감지
-    const resolvedMemberId = memberId ||
-        (typeof window !== 'undefined' && (
-            window.memberId ||
-            document?.body?.dataset?.memberId
-        ));
+    const resolvedMemberId = memberId || null;
+
+    console.log('[SSE Hook] memberId param:', memberId);
+    console.log('[SSE Hook] window.memberId:', window.memberId);
+    console.log('[SSE Hook] body dataset memberId:', document?.body?.dataset?.memberId);
 
     // 연결 상태 업데이트
     const updateConnectionStatus = useCallback((connected, error = null) => {

@@ -67,7 +67,7 @@ function App() {
     );
   }
 
-  const user = useAuth();
+  const { user } = useAuth();
 
   return (
       <BrowserRouter>
