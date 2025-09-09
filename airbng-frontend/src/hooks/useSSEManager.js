@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { getUserProfile } from '../utils/jwtUtil';
 
 const DEL_STORAGE_KEY = 'deletedNotifications';
 
@@ -16,7 +17,8 @@ export const useSSEManager = (memberId) => {
     const connectionTimeoutRef = useRef(null); // 연결 타임아웃 추가
 
     // memberId 자동 감지
-    const resolvedMemberId = memberId || null;
+    const profile = getUserProfile();
+    const resolvedMemberId = memberId || profile?.id || null;
 
     console.log('[SSE Hook] memberId param:', memberId);
     console.log('[SSE Hook] window.memberId:', window.memberId);
@@ -120,7 +122,7 @@ export const useSSEManager = (memberId) => {
         }, 10000);
 
         try {
-            eventSourceRef.current = new EventSource(`http://localhost:9000/AirBnG/alarms/reservations/alarms`);
+            eventSourceRef.current = new EventSource(`http://localhost:9000/AirBnG/alarms/reservations/alarms`,{withCredentials:true});
 
             // 서버에서 보내는 'connect' 이벤트로만 연결 완료 판단
             eventSourceRef.current.addEventListener('connect', (event) => {
