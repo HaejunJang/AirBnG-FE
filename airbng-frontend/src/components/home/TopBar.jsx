@@ -3,10 +3,9 @@ import { Link } from "react-router-dom";
 import logoImg from "../../assets/logo_ic.svg";
 import bellImg from "../../assets/bell_ic.svg";
 import dot from "../../assets/dot.svg";
-import {useDot} from "../../hooks/useDot";
+import "../../styles/dot.css"
 
-function TopBar() {
-  const { hasDot } = useDot();
+function TopBar({ hasDot }) {
 
   return (
     <div className="top-bar">

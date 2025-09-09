@@ -1,10 +1,10 @@
 /* dot 기본 스타일 */
 .dot-indicator {
     position: absolute;       /* .bell-wrapper 기준 */
-    top: -10px;                /* 벨 아이콘 위쪽 */
-    right: 0px;              /* 벨 아이콘 오른쪽 */
-    width: 7px;               /* 작은 점 */
-    height: 6px;
+    top: -10px;                /* 벨 아이콘 위쪽으로 조금 더 올림 */
+    right: -1px;              /* 벨 아이콘 오른쪽으로 살짝 이동 */
+    width: 7px;              /* 점 크기 키움 */
+    height: 10px;
     border-radius: 50%;       /* 동그란 점 */
     z-index: 10;
 
@@ -44,5 +44,5 @@
 
 @keyframes dot-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.1); }
+    50% { opacity: 0.6; transform: scale(1.2); } /* 조금 더 크게 맥박 */
 }

@@ -61,7 +61,6 @@ function HomePage() {
 
   return (
       <>
-       {/*<SSEProvider memberId={window.memberId}>*/}
           <div className="top-section">
             <TopBar hasDot={hasDot}/>
             <span className="ring ring--bell" aria-hidden />
@@ -78,7 +77,6 @@ function HomePage() {
             loading={loadingPopular}
             onPopularClick={handlePopularClick}
           />
-     {/*</SSEProvider>*/}
        </>
   );
 }
