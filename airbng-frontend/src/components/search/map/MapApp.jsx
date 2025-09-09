@@ -42,7 +42,7 @@ const MapApp = () => {
     };
 
     const handleLockerSelect = (lockerId) => {
-        setSelectedLockerId(prev => prev === lockerId ? null : lockerId);
+        setSelectedLockerId(lockerId);
     };
 
     const handleBottomSheetToggle = (isFixed) => {

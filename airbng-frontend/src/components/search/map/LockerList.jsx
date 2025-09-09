@@ -9,10 +9,6 @@ const LockerList = ({
                         onLockerSelect,
                         isSheetFixed
                     }) => {
-    const handleLockerClick = (locker) => {
-        if (locker.isAvailable === 'NO' || !isSheetFixed) return;
-        onLockerSelect(locker.lockerId);
-    };
 
     if (lockers.length === 0) {
         return (
@@ -33,7 +29,7 @@ const LockerList = ({
                     key={locker.lockerId}
                     locker={locker}
                     isSelected={selectedLockerId === locker.lockerId}
-                    onClick={() => handleLockerClick(locker)}
+                    onClick={() => onLockerSelect(locker.lockerId)}
                 />
             ))}
         </div>

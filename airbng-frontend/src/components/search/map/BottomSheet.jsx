@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import LockerList from './LockerList';
 import "../../../styles/pages/bottomSheet.css";
 import arrowDownIcon from '../../../assets/arrow-down.svg';
+import {useNavigate} from "react-router-dom";
 
 const BottomSheet = ({
                          lockers,
@@ -10,12 +11,21 @@ const BottomSheet = ({
                          selectedLockerId,
                          onLockerSelect,
                      }) => {
+    const navigate = useNavigate();
     const sheetRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [startY, setStartY] = useState(0);
-
+    const [isOpen, setIsOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [currentBagType, setCurrentBagType] = useState(0);
+    const handleBagTypeSelect = (id) => {
+        setCurrentBagType(Number(id));
+        setIsDropdownOpen(false);
+
+        // 현재 URL 기반으로 파라미터 갱신
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.set("jimTypeId", id);
+
+        navigate(`?${searchParams.toString()}`, {replace: true});
+    };
 
     const typeMap = {
         0: '모든 짐',
@@ -26,46 +36,20 @@ const BottomSheet = ({
         5: '유모차'
     };
 
-    const handleBagTypeSelect = (id) => {
-        setCurrentBagType(Number(id));
-        setIsDropdownOpen(false);
-    };
-
-    const handleMouseDown = (e) => {
-        setStartY(e.clientY);
-        setIsDragging(true);
-        sheetRef.current?.classList.add("dragging");
-
-        const handleMouseMove = (e) => {
-            // 드래그 중 처리 로직
-        };
-
-        const handleMouseUp = (e) => {
-            if (!isDragging) return;
-
-            const deltaY = e.clientY - startY;
-            onToggle(deltaY <= 20);
-
-            setIsDragging(false);
-            sheetRef.current?.classList.remove("dragging");
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
+    const handleClick = () => {
+        setIsOpen((prev) => {
+            const next = !prev;
+            return next;
+        });
     };
 
     return (
         <div
             ref={sheetRef}
             id="bottomSheet"
-            className="bottom-sheet"
-            style={{
-                transform: isFixed ? "translateX(-50%) translateY(0%)" : "translateX(-50%) translateY(70%)"
-            }}
+            className={`bottom-sheet ${isOpen ? "fixed" : ""}`}
         >
-            <div id="sheetHeader" className="sheet-header" onMouseDown={handleMouseDown}>
+            <div id="sheetHeader" className="sheet-header" onClick={handleClick}>
                 <div className="sheet-drag-handle"></div>
             </div>
 
@@ -75,17 +59,18 @@ const BottomSheet = ({
                     <span className="sheet-count">{lockers.length}</span>
                 </div>
 
-                <div >
+                <div className="sheet-right">
                     <button className="sheet-subtitle" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                         <span id="selectedBagType">{typeMap[currentBagType]}</span>
                         <img className="dropdown-down" src={arrowDownIcon} alt="드롭다운"/>
                     </button>
 
                     {isDropdownOpen && (
-                        <div id="bag-dropdown" className="dropdown-menu">
+                        <div id="bag-dropdown" className="sheet-dropdown-menu">
                             {Object.entries(typeMap).map(([id, name]) => (
                                 <button
                                     key={id}
+                                    className="sheet-dropdown-option"
                                     onClick={() => handleBagTypeSelect(id)}
                                 >
                                     {name}
