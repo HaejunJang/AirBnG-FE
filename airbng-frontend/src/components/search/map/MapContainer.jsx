@@ -1,9 +1,8 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMap } from '../../../hooks/useMap';
 import "../../../styles/pages/search.css";
 import CurrentLocation from "../../../assets/icon.gif";
-import imgUpload from "../../../assets/img_upload_ic.svg";
 
 const MapContainer = ({
                           lockers,
@@ -22,6 +21,9 @@ const MapContainer = ({
         createMarkerImage
     } = useMap();
 
+    // 현재 위치 마커 전용 ref
+    const currentLocationMarkerRef = useRef(null);
+
     // 상세보기 네비게이션 핸들러
     const handleDetailNavigation = useCallback((lockerId) => {
         navigate(`/page/lockerDetails?lockerId=${encodeURIComponent(lockerId)}`);
@@ -30,59 +32,73 @@ const MapContainer = ({
     // 인포윈도우 템플릿 생성
     const createInfoWindowTemplate = useCallback((locker) => {
         const { lockerName, lockerId, isAvailable, address, url } = locker;
-        const imageUrl = url || imgUpload;
+        const imageUrl = url || `/assets/default.jpg`;
         const availabilityText = isAvailable === 'YES' ? '보관가능' : '보관대기';
         const availabilityColor = isAvailable === 'YES' ? '#4CAF50' : '#ff9800';
 
         return `
-            <div class="info-window">
-                <div class="info-window-image" style="background-image: url('${imageUrl}');">
-                    <div class="info-window-availability" style="background-color: ${availabilityColor};">
-                        ${availabilityText}
-                    </div>
-                </div>
-                <div class="info-window-content">
-                    <div class="info-window-title">${lockerName}</div>
-                    <div class="info-window-address">${address || '주소 정보 없음'}</div>
-                    <button
-                        class="info-window-button"
-                        data-locker-id="${lockerId}"
-                    >
-                        상세보기
-                    </button>
-                </div>
-            </div>
-        `;
+      <div class="info-window">
+        <div class="info-window-image" style="background-image: url('${imageUrl}');">
+          <div class="info-window-availability ${availabilityColor}">
+            ${availabilityText}
+          </div>
+        </div>
+        <div class="info-window-content">
+          <div class="info-window-title">${lockerName}</div>
+          <div class="info-window-address">${address || '주소 정보 없음'}</div>
+          <button
+            class="info-window-button"
+            data-locker-id="${lockerId}"
+          >
+            상세보기
+          </button>
+        </div>
+      </div>
+    `;
     }, []);
 
+    // 현재 위치 마커 렌더링 (보관소 마커는 만들지 않음)
     const renderCurrentLocation = useCallback(() => {
         if (!mapInstanceRef.current) return;
 
+        const map = mapInstanceRef.current;
+
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                const currentPos = new window.kakao.maps.LatLng(lat, lng);
 
-                const currentPosition = new window.kakao.maps.LatLng(lat, lng);
+                // 기존 현재 위치 마커 제거
+                if (currentLocationMarkerRef.current) {
+                    currentLocationMarkerRef.current.setMap(null);
+                }
 
+                // 새 현재 위치 마커 생성
                 const marker = new window.kakao.maps.Marker({
-                    map: mapInstanceRef.current,
-                    position: currentPosition,
+                    position: currentPos,
                     title: "현재 위치",
                     image: new window.kakao.maps.MarkerImage(
-                        CurrentLocation, // 현재위치 아이콘 (직접 준비)
+                        CurrentLocation,
                         new window.kakao.maps.Size(32, 32),
                         { offset: new window.kakao.maps.Point(16, 32) }
                     )
                 });
+                marker.setMap(map);
+                currentLocationMarkerRef.current = marker;
 
-                // 현재 위치로 지도 이동
-                mapInstanceRef.current.panTo(currentPosition);
+                // 초기 로드시 현재 위치 + 보관소 마커 모두 보이도록 bounds 조정
+                if (!selectedLockerId) {
+                    const bounds = new window.kakao.maps.LatLngBounds();
+                    bounds.extend(currentPos);
+                    markersRef.current.forEach(m => bounds.extend(m.getPosition()));
+                    map.setBounds(bounds);
+                }
             });
         } else {
             alert("위치 정보를 사용할 수 없습니다.");
         }
-    }, [mapInstanceRef]);
+    }, [markersRef, selectedLockerId]);
 
     // 인포윈도우 버튼 클릭 이벤트 처리
     const handleInfoWindowClick = useCallback((event) => {
@@ -94,41 +110,25 @@ const MapContainer = ({
         }
     }, [handleDetailNavigation]);
 
-    // 마커 위치 조정 계산 함수
-    const calculateOffsetPosition = useCallback((markerPosition) => {
-        if (!mapInstanceRef.current || !mapRef.current) return markerPosition;
-
-        const mapContainer = mapRef.current;
-        const mapHeight = mapContainer.offsetHeight;
+    // 바텀시트 상태에 따른 오프셋 계산 함수
+    const calculateOffset = useCallback(() => {
         const bounds = mapInstanceRef.current.getBounds();
         const latRange = bounds.getNorthEast().getLat() - bounds.getSouthWest().getLat();
 
-        let offsetLat = 0;
+        const bottomSheet = document.getElementById('bottomSheet');
 
-        // 상단 검색창 높이 고려 (대략 60px 정도로 가정)
-        const searchBarHeight = 60;
-        const searchBarRatio = searchBarHeight / mapHeight;
+        if (bottomSheet) {
+            const hasFixedClass = bottomSheet.classList.contains('fixed');
 
-        if (isBottomSheetFixed) {
-            // 바텀시트가 고정된 경우
-            const sheetHeight = mapHeight * 0.6; // 바텀시트가 차지하는 높이
-            const totalOccupiedHeight = searchBarHeight + sheetHeight;
-            const availableHeight = mapHeight - totalOccupiedHeight;
-
-            // 사용 가능한 영역의 중앙으로 조정
-            const targetRatio = (searchBarHeight + availableHeight * 0.4) / mapHeight;
-            offsetLat = latRange * (0.5 - targetRatio);
-        } else {
-            // 바텀시트가 없는 경우, 검색창만 고려
-            const targetRatio = (searchBarHeight + 100) / mapHeight; // 인포윈도우 높이도 고려
-            offsetLat = latRange * (0.5 - targetRatio);
+            if (hasFixedClass) {
+                return latRange * (-0.08);
+            } else {
+                return latRange * (-0.01);
+            }
         }
 
-        return new window.kakao.maps.LatLng(
-            markerPosition.getLat() + offsetLat,
-            markerPosition.getLng()
-        );
-    }, [isBottomSheetFixed, mapRef, mapInstanceRef]);
+        return latRange * 0.15;
+    }, []);
 
     // 마커 렌더링
     const renderMarkers = useCallback(() => {
@@ -136,7 +136,7 @@ const MapContainer = ({
 
         clearMarkers();
 
-        lockers.forEach((locker, index) => {
+        lockers.forEach((locker) => {
             const { latitude, longitude, lockerName, lockerId, isAvailable } = locker;
 
             if (latitude && longitude) {
@@ -166,17 +166,20 @@ const MapContainer = ({
                     if (isOpen) {
                         infowindow.close();
                     } else {
-                        // 모든 인포윈도우 닫기
                         infoWindowsRef.current.forEach(iw => iw.close());
                         infowindow.open(mapInstanceRef.current, marker);
 
-                        const markerPosition = marker.getPosition();
-                        const adjustedPosition = calculateOffsetPosition(markerPosition);
+                        const position = marker.getPosition();
+                        const lat = position.getLat();
+                        const lng = position.getLng();
 
-                        mapInstanceRef.current.panTo(adjustedPosition);
+                        const offsetLat = calculateOffset();
+                        const adjustedPosition = new window.kakao.maps.LatLng(lat + offsetLat, lng);
+
+                        mapInstanceRef.current.setLevel(3);
                         setTimeout(() => {
-                            mapInstanceRef.current.setLevel(3);
-                        }, 300);
+                            mapInstanceRef.current.panTo(adjustedPosition);
+                        }, 100);
 
                         onMarkerClick(lockerId);
                     }
@@ -184,8 +187,7 @@ const MapContainer = ({
             }
         });
 
-        // 지도 범위 조정
-        if (lockers.length > 0) {
+        if (lockers.length > 0 && !selectedLockerId) {
             const bounds = new window.kakao.maps.LatLngBounds();
             lockers.forEach(locker => {
                 if (locker.latitude && locker.longitude) {
@@ -195,7 +197,7 @@ const MapContainer = ({
             });
             mapInstanceRef.current.setBounds(bounds);
         }
-    }, [lockers, clearMarkers, createMarkerImage, createInfoWindowTemplate, onMarkerClick, calculateOffsetPosition]);
+    }, [lockers, clearMarkers, createMarkerImage, createInfoWindowTemplate, onMarkerClick, selectedLockerId, calculateOffset]);
 
     // 선택된 락커로 이동
     const moveToLocker = useCallback((lockerId) => {
@@ -210,25 +212,25 @@ const MapContainer = ({
         const lat = parseFloat(targetLocker.latitude);
         const lng = parseFloat(targetLocker.longitude);
 
-        const markerPosition = new window.kakao.maps.LatLng(lat, lng);
-        const adjustedPosition = calculateOffsetPosition(markerPosition);
+        const offsetLat = calculateOffset();
+        const adjustedPosition = new window.kakao.maps.LatLng(lat + offsetLat, lng);
 
         mapInstanceRef.current.setLevel(3);
         mapInstanceRef.current.panTo(adjustedPosition);
 
-        // 인포윈도우 열기
         infoWindowsRef.current.forEach(iw => iw.close());
         if (markersRef.current[markerIndex] && infoWindowsRef.current[markerIndex]) {
             setTimeout(() => {
                 infoWindowsRef.current[markerIndex].open(mapInstanceRef.current, markersRef.current[markerIndex]);
             }, 300);
         }
-    }, [lockers, calculateOffsetPosition]);
+    }, [lockers, calculateOffset]);
 
+    // 지도 및 마커 초기화
     useEffect(() => {
         if (isMapReady) {
-            renderMarkers();         // 기존 락커 마커들 표시
-            renderCurrentLocation(); // 현재 위치 마커 표시
+            renderMarkers();
+            renderCurrentLocation();
         }
     }, [isMapReady, renderMarkers, renderCurrentLocation]);
 
@@ -243,18 +245,14 @@ const MapContainer = ({
         }
     }, [handleInfoWindowClick]);
 
-    useEffect(() => {
-        if (isMapReady) {
-            renderMarkers();
-        }
-    }, [isMapReady, renderMarkers]);
-
+    // 선택된 락커로 이동
     useEffect(() => {
         if (selectedLockerId && isMapReady) {
             moveToLocker(selectedLockerId);
         }
     }, [selectedLockerId, moveToLocker, isMapReady]);
 
+    // 지도 리사이즈 처리
     useEffect(() => {
         if (isMapReady && mapInstanceRef.current) {
             window.kakao.maps.event.trigger(mapInstanceRef.current, "resize");
