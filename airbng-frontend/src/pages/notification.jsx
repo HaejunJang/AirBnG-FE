@@ -4,30 +4,40 @@ import { loadDeletedIds, saveDeletedIds } from '../hooks/useSSEManager';
 import {getNotification, hasreadAlarm} from '../api/notification';
 import '../styles/pages/notification.css';
 import {useDot} from "../hooks/useDot";
+import {useNavigate} from "react-router-dom";
+
 
 const Header = ({ title, showBackButton, backUrl }) => (
     <div className="header">
         {showBackButton && (
             <button
                 onClick={() => (window.location.href = backUrl)}
-                className="back-button"
+                className="notification-back-button"
             >
-                ← 뒤로
+                ←
             </button>
         )}
         <h1 className="header-title">{title}</h1>
     </div>
 );
 
-const Welcome = ({ subtitle }) => (
-    <div className="welcome-container">
-        <div>
-            <h2 className="welcome-title">알림 서비스</h2>
-            <p className="welcome-subtitle">{subtitle}</p>
-            <button className="login-button">로그인하러 가기</button>
+const Welcome = ({ subtitle }) => {
+    const navigate = useNavigate(); // 여기서 훅 사용
+
+    return (
+        <div className="welcome-container">
+            <div>
+                <p className="welcome-subtitle">{subtitle}</p>
+                <button
+                    className="login-button"
+                    onClick={() => navigate("/page/login")}
+                >
+                    로그인하러 가기
+                </button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const NotificationItem = ({ notification, onRemove }) => {
     const typeMap = {
@@ -295,12 +305,12 @@ const NotificationApp = () => {
 
     return (
         <div className="app-container">
-            <div className="app-content">
+            <div className="notification-app-content">
                 <div className="main-content">
                     <Header title="알림" showBackButton={true} backUrl="/page/home" />
                     {!memberId ? (
                         <div className="welcome-wrapper">
-                            <Welcome subtitle="로그인 후 알림 기능을 사용할 수 있습니다." />
+                            <Welcome subtitle="로그인 후 사용 가능합니다." />
                         </div>
                     ) : (
                         <>

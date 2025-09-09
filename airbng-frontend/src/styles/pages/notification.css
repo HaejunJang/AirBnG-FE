@@ -10,7 +10,7 @@
     flex-direction: column;
 }
 
-.app-content {
+.notification-app-content {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -21,9 +21,12 @@
     background: white;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     display: flex;
+    max-width: 412px;
     flex-direction: column;
     flex-grow: 1;
     overflow: hidden;
+    padding-top: 60px;
+    padding-bottom: 80px;
 }
 
 /* Header 스타일 */
@@ -43,7 +46,7 @@
     margin: 0 auto;
 }
 
-.back-button {
+.notification-back-button {
     background: none;
     border: none;
     color: white;
@@ -240,18 +243,18 @@
 
 /* 알림 타입별 스타일 (확장 가능) */
 .notification-type.expired {
-    background-color: #dc3545;
+    background-color: #4561DB;
 }
 
 .notification-type.reminder {
-    background-color: #28a745;
+    background-color: #4561DB;
 }
 
 .notification-type.state-change {
-    background-color: #17a2b8;
+    background-color: #4561DB;
 }
 
 .notification-type.cancel-notice {
-    background-color: #ffc107;
+    background-color: #4561DB;
     color: #212529;
 }

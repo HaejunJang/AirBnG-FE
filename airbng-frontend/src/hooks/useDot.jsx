@@ -46,15 +46,6 @@ export const useDot = (memberId) => {
     }, [checkUnread]);
 
     // SSE 이벤트로 새 알림 수신 시 dot 표시
-    // useEffect(() => {
-    //     const handleAlarm = (event) => {
-    //         if (event.detail?.receiverId === memberId) {
-    //             showDot();
-    //         }
-    //     };
-    //     window.addEventListener('newAlarmReceived', handleAlarm);
-    //     return () => window.removeEventListener('newAlarmReceived', handleAlarm);
-    // }, [memberId, showDot]);
     useEffect(() => {
         const handleAlarm = (event) => {
             console.log('[useDot] newAlarmReceived', event.detail, memberId);
