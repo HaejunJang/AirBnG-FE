@@ -25,23 +25,24 @@ body {
     background-color: #ffffff;
 }
 
-/*.header {*/
-/*    position: fixed;*/
-/*    top: 0;*/
-/*    left: 0;*/
-/*    right: 0;*/
-/*    max-width: 412px;*/
-/*    margin: 0 auto;*/
-/*    z-index: 1000;*/
-/*    height: var(--header-height);*/
-/*    background: white;*/
-/*    padding: 0 20px;*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    border-bottom: 1px solid #eee;*/
-/*}*/
+.reservationlist-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    max-width: 412px;
+    margin: 0 auto;
+    z-index: 1000;
+    height: var(--header-height);
+    background: white;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
 
-.back-button {
+
+.reservationlist-back-button {
     background: none;
     border: none;
     font-size: 20px;
@@ -49,10 +50,7 @@ body {
     margin-right: 10px;
 }
 
-/*.header-title {*/
-/*    font-size: 18px;*/
-/*    font-weight: 600;*/
-/*}*/
+
 
 .tab-container {
     position: fixed;
