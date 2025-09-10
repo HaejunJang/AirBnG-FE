@@ -202,7 +202,6 @@
 //
 // export default LockerDetails;
 
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useLocation } from 'react-router-dom';
@@ -281,7 +280,7 @@ const LockerDetails = () => {
         window.location.href = `/reservations/form?lockerId=${lockerId}`;
     };
 
-    const formatPhoneNumber = (콜) => {
+    const formatPhoneNumber = (phone) => {
         if (!phone) return '';
         const numbers = phone.replace(/\D/g, '');
         if (numbers.length === 11) return `${numbers.slice(0,3)}-${numbers.slice(3,7)}-${numbers.slice(7,11)}`;
