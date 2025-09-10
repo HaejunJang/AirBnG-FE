@@ -25,8 +25,6 @@ const ReservationList = () => {
     const { user } = useAuth();
     const memberId = user?.id;
 
-    console.log("memberId", memberId);
-
     const {
         currentStates,
         currentPeriod,
