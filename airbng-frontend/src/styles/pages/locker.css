@@ -4,7 +4,7 @@
   font-family: 'BMJUA', sans-serif;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
   margin: 0;
   min-height: 100vh;     /* height:100% 대신 안전하게 */
   overflow-x: hidden;
@@ -15,46 +15,52 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  width: 412px;
+  width: var(--app-max-width);
   background: white;
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
-  padding-bottom: 80px;   /* 네비바 공간 */
-  overflow: hidden;
+  padding-bottom: var(--bottom-nav-height);   /* 네비바 공간 */
+  /* overflow: hidden; */
+  overflow: visible;
 }
 
 /* 메인 컨텐츠 */
+/* 메인 컨텐츠: 헤더/하단바 제외한 영역을 세로 기준 중앙 정렬 */
 .airbng-locker .main-content {
-    max-width: 412px;
-    width: 100%;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 200px;
-    box-sizing: border-box;
-    overflow: hidden;
+  max-width: var(--app-max-width);
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  justify-items: center;          /* 가로 중앙 */
+  align-content: center;          /* 세로 중앙 */
+  row-gap: 16px;
+  padding: 16px;
+  /* 헤더(60) + 바텀탭(80)만큼 뺀 높이에서 중앙 배치 */
+  min-height: calc(100dvh - var(--header-height) - var(--bottom-nav-height));
+  overflow: visible;              /* 애니메이션 클리핑 방지 */
 }
 
-/* 메뉴 카드 */
+/* 카드: 애니메이션 유지 + 살짝 위로(센트럴 오프셋) */
 .airbng-locker .menu-section {
-    width: 100%;
-    max-width: 412px;
-    border: 1px solid #f0f0f0;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #fff;
-    animation: fadeInUp 0.6s ease-out;
-    margin: 0 auto;
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid #f0f0f0;
+  border-radius: 18px;
+  background: #fff;
+  margin: -10px auto 0;            /* 🔼 중앙 기준 살짝 위로 끌어올림 */
+  animation: fadeInUp 0.55s var(--ease) both;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
 }
 
+/* 카드 내부 간격을 살짝 컴팩트하게 */
 .airbng-locker .menu-item-card {
-    display: flex;
-    flex-direction: column;
-    background-color: #f9fafa;
-    border-radius: 18px;
-    padding: 24px;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9fafa;
+  border-radius: 18px;
+  padding: 18px;                  
+  gap: 8px;                      
 }
 
 .airbng-locker .menu-item-content {
@@ -99,11 +105,11 @@
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(0, 16px, 0);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0, 0, 0);
     }
 }
 
@@ -186,8 +192,8 @@
 
 /* 버튼 그룹 */
 .airbng-locker .locker-action-buttons {
-    margin-top: 10px;
-    /*padding: 0 24px;*/
+    margin-top: -15px;
+    padding: 0 24px;
     display: flex;
     flex-direction: column;
     gap: 10px;

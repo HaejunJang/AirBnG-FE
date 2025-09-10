@@ -16,7 +16,6 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // /page/login?redirect=/page/home 형태 지원
   const redirect = useMemo(() => {
     const sp = new URLSearchParams(location.search);
     return sp.get('redirect') || '/page/home';
@@ -24,14 +23,14 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);             // ✅ 자동 로그인 상태
   const [submitting, setSubmitting] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [countdown, setCountdown] = useState(0);
 
-  // --- 모달 상태 ---
   const [modal, setModal] = useState({
     open: false,
-    type: 'info', // 'info' | 'confirm' | 'error' | 'warning'
+    type: 'info',
     title: '',
     message: '',
     onConfirm: null,
@@ -42,13 +41,11 @@ export default function LoginPage() {
   const closeModal = () =>
     setModal({ open: false, type: 'info', title: '', message: '', onConfirm: null });
 
-  // 이메일 변경 시 해당 이메일의 쿨다운 복원
   useEffect(() => {
     const saved = Number(sessionStorage.getItem(cdKeyFor(email)) || 0);
     setCooldownUntil(saved);
   }, [email]);
 
-  // --- 쿨다운 타이머 ---
   useEffect(() => {
     if (!cooldownUntil) return;
     const tick = () => {
@@ -70,12 +67,10 @@ export default function LoginPage() {
     setCooldownUntil(end);
   }, [email]);
 
-  // 실패 횟수 유틸
   const getFailCount = () => Number(sessionStorage.getItem(FAIL_COUNT_KEY) || '0');
   const setFailCount = (n) => sessionStorage.setItem(FAIL_COUNT_KEY, String(n));
   const resetFailCount = () => sessionStorage.removeItem(FAIL_COUNT_KEY);
 
-  // 제출
   const onSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (submitting || cooldownUntil) return;
@@ -87,7 +82,8 @@ export default function LoginPage() {
 
     try {
       setSubmitting(true);
-      const r = await login({ email, password });
+      // remember 값을 함께 전달
+      const r = await login({ email, password, remember });
 
       if (r?.ok) {
         resetFailCount();
@@ -98,7 +94,6 @@ export default function LoginPage() {
         return;
       }
 
-      // 서버 레이트리밋 최우선
       if (r?.status === 429 || r?.code === 8003) {
         const sec = Number(r?.retryAfter || DEFAULT_COOLDOWN);
         startCooldown(sec);
@@ -106,7 +101,6 @@ export default function LoginPage() {
         return;
       }
 
-      // 일반 실패 → 로컬 보조 카운트
       const next = getFailCount() + 1;
       setFailCount(next);
       if (next >= MAX_ATTEMPTS) {
@@ -121,7 +115,7 @@ export default function LoginPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [email, password, submitting, cooldownUntil, login, navigate, redirect, startCooldown]);
+  }, [email, password, remember, submitting, cooldownUntil, login, navigate, redirect, startCooldown]);
 
   const disabled = submitting || cooldownUntil > 0;
 
@@ -166,7 +160,12 @@ export default function LoginPage() {
 
             <div className="login-options">
               <label className="checkbox">
-                <input type="checkbox" disabled />
+                {/* 활성화 + 상태 바인딩 */}
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                />
                 <span>자동 로그인</span>
               </label>
               <button
