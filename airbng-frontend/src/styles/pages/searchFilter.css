@@ -144,9 +144,9 @@
 }
 
 .ranking-title {
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     color: #333;
-    font-size: 17px;
+    font-size: 20px;
     font-style: normal;
     font-weight: 600;
     line-height: 17px;
@@ -155,7 +155,7 @@
 .ranking-list {
     display: flex;
     flex-direction: column;
-    gap: 23px;
+    gap: 25px;
 }
 
 .ranking-item {
@@ -195,7 +195,7 @@
 
 .ranking-location-container {
     position: relative;
-    width: 80px;
+    width: 200px;
     height: 30px;
     transform-style: preserve-3d;
 }
@@ -214,8 +214,8 @@
     width: 100%;
     height: 100%;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: left;
     font-size: 17px;
     font-weight: 500;
     color: #333;
