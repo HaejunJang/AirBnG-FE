@@ -26,14 +26,13 @@ function CategorySection({ onCategoryClick, className = "" }) {
       const target = `/page/lockerSearch?jimTypeId=${jimTypeId}`;
       if (!ready) return; // AuthContext 준비 전 클릭 무시
 
-      if (!isLoggedIn) {
-        alert("로그인이 필요합니다. 로그인 후 이용해주세요.");
-        navigate(`/page/login?redirect=${encodeURIComponent(target)}`);
-        return;
-      }
+      // if (!isLoggedIn) {
+      //   alert("로그인이 필요합니다. 로그인 후 이용해주세요.");
+      //   navigate(`/page/login?redirect=${encodeURIComponent(target)}`);
+      //   return;
+      // }
       navigate(target);
-    },
-    [isLoggedIn, ready, navigate]
+    }, [ready, navigate]
   );
 
   const handleCardActivate = useCallback(
