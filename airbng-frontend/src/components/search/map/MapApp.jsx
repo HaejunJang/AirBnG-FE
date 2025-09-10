@@ -49,7 +49,7 @@ const MapApp = () => {
     };
 
     const handleLockerSelect = (lockerId) => {
-        setSelectedLockerId(lockerId);
+        setSelectedLockerId(prev => prev === lockerId ? null : lockerId);
     };
 
     const handleBottomSheetToggle = (isFixed) => {

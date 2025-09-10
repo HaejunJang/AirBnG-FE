@@ -15,6 +15,8 @@ const LockerItem = ({ locker, isSelected, onClick }) => {
         }
     };
 
+
+
     return (
         <div
             className={`storage-item ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`}
