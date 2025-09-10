@@ -56,6 +56,10 @@ const MapApp = () => {
         setIsBottomSheetFixed(isFixed);
     };
 
+    useEffect(() => {
+        setSelectedLockerId(null);
+    }, [jimTypeId]);
+
     return (
         <>
             <SearchControls
