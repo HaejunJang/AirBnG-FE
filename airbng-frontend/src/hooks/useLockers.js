@@ -17,17 +17,7 @@ export const useLockers = () => {
                 setLockers([]);
                 return;
             }
-
-            let filteredLockers = data.result.lockers;
-            if (jimTypeId && jimTypeId !== "0") {
-                filteredLockers = filteredLockers.filter(locker =>
-                    locker.jimTypeResults?.some(
-                        jtr => String(jtr.jimTypeId) === String(jimTypeId)
-                    )
-                );
-            }
-
-            setLockers(filteredLockers);
+            setLockers(data.result.lockers);
         } catch (err) {
             setError(err.message);
             setLockers([]);

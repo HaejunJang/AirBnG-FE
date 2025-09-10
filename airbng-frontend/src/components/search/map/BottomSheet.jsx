@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import LockerList from './LockerList';
 import "../../../styles/pages/bottomSheet.css";
 import arrowDownIcon from '../../../assets/arrow-down.svg';
-import {useNavigate} from "react-router-dom";
 
 const BottomSheet = ({
                          lockers,
@@ -10,22 +9,25 @@ const BottomSheet = ({
                          onToggle,
                          selectedLockerId,
                          onLockerSelect,
+                         currentJimTypeId,
+                         onJimTypeChange
                      }) => {
-    const navigate = useNavigate();
     const sheetRef = useRef(null);
     const [isOpen, setIsOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [currentBagType, setCurrentBagType] = useState(0);
-    const handleBagTypeSelect = (id) => {
-        setCurrentBagType(Number(id));
+
+    const handleBagTypeSelect = (id, e) => {
+        e.stopPropagation();
+        const numericId = Number(id);
+        setCurrentBagType(numericId);
         setIsDropdownOpen(false);
-
-        // 현재 URL 기반으로 파라미터 갱신
-        const searchParams = new URLSearchParams(window.location.search);
-        searchParams.set("jimTypeId", id);
-
-        navigate(`?${searchParams.toString()}`, {replace: true});
+        onJimTypeChange(numericId);
     };
+
+    useEffect(() => {
+        setCurrentBagType(Number(currentJimTypeId));
+    }, [currentJimTypeId]);
 
     const typeMap = {
         0: '모든 짐',
@@ -37,10 +39,7 @@ const BottomSheet = ({
     };
 
     const handleClick = () => {
-        setIsOpen((prev) => {
-            const next = !prev;
-            return next;
-        });
+        setIsOpen((prev) => !prev);
     };
 
     return (
@@ -70,8 +69,8 @@ const BottomSheet = ({
                             {Object.entries(typeMap).map(([id, name]) => (
                                 <button
                                     key={id}
-                                    className="sheet-dropdown-option"
-                                    onClick={() => handleBagTypeSelect(id)}
+                                    className={`sheet-dropdown-option ${Number(id) === currentBagType ? 'selected' : ''}`}
+                                    onClick={(e) => handleBagTypeSelect(id, e)}
                                 >
                                     {name}
                                 </button>
