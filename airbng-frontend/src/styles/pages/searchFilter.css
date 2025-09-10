@@ -103,6 +103,11 @@
     outline: none;
 }
 
+.searchFilter-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
 .filter-row {
     display: flex;
     align-items: center;
