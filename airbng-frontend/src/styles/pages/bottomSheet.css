@@ -236,7 +236,7 @@
 
 .disabled .storage-button {
     background: #ccc;
-    cursor: not-allowed;
+    /*cursor: not-allowed;*/
 }
 
 
