@@ -288,17 +288,27 @@ const NotificationApp = () => {
 
     // 알림 페이지 진입 시 읽음 처리
     useEffect(() => {
-        const markRead = async () => {
-            if (!memberId) return;
-            try {
-                await hasreadAlarm(); // 서버에서 markAllAsRead 수행
-                hideDot();               // DOT 숨김
-                window.dispatchEvent(new CustomEvent('alarmRead', { detail: { readMemberId: memberId } }));
-            } catch (e) {
-                console.error('[NotificationApp] 알림 읽음 처리 실패', e);
+        if (!memberId) return;
+
+        const handleAlarm = async (event) => {
+            const receiverId = String(event.detail?.receiverId);
+            const myId = String(memberId);
+
+            // 내가 받은 알림이고, 현재 알림 페이지면 → 즉시 읽음 처리
+            if (receiverId === myId && window.location.pathname === '/page/notification') {
+                try {
+                    await hasreadAlarm();  // 서버 읽음 처리
+                    hideDot();             // dot 숨김
+                    window.dispatchEvent(new CustomEvent('alarmRead', { detail: { readMemberId: memberId } }));
+                    console.log('[NotificationApp] 알림 페이지에서 SSE 알림 수신 → 즉시 읽음 처리');
+                } catch (e) {
+                    console.error('[NotificationApp] SSE 알림 읽음 처리 실패', e);
+                }
             }
         };
-        markRead();
+
+        window.addEventListener('newAlarmReceived', handleAlarm);
+        return () => window.removeEventListener('newAlarmReceived', handleAlarm);
     }, [memberId, hideDot]);
 
     console.log('[NotificationApp] 렌더링 - 연결상태:', isConnected, '총 알림:', alarms?.length || 0);
