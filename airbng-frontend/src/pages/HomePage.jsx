@@ -36,18 +36,18 @@ function HomePage() {
 
   useEffect(() => { loadPopular(); }, [loadPopular]);
 
-  const handleCategoryClick = (index) => {
-    if (!isLoggedIn) {
-      if (window.confirm("로그인이 필요합니다. 로그인 페이지로 이동할까요?")) {
-        navigate("/page/login");
-      }
-      return;
-    }
-    const jimTypeIdMap = { 0: 1, 1: 2, 2: 4, 3: 5 };
-    if (index === 1) return; // 캐리어 모달 예정
-    const jimTypeId = jimTypeIdMap[index];
-    if (jimTypeId) navigate(`/page/lockerSearch?jimTypeId=${jimTypeId}`);
-  };
+  // const handleCategoryClick = (index) => {
+  //   if (!isLoggedIn) {
+  //     if (window.confirm("로그인이 필요합니다. 로그인 페이지로 이동할까요?")) {
+  //       navigate("/page/login");
+  //     }
+  //     return;
+  //   }
+  //   const jimTypeIdMap = { 0: 1, 1: 2, 2: 4, 3: 5 };
+  //   if (index === 1) return; // 캐리어 모달 예정
+  //   const jimTypeId = jimTypeIdMap[index];
+  //   if (jimTypeId) navigate(`/page/lockerSearch?jimTypeId=${jimTypeId}`);
+  // };
 
   const handlePopularClick = (lockerId) => {
     navigate(`/page/lockers/${lockerId}`);
