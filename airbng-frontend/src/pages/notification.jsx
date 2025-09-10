@@ -90,7 +90,6 @@ const NotificationList = ({ notifications, deletedNotificationIds, onRemove, onC
         return `${alarm.reservationId}-${alarm.receiverId}-${alarm.type}-${alarm.receivedAt}`;
     };
 
-    // 23시간 밀리초
     const TWENTY_THREE_HOURS = 23 * 60 * 60 * 1000;
 
     // 삭제되지 않았거나 23시간이 지난 알림만 표시
@@ -154,7 +153,6 @@ const NotificationApp = () => {
     // 고유 키 생성 함수 (여러 필드 조합으로 생성)
     const getAlarmKey = useCallback((alarm) => {
         if (!alarm) {
-            console.error('[NotificationApp] 잘못된 알림 객체:', alarm);
             return null;
         }
 
@@ -168,7 +166,6 @@ const NotificationApp = () => {
             return `${alarm.reservationId}-${alarm.receiverId}-${alarm.type}-${alarm.receivedAt}`;
         }
 
-        console.error('[NotificationApp] 알림 키 생성에 필요한 필드 부족:', alarm);
         return null;
     }, []);
 
@@ -176,9 +173,7 @@ const NotificationApp = () => {
     useEffect(() => {
         if (typeof window !== 'undefined' && 'Notification' in window) {
             if (Notification.permission === 'default') {
-                console.log('[NotificationApp] 브라우저 알림 권한 요청');
                 Notification.requestPermission().then((permission) => {
-                    console.log('[NotificationApp] 브라우저 알림 권한 결과:', permission);
                 });
             } else {
                 console.log('[NotificationApp] 현재 브라우저 알림 권한:', Notification.permission);
@@ -205,7 +200,6 @@ const NotificationApp = () => {
             // 변경사항이 있으면 저장
             if (cleanedCount > 0) {
                 saveDeletedIds(newMap, memberId);
-                console.log('[NotificationApp] 마운트 시 삭제 기록 정리:', cleanedCount, '개 제거');
             }
 
             return newMap;
@@ -216,19 +210,15 @@ const NotificationApp = () => {
     const removeNotification = useCallback(
         (notification) => {
             if (!notification) {
-                console.error('[NotificationApp] 삭제할 알림이 없습니다.');
                 return;
             }
 
             const key = getAlarmKey(notification);
             if (!key) {
-                console.error('[NotificationApp] 알림 키 생성 실패:', notification);
                 return;
             }
 
             const now = Date.now();
-
-            console.log('[NotificationApp] 개별 알림 삭제:', key, notification.message);
 
             setDeletedRef((prevMap) => {
                 const newMap = new Map(prevMap);
@@ -236,9 +226,7 @@ const NotificationApp = () => {
 
                 try {
                     saveDeletedIds(newMap, memberId);
-                    console.log('[NotificationApp] 개별 삭제 저장 완료. 삭제된 키:', key);
                 } catch (error) {
-                    console.error('[NotificationApp] 개별 삭제 저장 실패:', error);
                 }
 
                 return newMap;
@@ -249,13 +237,11 @@ const NotificationApp = () => {
 
     // 모든 알림 삭제
     const clearAllNotifications = useCallback(() => {
-        if (!alarms || alarms.length === 0) {
-            console.log('[NotificationApp] 삭제할 알림이 없습니다.');
+        if (!alarms || alarms.length === 0) {;
             return;
         }
 
         const now = Date.now();
-        console.log('[NotificationApp] 전체 알림 삭제 시작. 대상:', alarms.length, '개');
 
         setDeletedRef((prevMap) => {
             const newMap = new Map(prevMap);
@@ -277,7 +263,6 @@ const NotificationApp = () => {
 
             try {
                 saveDeletedIds(newMap, memberId);
-                console.log('[NotificationApp] 전체 삭제 완료:', newDeletedCount, '개 삭제');
             } catch (error) {
                 console.error('[NotificationApp] 전체 삭제 저장 실패:', error);
             }
@@ -300,7 +285,6 @@ const NotificationApp = () => {
                     await hasreadAlarm();  // 서버 읽음 처리
                     hideDot();             // dot 숨김
                     window.dispatchEvent(new CustomEvent('alarmRead', { detail: { readMemberId: memberId } }));
-                    console.log('[NotificationApp] 알림 페이지에서 SSE 알림 수신 → 즉시 읽음 처리');
                 } catch (e) {
                     console.error('[NotificationApp] SSE 알림 읽음 처리 실패', e);
                 }

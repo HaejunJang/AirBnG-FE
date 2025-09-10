@@ -21,8 +21,6 @@ export const useSSEManager = (memberId) => {
     const resolvedMemberId = memberId || profile?.id || null;
 
     console.log('[SSE Hook] memberId param:', memberId);
-    console.log('[SSE Hook] window.memberId:', window.memberId);
-    console.log('[SSE Hook] body dataset memberId:', document?.body?.dataset?.memberId);
 
     // 연결 상태 업데이트
     const updateConnectionStatus = useCallback((connected, error = null) => {

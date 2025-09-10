@@ -1,6 +1,5 @@
 import React, {createContext, useContext, useCallback, useRef, useState, useEffect} from 'react';
 import { useSSEManager } from '../hooks/useSSEManager';
-// import {useAuth} from "./AuthContext";
 
 
 // SSE Context 생성
@@ -35,7 +34,6 @@ export const SSEProvider = ({ children, memberId }) => {
             try {
                 const parsedAlarms = JSON.parse(saved);
                 if (Array.isArray(parsedAlarms)) {
-                    console.log('[SSE Context] 저장된 알림 불러오기 성공:', parsedAlarms.length + '개');
                     setAlarms(parsedAlarms);
                 } else {
                     localStorage.removeItem(STORAGE_KEY);
@@ -72,7 +70,6 @@ export const SSEProvider = ({ children, memberId }) => {
 
     // 브라우저 알림 표시 함수
     const showNotification = useCallback((title, message, options = {}) => {
-        console.log('[SSE Context] 브라우저 알림 생성 시도:', title, message);
 
         if (typeof window !== 'undefined' && 'Notification' in window) {
             console.log('[SSE Context] 현재 알림 권한:', Notification.permission);
@@ -86,8 +83,6 @@ export const SSEProvider = ({ children, memberId }) => {
                         requireInteraction: false,
                         ...options
                     });
-
-                    console.log('[SSE Context] 브라우저 알림 생성 성공');
 
                     if (options.autoClose !== false) {
                         setTimeout(() => {
@@ -104,7 +99,6 @@ export const SSEProvider = ({ children, memberId }) => {
                     console.error('[SSE Context] 브라우저 알림 생성 실패:', error);
                 }
             } else if (Notification.permission === 'default') {
-                console.log('[SSE Context] 알림 권한 요청 중...');
                 Notification.requestPermission().then(permission => {
                     if (permission === 'granted') {
                         // 권한을 받은 후 다시 알림 시도
@@ -137,8 +131,6 @@ export const SSEProvider = ({ children, memberId }) => {
     useEffect(() => {
         if (!sseManager.isConnected || !memberId || globalListenerRef.current) return;
 
-        console.log('[SSE Context] 전역 알림 리스너 등록');
-
         const globalAlarmHandler = (data) => {
             console.log('[SSE Context] 전역 알림 수신:', data);
 
@@ -150,7 +142,6 @@ export const SSEProvider = ({ children, memberId }) => {
 
             // 전역 알림 상태 업데이트 (모든 페이지에서 공유)
             setAlarms((prevAlarms) => {
-                console.log('[SSE Context] 이전 알림 개수:', prevAlarms.length);
                 const newAlarms = [alarmWithTime, ...prevAlarms].slice(0, 100);
                 console.log('[SSE Context] 업데이트된 알림 개수:', newAlarms.length);
                 return newAlarms;
@@ -171,7 +162,6 @@ export const SSEProvider = ({ children, memberId }) => {
 
         return () => {
             if (globalListenerRef.current) {
-                console.log('[SSE Context] 전역 알림 리스너 제거');
                 sseManager.removeEventListener('alarm', globalListenerRef.current);
                 globalListenerRef.current = null;
             }
@@ -199,9 +189,8 @@ export const SSEProvider = ({ children, memberId }) => {
         requestNotificationPermission,
         showNotification,
 
-        // 개별 컴포넌트용 구독 (선택사항)
+        // 개별 컴포넌트용 구독
         subscribeToAlarms: useCallback((callback) => {
-            console.log('[SSE Context] 개별 알림 구독 추가');
 
             const wrappedCallback = (data) => {
                 if (callback && typeof callback === 'function') {
@@ -212,7 +201,6 @@ export const SSEProvider = ({ children, memberId }) => {
                         };
                         callback(alarmWithTime);
                     } catch (error) {
-                        console.error('[SSE Context] 개별 콜백 실행 오류:', error);
                     }
                 }
             };
@@ -220,7 +208,6 @@ export const SSEProvider = ({ children, memberId }) => {
             sseManager.addEventListener('alarm', wrappedCallback);
 
             return () => {
-                console.log('[SSE Context] 개별 알림 구독 제거');
                 sseManager.removeEventListener('alarm', wrappedCallback);
             };
         }, [sseManager, formatDateTime])
@@ -242,13 +229,12 @@ export const useSSE = () => {
     return context;
 };
 
-// 개별 컴포넌트에서 알림을 쉽게 구독할 수 있는 Hook (선택사항)
+// 개별 컴포넌트에서 알림을 쉽게 구독할 수 있는 Hook
 export const useAlarmSubscription = (callback, dependencies = []) => {
     const { subscribeToAlarms } = useSSE();
 
     React.useEffect(() => {
         if (callback && typeof callback === 'function') {
-            console.log('[SSE Hook] useAlarmSubscription 구독 시작');
             const unsubscribe = subscribeToAlarms(callback);
             return unsubscribe;
         }
@@ -274,68 +260,3 @@ export const useNotification = () => {
     return { notify, requestNotificationPermission };
 };
 
-// App.jsx에서 사용할 수 있는 전역 SSE 설정 컴포넌트
-export const SSEConnectionIndicator = () => {
-    const { isConnected, isConnecting, connectionError } = useSSE();
-
-    return (
-        <div
-            id="connectionIndicator"
-            className={`connection-indicator ${isConnected ? 'connected' : ''}`}
-            data-status={isConnected ? '실시간 알림 연결됨' : '연결 끊김'}
-            title={connectionError || (isConnecting ? '연결 중...' : (isConnected ? '실시간 알림 연결됨' : '연결 끊김'))}
-        >
-            <span className="status-dot"></span>
-            {isConnecting ? '연결 중' : (isConnected ? '온라인' : '오프라인')}
-
-            <style jsx>{`
-                .connection-indicator {
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 8px 12px;
-                    border-radius: 20px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    background-color: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    color: #6c757d;
-                    z-index: 1000;
-                    transition: all 0.3s ease;
-                }
-                
-                .connection-indicator.connected {
-                    background-color: #d1f2eb;
-                    border-color: #7dcea0;
-                    color: #186a3b;
-                }
-                
-                .status-dot {
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    background-color: #dc3545;
-                    animation: pulse-offline 2s infinite;
-                }
-                
-                .connection-indicator.connected .status-dot {
-                    background-color: #28a745;
-                    animation: pulse-online 2s infinite;
-                }
-                
-                @keyframes pulse-online {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                }
-                
-                @keyframes pulse-offline {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.3; }
-                }
-            `}</style>
-        </div>
-    );
-};
