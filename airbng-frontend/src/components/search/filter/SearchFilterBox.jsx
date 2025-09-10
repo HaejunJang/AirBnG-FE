@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useDropdown } from '../../../hooks/useFilterDropdown';
 import '../../../styles/pages/searchFilter.css';
 import Group2 from '../../../assets/Group 2.svg';
 import calendarC from '../../../assets/calendarC.svg';
 import bag2 from '../../../assets/bag-2.svg';
 import clock from '../../../assets/clock.svg';
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 
 const SearchFilterBox = ({
                              searchQuery,
@@ -19,7 +19,8 @@ const SearchFilterBox = ({
                              onTimeClick,
                              onSearch
                          }) => {
-    const navigate = useNavigate();
+    //const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { isOpen: showBagDropdown, toggle: toggleBagDropdown } = useDropdown(false);
 
     const jimTypeMap = [
@@ -30,6 +31,18 @@ const SearchFilterBox = ({
         '박스/큰 짐',
         '유아용품'
     ];
+
+    useEffect(() => {
+        const jimTypeId = searchParams.get('jimTypeId');
+        if (jimTypeId !== null) {
+            const typeIndex = parseInt(jimTypeId, 10);
+            // jimTypeId가 유효한 범위 내에 있는지 확인
+            if (typeIndex >= 0 && typeIndex < jimTypeMap.length) {
+                const selectedType = jimTypeMap[typeIndex];
+                setSelectedBagType(selectedType);
+            }
+        }
+    }, [searchParams, setSelectedBagType]);
 
     const selectBagType = (bagType) => {
         setSelectedBagType(bagType);
