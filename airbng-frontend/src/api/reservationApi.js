@@ -8,7 +8,7 @@ export const getReservationList = ({ isDropper, memberId, state, nextCursorId, p
     return httpAuth.get("/reservations", {
         params: {
             isDropper,
-            memberId,      // 여기 추가
+            memberId,
             state: safeState,
             nextCursorId,
             period: safePeriod,
