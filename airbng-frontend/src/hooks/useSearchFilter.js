@@ -41,13 +41,13 @@ export const useSearchFilter = (jimTypeId = '모든 짐') => {
 
         const params = new URLSearchParams({
             address: searchQuery,
-            lockerName : searchQuery,
+            // lockerName : searchQuery,
             // date: selectedDate,
             jimTypeId: jimTypeId.toString()
             // startTime: selectedStartTime,
             // endTime: selectedEndTime
         }).toString();
-        navigate(`/lockerSearchDetails?${params}`);
+        navigate(`/page/lockerSearchDetails?${params}`);
     };
 
     // 순위 아이템 클릭
