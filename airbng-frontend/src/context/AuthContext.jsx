@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
           const authHeader = res.headers['authorization'] || res.headers['Authorization'];
           if (authHeader?.startsWith('Bearer ')) {
             const newToken = authHeader.slice('Bearer '.length).trim();
-            setAccessToken(newToken);
+            await setAccessToken(newToken);
             const u = buildUser(newToken) || {};
             const saved = getUserProfile();
             setUser({
@@ -102,7 +102,7 @@ export function AuthProvider({ children }) {
     }
 
     const token = authHeader.slice('Bearer '.length).trim();
-    setAccessToken(token);
+    await setAccessToken(token);
 
     const baseUser = buildUser(token) || {};
     const nextUser = {
@@ -114,7 +114,7 @@ export function AuthProvider({ children }) {
     setUserProfile(nextUser);
     setUser(nextUser);
 
-    // ✅ rememberMe 저장
+    // rememberMe 저장
     setRememberMe(!!remember);
 
     return { ok: true, status: res.status, data: body };

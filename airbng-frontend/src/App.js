@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { getStompClient } from "./utils/stompClient";
+import { useEffect } from "react";
 import Navbar from "./components/Footer/Navbar";
 import "./styles/App.css";
 
@@ -14,8 +16,17 @@ import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
 import ReservationList from "./pages/ReservationList";
 import LoginPage from "./pages/LoginPage";
+import ChatListPage from "./pages/ChatListPage";
+import ChatStartPage from "./pages/ChatStartPage";
+import ChatRoomPage from "./pages/ChatRoomPage";
 
 function App() {
+  useEffect(() => {
+    const c = getStompClient();
+    if (!c.active) c.activate();          // ← 최초 1회 연결
+    return () => { c.deactivate(); };     // 앱 unload 시 정리
+  }, []);
+
   function getActiveNav(pathname) {
     if (pathname.startsWith("/page/lockers")) return "cart";
     if (pathname.startsWith("/page/chatList")) return "chat";
@@ -61,6 +72,9 @@ function App() {
           <Route path="/page/mypage" element={<MyPage />} />
           <Route path="/page/signup" element={<SignupPage />} />
           <Route path="/page/login" element={<LoginPage />} />
+          <Route path="/page/chatList" element={<ChatListPage />} />
+          <Route path="/page/chat/new" element={<ChatStartPage />} />
+          <Route path="/page/chat/:convId" element={<ChatRoomPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>

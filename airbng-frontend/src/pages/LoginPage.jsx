@@ -23,7 +23,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(false);             // ✅ 자동 로그인 상태
+  const [remember, setRemember] = useState(false);             // 자동 로그인 상태
   const [submitting, setSubmitting] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [countdown, setCountdown] = useState(0);
