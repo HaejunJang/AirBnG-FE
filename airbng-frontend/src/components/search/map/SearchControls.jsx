@@ -45,6 +45,7 @@ const SearchControls = ({ address, reservationDate, jimTypeId, onBagTypeChange, 
                         id="searchInput"
                         placeholder={address}
                         required
+                        onClick={() => navigate('/page/lockerSearch')}
                     />
                     <img
                         className="search-button"
