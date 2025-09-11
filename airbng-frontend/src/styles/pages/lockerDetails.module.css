@@ -46,10 +46,40 @@ body {
     color: #333;
 }
 
+.header {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 412px;
+    height: 60px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    border-bottom: 1px solid #eee;
+    z-index: 1000;
+    position: relative; /* 추가 */
+}
+
 .headerTitle {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 18px;
     font-weight: 600;
     color: #333;
+}
+
+.backButton {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    color: #333;
+    z-index: 1; /* 제목보다 앞에 오도록 */
 }
 
 .content {
