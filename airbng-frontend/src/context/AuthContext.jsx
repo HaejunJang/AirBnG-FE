@@ -128,18 +128,20 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({
-    user,
-    ready,
-    isLoggedIn: Boolean(user?.id) && (() => {
-      const t = getAccessToken();
-      return Boolean(t) && !isExpired(t);
-    })(),
-    login,
-    logout,
-  }), [user, ready, login, logout]);
+    const token = getAccessToken();
+    const validToken = Boolean(token) && !isExpired(token);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    const value = useMemo(() => ({
+        user,
+        ready,
+        isLoggedIn: Boolean(user?.id) && validToken,
+        login,
+        logout,
+        setUser,
+    }), [user, ready, validToken, login, logout]);
+
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);
