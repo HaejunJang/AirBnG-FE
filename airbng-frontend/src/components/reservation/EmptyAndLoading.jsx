@@ -7,7 +7,7 @@ const EmptyAndLoading = ({ data, loading, message }) => {
     const shouldShowLoading = loading && (!data || data.length === 0);
 
     return (
-        <div className="reservation-list">
+        <div>
             {shouldShowLoading && (
                 <div className="loading">
                     <p>로딩 중...</p>

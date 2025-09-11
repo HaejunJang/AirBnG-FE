@@ -15,7 +15,6 @@ import EmptyAndLoading from '../components/reservation/EmptyAndLoading';
 import { PERIOD_OPTIONS } from '../utils/reservation/reservationUtils';
 
 import "../styles/pages/reservation/reservationList.css"
-import "../styles/layout/header.css"
 
 import { useAuth } from '../context/AuthContext';
 
@@ -120,7 +119,7 @@ const ReservationList = () => {
     return (
         <div className="reervationlist-page-container">
             {/* 헤더 */}
-            <ReservationHeader />
+            <ReservationHeader/>
 
             {/* 탭 메뉴 */}
             <ReservationTabs
@@ -158,7 +157,8 @@ const ReservationList = () => {
                                     disabled={loading}
                                 >
                                     <span>{PERIOD_OPTIONS.find(p => p.value === currentPeriod)?.label || '전체'}</span>
-                                    <svg className="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <svg className="dropdown-arrow" viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" strokeWidth="2">
                                         <polyline points="6,9 12,15 18,9"></polyline>
                                     </svg>
                                 </button>
@@ -182,8 +182,6 @@ const ReservationList = () => {
                         </div>
                     )}
                 </div>
-
-
             </div>
 
             {/* 예약 내역 리스트 */}
@@ -203,7 +201,6 @@ const ReservationList = () => {
                     ))}
                 </div>
             )}
-
 
 
             {/* 빈 상태 & 로딩 */}
