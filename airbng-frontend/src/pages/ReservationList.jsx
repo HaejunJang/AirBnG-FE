@@ -118,7 +118,7 @@ const ReservationList = () => {
 
 
     return (
-        <div className="page-container">
+        <div className="reervationlist-page-container">
             {/* 헤더 */}
             <ReservationHeader />
 
