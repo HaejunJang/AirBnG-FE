@@ -11,6 +11,7 @@ import {
   toggleLockerActivation,
   deleteLocker,
 } from "../api/lockerApi";
+import "../styles/pages/locker.css";
 
 const unbox = (res) => res?.data?.result ?? res?.data?.data ?? res?.data;
 

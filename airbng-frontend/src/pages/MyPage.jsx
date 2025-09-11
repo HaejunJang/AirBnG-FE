@@ -259,7 +259,7 @@ export default function MyPage() {
     <div className="container">
       <header className="header" />
       <main className="main-content">
-        {!isLoggedIn ? (
+        {!isLoggedIn || !user?.id ? (
           <>
             <WelcomeSection />
             <LoggedOutMenu />

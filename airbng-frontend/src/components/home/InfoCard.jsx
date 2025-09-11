@@ -1,17 +1,31 @@
 import React, { useState } from 'react';
+import {useNavigate} from "react-router-dom";
 
 function InfoCard({ locationName }) {
-  const [location, setLocation] = useState(locationName || '');
+    const navigate = useNavigate();
+  const [location, setLocation] = useState("");
+  const [lockerName, setLockerName] = useState("");
+  const [jimTypeId, setJimTypeId] = useState(0);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('18:00~20:00');
   const [isLoggedIn] = useState(false);
 
   const handleFindClick = () => {
-    if (!isLoggedIn) {
-      alert("로그인이 필요합니다. 로그인 후 이용해주세요.");
-      return;
-    }
+    // if (!isLoggedIn) {
+    //   alert("로그인이 필요합니다. 로그인 후 이용해주세요.");
+    //   return;
+    // }
   };
+
+    const handleSearch = () => {
+        const params = new URLSearchParams();
+        if (location) params.append("address", location);
+        // params.append("reservationDate", date || new Date().toISOString().split("T")[0]);
+        if (lockerName) params.append("lockerName", lockerName);
+        params.append("jimTypeId", jimTypeId);
+        navigate(`/page/lockerSearchDetails?${params.toString()}`);
+    };
+
 
   return (
     <div className="info-card">
@@ -50,7 +64,12 @@ function InfoCard({ locationName }) {
           </select>
         </div>
       </div>
-      <button className="find-button" onClick={handleFindClick}>보관소 찾기</button>
+        <button
+            className="find-button"
+            onClick={handleSearch}
+        >
+            보관소 찾기
+        </button>
     </div>
   );
 }

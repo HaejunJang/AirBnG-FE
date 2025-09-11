@@ -15,33 +15,40 @@ body {
     overflow: hidden;
 }
 
-.page-container {
-    display: flex;
-    flex-direction: column;
-    /*min-height: 100vh;*/
+.reervationlist-page-container {
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*!*min-height: 100vh;*!*/
+    /*max-width: 412px;*/
+    /*margin: 0 auto;*/
+    /*overflow: hidden;      !* 전체 스크롤 막기 *!*/
+    /*background-color: #ffffff;*/
+    display: block;
     max-width: 412px;
+    width: 100%;
     margin: 0 auto;
-    overflow: hidden;      /* 전체 스크롤 막기 */
+    padding: 40px 20px 24px;
     background-color: #ffffff;
 }
 
-/*.header {*/
-/*    position: fixed;*/
-/*    top: 0;*/
-/*    left: 0;*/
-/*    right: 0;*/
-/*    max-width: 412px;*/
-/*    margin: 0 auto;*/
-/*    z-index: 1000;*/
-/*    height: var(--header-height);*/
-/*    background: white;*/
-/*    padding: 0 20px;*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    border-bottom: 1px solid #eee;*/
-/*}*/
+.reservationlist-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    max-width: 412px;
+    margin: 0 auto;
+    z-index: 1000;
+    height: var(--header-height);
+    background: white;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
 
-.back-button {
+
+.reservationlist-back-button {
     background: none;
     border: none;
     font-size: 20px;
@@ -49,10 +56,7 @@ body {
     margin-right: 10px;
 }
 
-/*.header-title {*/
-/*    font-size: 18px;*/
-/*    font-weight: 600;*/
-/*}*/
+
 
 .tab-container {
     position: fixed;
@@ -241,13 +245,9 @@ body {
 .reservation-list {
     padding: 15px;
     position: relative;
-    margin-top: 212px;
-    /*margin-bottom: 80px;*/
+    margin-top: 170px;
     height: 620px;
-    /*padding: 15px;*/
-    /*height: calc(100vh - 219px);*/
     overflow-y: auto;
-    /*padding-bottom: 80px;*/
 }
 
 .reservation-card {
@@ -567,41 +567,11 @@ body {
     color: #666;
 }
 
-/*.modal-overlay {*/
-/*    position: fixed;*/
-/*    top: 0;*/
-/*    left: 0;*/
-/*    right: 0;*/
-/*    bottom: 0;*/
-/*    background: rgba(0, 0, 0, 0.5);*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    justify-content: center;*/
-/*    z-index: 9999;*/
-/*}*/
-
-/*.modal {*/
-/*    height: 100%;*/
-/*    background: white;*/
-/*    border-radius: 12px;*/
-/*    max-width: 320px;*/
-/*    width: 90%;*/
-/*    overflow: hidden;*/
-/*}*/
-
-
-/*.modal-contentr {*/
-/*    padding: 40px 20px 20px;*/
-/*    text-align: center;*/
-/*    height: 100%;*/
-/*}*/
-
 .modal-overlay {
     display: flex;
-    align-items: flex-start; /* center에서 flex-start로 변경 */
+    align-items: flex-start;
     justify-content: center;
-    padding-top: 30vh; /* 화면 높이의 20% 지점에서 시작 */
-    /* 기존 overlay 스타일들... */
+    padding-top: 30vh;
 }
 
 .modal-contentr {
