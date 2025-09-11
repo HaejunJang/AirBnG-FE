@@ -1,0 +1,351 @@
+. container {
+    display: flex;
+    height: 100vh;
+    background-color: #f3f4f6;
+}
+
+    .sidebar {
+        background-color: white;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebarOpen {
+        width: 16rem;
+    }
+
+    .sidebarClosed {
+        width: 4rem;
+    }
+
+    .sidebarHeader {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sidebarTitle {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .toggleButton {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .toggleButton:hover {
+        background-color: #f3f4f6;
+    }
+
+    .nav {
+        flex: 1;
+        padding: 1rem;
+    }
+
+    .menuItem {
+        margin-bottom: 0.5rem;
+    }
+
+    .menuButton {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        text-align: left;
+        transition: colors 0.2s;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        color: #374151;
+    }
+
+    .menuButton:hover {
+        background-color: #f3f4f6;
+    }
+
+    .menuButtonActive {
+        background-color: #e5e7eb;
+        color: #111827;
+    }
+
+    .menuIcon {
+        flex-shrink: 0;
+    }
+
+    .menuText {
+        margin-left: 0.75rem;
+        font-weight: 500;
+    }
+
+    .subMenu {
+        margin-left: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .subMenuButton {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        text-align: left;
+        transition: colors 0.2s;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        color: #4b5563;
+        margin-bottom: 0.25rem;
+    }
+
+    .subMenuButton:hover {
+        background-color: #f3f4f6;
+    }
+
+    .subMenuButtonActive {
+        background-color: #d1d5db;
+        color: #111827;
+    }
+
+    .subMenuIcon {
+        flex-shrink: 0;
+    }
+
+    .subMenuText {
+        margin-left: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .mainContent {
+        flex: 1;
+        padding: 1.5rem;
+        overflow: auto;
+    }
+
+    .contentWrapper {
+        max-width: 112rem;
+        margin: 0 auto;
+    }
+
+    .contentCard {
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+    }
+
+    .contentTitle {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+    }
+
+    .textGray {
+        color: #4b5563;
+    }
+
+    .statsGrid {
+        margin-top: 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .statCard {
+        background-color: #f9fafb;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .statLabel {
+        font-weight: 500;
+        color: #1f2937;
+    }
+
+    .statValue {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-top: 0.5rem;
+    }
+
+    .textOrange {
+        color: #ea580c;
+    }
+
+    .textGreen {
+        color: #16a34a;
+    }
+
+    .textRed {
+        color: #dc2626;
+    }
+
+    .subTitle {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+    }
+
+    .salesGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .salesCard {
+        background-color: #f9fafb;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .salesLabel {
+        font-weight: 500;
+        color: #4b5563;
+    }
+
+    .salesValue {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #1f2937;
+        margin-top: 0.5rem;
+    }
+
+    .storageList {
+        background-color: #f9fafb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+
+    .storageItems {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .storageItem {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: white;
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+    }
+
+    .storageName {
+        font-weight: 500;
+        color: #1f2937;
+    }
+
+    .storageInfo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .storageSales {
+        color: #1f2937;
+        font-weight: 600;
+    }
+
+    .growthBadge {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+    }
+
+    .growthPositive {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+
+    .growthNegative {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .profitGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .profitCard {
+        background-color: #f9fafb;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .profitTitle {
+        font-weight: 500;
+        color: #4b5563;
+        margin-bottom: 0.75rem;
+    }
+
+    .profitItems {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .profitItem {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .profitLabel {
+        color: #374151;
+    }
+
+    .profitLabelBold {
+        color: #1f2937;
+        font-weight: 600;
+    }
+
+    .profitValue {
+        font-weight: 600;
+    }
+
+    .profitValueBold {
+        font-weight: bold;
+    }
+
+    .divider {
+        margin: 0.5rem 0;
+        border: none;
+        border-top: 1px solid #d1d5db;
+    }
+
+    .profitRateContainer {
+        text-align: center;
+    }
+
+    .profitRate {
+        font-size: 1.875rem;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .profitRateLabel {
+        font-size: 0.875rem;
+        color: #4b5563;
+    }
+
+    .profitGrowth {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        color: #16a34a;
+    }
