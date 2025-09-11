@@ -16,15 +16,14 @@ import { PERIOD_OPTIONS } from '../utils/reservation/reservationUtils';
 
 import "../styles/pages/reservation/reservationList.css"
 import "../styles/layout/header.css"
-import "../styles/pages/MyPage.css"
+
+import { useAuth } from '../context/AuthContext';
 
 const ReservationList = () => {
     const navigate = useNavigate();
-    //나중에 jwt 들어올때 진짜 코드
-    // const { member } = useContext(AuthContext);
-    // const memberId = member?.memberId;
-    const memberId = 3; //테스트 용
 
+    const { user } = useAuth();
+    const memberId = user?.id;
 
     const {
         currentStates,
