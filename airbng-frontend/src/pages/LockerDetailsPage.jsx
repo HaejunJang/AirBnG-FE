@@ -678,6 +678,7 @@ const LockerDetails = () => {
                 onLoginConfirm={handleLoginConfirm}
             />
         </div>
+
     );
 };
 

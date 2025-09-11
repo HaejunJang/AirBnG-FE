@@ -41,6 +41,7 @@ const useModal = () => {
         setLoginModal({ show: false, action: null });
     };
 
+
     return {
         // Modal States
         confirmModal,

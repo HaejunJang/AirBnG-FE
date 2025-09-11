@@ -40,6 +40,7 @@ export const getMyLocker = () => httpAuth.get("/lockers/me");
 // 수정용
 // export const getMyLockerForUpdate = () => httpAuth.get("/lockers/me/update");
 
+
 // 찜 여부 확인
 export const checkZzimExists = (lockerId, memberId) =>
     httpAuth.get(`/lockers/${lockerId}/members/${memberId}/zzim/exists`);
