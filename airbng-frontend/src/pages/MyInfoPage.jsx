@@ -6,11 +6,12 @@ import LoadingSpinner from '../components/info/LoadingSpinner';
 import ErrorMessage from '../components/info/ErrorMessage';
 import SuccessModal from '../components/info/SuccessModal';
 import info from '../styles/pages/myInfo.module.css';
+import {getCurrentUserIdFromToken, useAuth} from '../context/AuthContext';
 
 const MyInfoPage = () => {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const memberId = searchParams.get('memberId');
+    const {user, isLoggedIn} = useAuth();
+    // const urlMemberId = searchParams.get('memberId');
 
     const {
         userInfo,
@@ -26,6 +27,7 @@ const MyInfoPage = () => {
         resetNicknameValidation,
         updateUserInfo,
         updateUserField,
+        updatePhoneField,
         setError,
         setShowSuccessModal
     } = useMyInfo();
@@ -35,11 +37,7 @@ const MyInfoPage = () => {
 
     // memberId로 사용자 정보 로드 후 최초 1번만 원래 닉네임 저장
     //1) memberId로 사용자 정보 로드
-    useEffect(() => {
-        if (memberId) {
-            loadUserInfo(memberId);
-        }
-    }, [memberId]);
+
 
     // 2) 원래 닉네임 저장 (최초 1번만)
     // useEffect(() => {
@@ -51,6 +49,20 @@ const MyInfoPage = () => {
 
     // 닉네임이 바뀌었는지 여부 확인
     //const isNicknameChanged = userInfo.nickname !== originalNicknameRef.current;
+    useEffect(() => {
+        console.log('로그인 상태:', isLoggedIn);
+        console.log('사용자 정보:', user);
+
+        if (!isLoggedIn || !user?.id) {
+            alert('로그인이 필요합니다.');
+            navigate('/page/home');
+            return;
+        }
+
+        // 사용자 정보 로드
+        loadUserInfo(user.id);
+    }, [isLoggedIn, user, navigate]);
+
 
     const handleBack = () => {
         navigate(-1);
@@ -163,8 +175,9 @@ const MyInfoPage = () => {
                                 type="tel"
                                 className={info.formInput}
                                 value={userInfo.phone || ''}
-                                onChange={(e) => updateUserField('phone', e.target.value)}
+                                onChange={(e) => updatePhoneField(e.target.value)}
                                 placeholder="휴대폰 번호 입력('-'제외 11자리 입력)"
+                                maxLength="13"
                                 required
                             />
                         </div>

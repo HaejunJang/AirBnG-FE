@@ -2,8 +2,12 @@ import {useState, useEffect, useRef} from 'react';
 import { infoApi, updateUserInfo } from '../api/infoApi';
 import defaultImage from '../assets/img_upload_ic.svg';
 import {httpAuth} from '../api/http';
+import {useAuth} from "../context/AuthContext";
+import {setUserProfile} from "../utils/jwtUtil";
+
 
 export const useMyInfo = () => {
+    const { setUser, updateUser } = useAuth();
     const [userInfo, setUserInfo] = useState({
         memberId: '',
         email: '',
@@ -185,10 +189,8 @@ export const useMyInfo = () => {
         setError('');
 
         try {
-            // FormData 생성 (memberUpdateRequest + profileImage)
             const formData = new FormData();
 
-            // DTO 부분 JSON으로 감싸기
             const memberUpdateRequest = {
                 memberId: userInfo.memberId,
                 email: userInfo.email,
@@ -197,25 +199,25 @@ export const useMyInfo = () => {
                 nickname: userInfo.nickname
             };
 
-            console.log('전송할 데이터:', memberUpdateRequest);
-
             formData.append(
                 'memberUpdateRequest',
                 new Blob([JSON.stringify(memberUpdateRequest)], { type: 'application/json' })
             );
 
-            // 프로필 이미지가 있으면 첨부
             if (profileImage) {
-                console.log('프로필 이미지 첨부:', profileImage.name);
                 formData.append('profileImage', profileImage);
             }
 
-            console.log('API 호출 시작');
             const response = await updateUserInfo(formData);
             console.log('API 응답:', response);
 
             if (response.status === 200 && response.data.code === 1000) {
                 console.log('수정 성공');
+
+                updateUser({
+                    nickname: userInfo.nickname  // 수정된 닉네임으로 업데이트
+                });
+
                 setShowSuccessModal(true);
                 return true;
             } else {
@@ -230,10 +232,101 @@ export const useMyInfo = () => {
         }
     };
 
+    // const updateUserInfoHandler2 = async () => {
+    //     console.log('수정 완료 버튼 클릭됨');
+    //
+    //     if (!validateForm()) {
+    //         console.log('폼 검증 실패');
+    //         return false;
+    //     }
+    //
+    //     console.log('폼 검증 성공, 수정 요청 시작');
+    //     setIsLoading(true);
+    //     setError('');
+    //
+    //     try {
+    //         const formData = new FormData();
+    //
+    //         const memberUpdateRequest = {
+    //             memberId: userInfo.memberId,
+    //             email: userInfo.email,
+    //             name: userInfo.name,
+    //             phone: userInfo.phone,
+    //             nickname: userInfo.nickname
+    //         };
+    //
+    //         formData.append(
+    //             'memberUpdateRequest',
+    //             new Blob([JSON.stringify(memberUpdateRequest)], { type: 'application/json' })
+    //         );
+    //
+    //         if (profileImage) {
+    //             formData.append('profileImage', profileImage);
+    //         }
+    //
+    //         const response = await updateUserInfo(formData);
+    //         console.log('API 응답:', response);
+    //
+    //         if (response.status === 200 && response.data.code === 1000) {
+    //             console.log('수정 성공');
+    //
+    //             // AuthContext + 로컬스토리지 업데이트
+    //             setUser(prevUser => {
+    //                 const updatedUser = {
+    //                     ...prevUser,
+    //                     name: userInfo.nickname, // nickname 통일!
+    //                 };
+    //
+    //                 setUserProfile({
+    //                     id: userInfo.memberId,
+    //                     nickname: userInfo.nickname,
+    //                     roles: updatedUser.roles || []
+    //                 });
+    //
+    //                 return updatedUser;
+    //             });
+    //
+    //             setShowSuccessModal(true);
+    //             return true;
+    //         } else {
+    //             throw new Error(response.data.message || '정보 수정에 실패했습니다.');
+    //         }
+    //     } catch (err) {
+    //         console.error('수정 요청 에러:', err);
+    //         setError(err.message || '정보 수정에 실패했습니다.');
+    //         return false;
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+
+
     // 입력값 업데이트
     const updateUserField = (field, value) => {
         setUserInfo(prev => ({ ...prev, [field]: value }));
         setError(''); // 에러 메시지 초기화
+    };
+
+    // 전화번호 포맷팅 함수 (숫자만 입력받아서 010-0000-0000 형태로 변환)
+    const formatPhoneNumber = (value) => {
+        // 숫자만 추출
+        const phoneNumber = value.replace(/[^\d]/g, '');
+
+        // 길이에 따라 포맷팅
+        if (phoneNumber.length <= 3) {
+            return phoneNumber;
+        } else if (phoneNumber.length <= 7) {
+            return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+        } else {
+            return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`;
+        }
+    };
+
+    // 전화번호 업데이트 함수
+    const updatePhoneField = (value) => {
+        const formattedPhone = formatPhoneNumber(value);
+        setUserInfo(prev => ({...prev, phone: formattedPhone}));
+        setError('');
     };
 
     return {
@@ -243,13 +336,14 @@ export const useMyInfo = () => {
         error,
         nicknameValidation,
         showSuccessModal,
-        isNicknameChanged: userInfo.nickname !== originalNicknameRef.current, // 이 줄 추가
+        isNicknameChanged: userInfo.nickname !== originalNicknameRef.current,
         loadUserInfo,
         handleProfileImageChange,
         checkNicknameDuplicate,
         resetNicknameValidation,
         updateUserInfo: updateUserInfoHandler,
         updateUserField,
+        updatePhoneField,
         setError,
         setShowSuccessModal
     };
