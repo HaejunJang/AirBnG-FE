@@ -11,6 +11,9 @@ import { getPopularTop5 } from "../api/lockerApi";
 import {useDot} from "../hooks/useDot";
 import { getUserProfile } from '../utils/jwtUtil';
 import { useAuth } from "../context/AuthContext";
+import {useDot} from "../hooks/useDot";
+import { getUserProfile } from '../utils/jwtUtil';
+import { useAuth } from "../context/AuthContext";        // ✅ 추가
 
 function HomePage() {
   const navigate = useNavigate();
