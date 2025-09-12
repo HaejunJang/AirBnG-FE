@@ -90,6 +90,38 @@
   .bottom-nav { height: 70px; }
 }
 
+/* 배지를 아이콘 기준으로 배치 */
+.nav-icon-wrap{
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+/* 하단 탭 배지 */
+.nav-badge{
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  display: inline-block;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  pointer-events: none; /* 탭 클릭 방해 금지 */
+}
+
+/* 고해상도/작은 화면 보정 */
+@media (max-width: 412px){
+  .nav-badge{ top: -5px; right: -9px; min-width: 16px; height: 16px; line-height: 16px; font-size: 10px; }
+}
+
 /* 사용자 설정: 모션 최소화 요청 시 애니메이션 제거 */
 @media (prefers-reduced-motion: reduce) {
   .nav-icon, .nav-item, .nav-text { transition: none !important; }

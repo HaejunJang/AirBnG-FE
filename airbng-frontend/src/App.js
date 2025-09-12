@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { getStompClient } from "./utils/stompClient";
 import { useEffect } from "react";
 import Navbar from "./components/Footer/Navbar";
+import WsPersonalBridge from "./components/ws/WsPersonalBridge";
+import { UnreadProvider } from "./context/UnreadContext";
 import "./styles/App.css";
 
 import ReservationDetail from "./pages/ReservationDetail";
@@ -83,7 +85,10 @@ function App() {
 
   return (
     <BrowserRouter>
-      <MainContent />
+      <UnreadProvider>
+        <WsPersonalBridge />
+        <MainContent />
+      </UnreadProvider>
     </BrowserRouter>
   );
 }
