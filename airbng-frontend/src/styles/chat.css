@@ -2,6 +2,7 @@
    Chat (List + Room)
    Brand: uses tokens from global.css
    ============================================================= */
+:root { --time-gutter: 48px; }
 
 .airbng-chat{
   background: #f8f9fa;                  /* 바깥 회색 배경 */
@@ -250,19 +251,21 @@
 
 .msg-row--me .bubble-row{ justify-content:flex-end; }
 .msg-row--me .bubble-time{ order: 1; }
-.msg-row--me .bubble{ order: 2; }
+.msg-row--me .bubble{ max-width: calc(var(--bubble-max) + var(--time-gutter)); order: 2; }
 
+.msg-row--you .bubble { max-width: calc(var(--bubble-max) + 44px); }
 .msg-row--you .bubble-row{ justify-content:flex-start; }
 .bubble-meta{ display:flex; align-items:flex-end; gap:6px; }
 
 /* bubbles (기존 유지, 일부 보완) */
 .bubble{ 
   max-width: var(--bubble-max);
+  min-width:56px;
   display: inline-block;
   border-radius:18px;
   padding:10px 12px;
   line-height:1.35;
-  box-shadow:var(--shadow-sm);
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--primary) 10%, rgba(0,0,0,.06)); 
   word-break:break-word;
   white-space:pre-wrap;
 }

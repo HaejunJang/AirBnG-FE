@@ -68,8 +68,13 @@ export default function useChatRoom(convId, meId) {
 
   // 읽음 (REST 예시)
   const markAllAsRead = useCallback(() => {
-    const lastSeq = messages.length ? messages[messages.length - 1].seq : null;
-    if (lastSeq == null) return;
+    // 마지막 유효 seq (뒤에서 앞으로 찾아 첫 숫자)
+    let lastSeq = 0;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const s = Number(messages[i]?.seq);
+      if (Number.isFinite(s)) { lastSeq = s; break; }
+    }
+    if (!lastSeq) return;
     publish(`/app/conversations/${convId}/read`, { lastSeenSeq: lastSeq });
   }, [publish, convId, messages]);
 
