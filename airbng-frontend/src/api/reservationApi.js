@@ -2,11 +2,10 @@ import qs from "qs";
 import { httpAuth, httpPublic } from "./http";
 
 export const getReservationList = ({ isDropper, memberId, state, nextCursorId, period }) => {
-    // 프론트에서 안전하게 전처리
-    const safeState = state ? state.map((s) => s.toUpperCase()) : undefined;
-    const safePeriod = period ? period.toUpperCase() : undefined;
+    const safeState = state?.map(s => s.toUpperCase());
+    const safePeriod = period?.toUpperCase();
 
-    return httpPublic.get("/reservations", {
+    return httpAuth.get("/reservations", {
         params: {
             isDropper,
             memberId,
@@ -14,7 +13,7 @@ export const getReservationList = ({ isDropper, memberId, state, nextCursorId, p
             nextCursorId,
             period: safePeriod,
         },
-        paramsSerializer: (params) =>
+        paramsSerializer: params =>
             qs.stringify(params, { arrayFormat: "repeat", skipNulls: true }),
     });
 };
