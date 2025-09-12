@@ -4,13 +4,13 @@ import { httpAuth, httpPublic } from "./http";
 export const getPopularTop5 = () => httpPublic.get("/lockers/popular");
 
 // 특정 보관소 조회
-export const getLockerById = (lockerId) => httpPublic.get("/lockers/${lockerId}");
+export const getLockerById = (lockerId) => httpPublic.get(`/lockers/${lockerId}`, lockerId);
 
 // 보관소 활성화/비활성화 토글
-export const toggleLockerActivation = (lockerId) => httpAuth.patch("/lockers/${lockerId}");
+export const toggleLockerActivation = (lockerId) => httpAuth.patch(`/lockers/${lockerId}`);
 
 // 특정 보관소 삭제
-export const deleteLocker = (lockerId) => httpAuth.delete("/lockers/${lockerId}");
+export const deleteLocker = (lockerId) => httpAuth.delete(`/lockers/${lockerId}`);
 
 // 보관소 등록
 export const registerLocker = ({ locker, images = [] }) => {
@@ -43,11 +43,22 @@ export const searchLockers = ({ address, lockerName, jimTypeId }) => {
 };
 
 // 수정할 특정 보관소 정보 조회
-export const getLockerForUpdate = (lockerId) => httpAuth.get("/lockers/update/${lockerId}");
+export const getLockerForUpdate = (lockerId) => httpAuth.get(`/lockers/update/${lockerId}`);
 
 
 // 상세
 export const getMyLocker = () => httpAuth.get("/lockers/me");
 
 // 수정용
+// export const getMyLockerForUpdate = () => httpAuth.get("/lockers/me/update");
+
+
+// 찜 여부 확인
+export const checkZzimExists = (lockerId, memberId) =>
+    httpAuth.get(`/lockers/${lockerId}/members/${memberId}/zzim/exists`);
+
+// 찜 토글
+export const toggleZzim = (lockerId, memberId) =>
+    httpAuth.post(`/lockers/${lockerId}/members/${memberId}/zzim`);
+
 // export const getMyLockerForUpdate = () => httpAuth.get("/lockers/me/update");

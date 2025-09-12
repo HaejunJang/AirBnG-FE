@@ -76,16 +76,20 @@
 }
 
 .search-input {
-  flex: 1;
-  height: 100%;
-  border: none;
-  outline: none;
-
-  color: #999;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 15px; /* 100% */
+    flex: 1;
+    height: 100%;
+    border: none;
+    outline: none;
+    color: #999;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 15px;
+    cursor: pointer;
+}
+.search-input:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .search-button {
