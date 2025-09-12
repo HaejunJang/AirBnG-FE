@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const useSearchFilter = (jimTypeId = '모든 짐') => {
     const navigate = useNavigate();
@@ -29,32 +29,29 @@ export const useSearchFilter = (jimTypeId = '모든 짐') => {
 
     // 검색 실행
     const handleSearch = () => {
-        // // TODO: 실제 API 호출로 교체
-        // const mockResults = [
-        //     { id: 1, name: '강남역 짐보관소', jimTypeName: selectedBagType, address: '서울시 강남구 강남대로 123' },
-        //     { id: 2, name: '홍대입구 보관함', jimTypeName: selectedBagType, address: '서울시 마포구 홍익로 456' }
-        // ];
-        //
-        // setSearchResults(mockResults);
-        // setShowResults(true);
         const jimTypeId = jimTypeMap.indexOf(selectedBagType);
 
         const params = new URLSearchParams({
             address: searchQuery,
-            lockerName : searchQuery,
-            // date: selectedDate,
             jimTypeId: jimTypeId.toString()
-            // startTime: selectedStartTime,
-            // endTime: selectedEndTime
         }).toString();
-        navigate(`/lockerSearchDetails?${params}`);
+
+        navigate(`/page/lockerSearchDetails?${params}`);
     };
 
-    // 순위 아이템 클릭
-    const handleRankingClick = (location) => {
-        setSearchQuery(location);
-        handleSearch();
+    // 순위 아이템 클릭 - 필요한 값만 파라미터로 전달
+    const handleRankingClick = ({ address, jimTypeId }) => {
+        console.log('받은 데이터:', { address, jimTypeId }); // 확인용
+
+        const params = new URLSearchParams({
+            address: address || '',
+            jimTypeId: jimTypeId?.toString() || '0'
+        }).toString();
+
+        console.log('생성된 URL 파라미터:', params);
+        navigate(`/page/lockerSearchDetails?${params}`);
     };
+
 
     // 모달 관리
     const openDateModal = () => setShowDateModal(true);

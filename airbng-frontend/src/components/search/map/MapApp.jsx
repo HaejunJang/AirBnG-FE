@@ -39,7 +39,7 @@ const MapApp = () => {
         // URL 갱신
         const url = new URL(window.location.href);
         url.searchParams.set("address", address);
-        url.searchParams.set("lockerName", lockerName);
+        //url.searchParams.set("lockerName", lockerName);
         url.searchParams.set("jimTypeId", numbericJimTypeId.toString());
         window.history.replaceState({}, '', url.toString());
     };

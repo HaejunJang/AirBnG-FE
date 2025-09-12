@@ -8,6 +8,7 @@ import {
     getJimTypesText,
     reservationCancel
 } from '../../utils/reservation/reservationUtils';
+import logoImg from "../../assets/favicon.svg"
 
 const ReservationCard = ({
                              reservation,
@@ -83,14 +84,25 @@ const ReservationCard = ({
     const renderReservationItem = () => (
         <div className="reservation-item">
             {reservation.lockerImage ? (
-                <img src={reservation.lockerImage} alt="보관소" className="item-image" />
+                <img
+                    src={reservation.lockerImage}
+                    alt="보관소"
+                    className="item-image"
+                />
             ) : (
-                <div className="item-image"></div>
+                <img
+                    src={logoImg}
+                    alt="기본 로고"
+                    className="item-image"
+                />
             )}
             <div className="item-info">
-                <div className="item-title">{reservation.lockerName || '보관소 정보 없음'}</div>
-                <div className="item-types">{formatDuration(reservation.durationHours)} • {jimTypes}</div>
-                {/*<div className="item-types">짐 종류: {jimTypes}</div>*/}
+                <div className="item-title">
+                    {reservation.lockerName || "보관소 정보 없음"}
+                </div>
+                <div className="item-types">
+                    {formatDuration(reservation.durationHours)} • {jimTypes}
+                </div>
             </div>
         </div>
     );

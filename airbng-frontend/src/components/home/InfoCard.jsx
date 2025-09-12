@@ -21,7 +21,7 @@ function InfoCard({ locationName }) {
         const params = new URLSearchParams();
         if (location) params.append("address", location);
         // params.append("reservationDate", date || new Date().toISOString().split("T")[0]);
-        if (lockerName) params.append("lockerName", lockerName);
+        //if (lockerName) params.append("lockerName", lockerName);
         params.append("jimTypeId", jimTypeId);
         navigate(`/page/lockerSearchDetails?${params.toString()}`);
     };

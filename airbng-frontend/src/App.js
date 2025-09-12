@@ -21,6 +21,7 @@ import LoginPage from "./pages/LoginPage";
 import ChatListPage from "./pages/ChatListPage";
 import ChatStartPage from "./pages/ChatStartPage";
 import ChatRoomPage from "./pages/ChatRoomPage";
+import MyInfoPage from "./pages/MyInfoPage";
 
 function App() {
   useEffect(() => {
@@ -77,6 +78,7 @@ function App() {
           <Route path="/page/chatList" element={<ChatListPage />} />
           <Route path="/page/chat/new" element={<ChatStartPage />} />
           <Route path="/page/chat/:convId" element={<ChatRoomPage />} />
+          <Route path="/page/mypage/update" element={<MyInfoPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
