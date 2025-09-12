@@ -33,8 +33,8 @@ httpAuth.interceptors.request.use((config) => {
 let isRefreshing = false;
 let refreshWaiters = [];
 function notifyWaiters(newToken, err) {
-  refreshWaiters.forEach(({ resolve, reject }) => (err ? reject(err) : resolve(newToken)));
-  refreshWaiters = [];
+    refreshWaiters.forEach(({ resolve, reject }) => (err ? reject(err) : resolve(newToken)));
+    refreshWaiters = [];
 }
 
 // 401 처리: /reissue 호출 → Authorization 헤더에서 새 토큰 뽑기

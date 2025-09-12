@@ -4,6 +4,8 @@ import "./styles/App.css";
 
 import ReservationDetail from "./pages/ReservationDetail";
 import HomePage from "./pages/HomePage";
+import SearchPage from "./pages/SearchPage";
+import SearchFilterPage from "./pages/SearchFilterPage";
 import LockerManagePage from "./pages/LockerManagePage";
 import LockerRegisterPage from "./pages/LockerRegisterPage";
 import LockerRootPage from "./pages/LockerRootPage";
@@ -15,6 +17,7 @@ import LoginPage from "./pages/LoginPage";
 import Notification from "./pages/notification";
 import { SSEProvider } from "./context/SseContext";
 import { getUserProfile } from './utils/jwtUtil';
+import MyInfoPage from "./pages/MyInfoPage";
 
 function App() {
   function getActiveNav(pathname) {
@@ -22,6 +25,7 @@ function App() {
     if (pathname.startsWith("/page/chatList")) return "chat";
     if (pathname.startsWith("/page/reservations")) return "calendar";
     if (pathname.startsWith("/page/mypage")) return "mypage";
+    return "home";
   }
 
   function MainContent() {
@@ -44,6 +48,8 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/page/home" element={<HomePage />} />
+          <Route path="/page/lockerSearchDetails" element={<SearchPage />} />
+          <Route path="/page/lockerSearch" element={<SearchFilterPage />} />
           <Route path="/page/lockers" element={<LockerRootPage />} />
           <Route path="/page/lockers/manage" element={<LockerManagePage />} />
           <Route path="/page/lockers/register" element={<LockerRegisterPage />} />
@@ -61,6 +67,7 @@ function App() {
           <Route path="/page/login" element={<LoginPage />} />
           <Route path="/page/notification" element={<Notification />} />
 
+            <Route path="/page/mypage/update" element={<MyInfoPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>

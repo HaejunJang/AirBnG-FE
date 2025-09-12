@@ -2,11 +2,18 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/pages/MyPage.css';
+import {useMyInfo} from "../hooks/useMyInfo";
+import {infoApi} from "../api/infoApi";
 
 export default function MyPage() {
-  const { user, ready, isLoggedIn, logout } = useAuth();
+    const {user, ready, isLoggedIn, logout, setUser} = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
+
+    // const {
+    //     userInfo
+    // } = useMyInfo();
 
   // ---- 로딩 & 모달 상태 ----
   const [loading, setLoading] = useState(false);
@@ -38,7 +45,31 @@ export default function MyPage() {
     }, 50);
   }, []);
 
-  useEffect(() => {
+    useEffect(() => {
+        if (!user?.id) return;
+        const fetchAndSetUser = async () => {
+            try {
+                const response = await infoApi.getUserInfo(user.id);
+
+                if (response.status === 200 && response.data.code === 1000) {
+                    const updatedUserInfo = response.data.result;
+
+                    // 토큰 같은 기존 상태 날아가지 않게 병합
+                    setUser((prev) => ({
+                        ...prev,
+                        ...updatedUserInfo,
+                    }));
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        fetchAndSetUser();
+    }, [user?.id, setUser]);
+
+
+
+    useEffect(() => {
     if (ready) animatePageElements();
   }, [ready, isLoggedIn, animatePageElements]);
 
@@ -90,7 +121,7 @@ export default function MyPage() {
     if (!requireLoginThen(goToMyInfo)) return;
     showLoading();
     setTimeout(() => {
-      navigate('/page/myInfo');
+      navigate(`/page/mypage/update?memberId=${user.id}`, { replace: true });
     }, 300);
   };
 
@@ -116,6 +147,8 @@ export default function MyPage() {
       }
     });
   };
+
+
 
   // ---- 섹션 컴포넌트 ----
   const WelcomeSection = () => (
@@ -259,7 +292,7 @@ export default function MyPage() {
     <div className="container">
       <header className="header" />
       <main className="main-content">
-        {!isLoggedIn ? (
+        {!isLoggedIn || !user?.id ? (
           <>
             <WelcomeSection />
             <LoggedOutMenu />

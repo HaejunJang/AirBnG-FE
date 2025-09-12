@@ -15,16 +15,14 @@ import EmptyAndLoading from '../components/reservation/EmptyAndLoading';
 import { PERIOD_OPTIONS } from '../utils/reservation/reservationUtils';
 
 import "../styles/pages/reservation/reservationList.css"
-import "../styles/layout/header.css"
-import "../styles/pages/MyPage.css"
+
+import { useAuth } from '../context/AuthContext';
 
 const ReservationList = () => {
     const navigate = useNavigate();
-    //나중에 jwt 들어올때 진짜 코드
-    // const { member } = useContext(AuthContext);
-    // const memberId = member?.memberId;
-    const memberId = 3; //테스트 용
 
+    const { user } = useAuth();
+    const memberId = user?.id;
 
     const {
         currentStates,
@@ -119,9 +117,9 @@ const ReservationList = () => {
 
 
     return (
-        <div className="page-container">
+        <div className="reervationlist-page-container">
             {/* 헤더 */}
-            <ReservationHeader />
+            <ReservationHeader/>
 
             {/* 탭 메뉴 */}
             <ReservationTabs
@@ -159,7 +157,8 @@ const ReservationList = () => {
                                     disabled={loading}
                                 >
                                     <span>{PERIOD_OPTIONS.find(p => p.value === currentPeriod)?.label || '전체'}</span>
-                                    <svg className="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <svg className="dropdown-arrow" viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" strokeWidth="2">
                                         <polyline points="6,9 12,15 18,9"></polyline>
                                     </svg>
                                 </button>
@@ -183,8 +182,6 @@ const ReservationList = () => {
                         </div>
                     )}
                 </div>
-
-
             </div>
 
             {/* 예약 내역 리스트 */}
@@ -204,7 +201,6 @@ const ReservationList = () => {
                     ))}
                 </div>
             )}
-
 
 
             {/* 빈 상태 & 로딩 */}
