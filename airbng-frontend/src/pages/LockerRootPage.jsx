@@ -58,7 +58,7 @@ export default function LockerRootPage() {
 
   const handleDetail = useCallback(() => {
     if (!locker?.lockerId) return;
-    navigate(`/page/lockers/${locker.lockerId}`);
+    navigate(`/page/lockerDetails/${locker.lockerId}`);
   }, [navigate, locker]);
 
   const handleToggle = useCallback(async () => {

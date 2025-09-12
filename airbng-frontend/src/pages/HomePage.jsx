@@ -62,7 +62,7 @@ function HomePage() {
   };
 
   const handlePopularClick = (lockerId) => {
-    navigate(`/page/lockers/${lockerId}`);
+    navigate(`/page/lockerDetails/${lockerId}`);
   };
 
   return (

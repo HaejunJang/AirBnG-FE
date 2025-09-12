@@ -5,7 +5,7 @@ function PopularSection({ items = [], loading = false, onPopularClick }) {
   const navigate = useNavigate();
   const handleClick = (id) => {
     if (onPopularClick) onPopularClick(id);
-    else navigate(`/page/lockers/${id}`);
+    else navigate(`/page/lockerDetails/${id}`);
   };
 
   return (
