@@ -14,6 +14,7 @@ import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
 import ReservationList from "./pages/ReservationList";
 import LoginPage from "./pages/LoginPage";
+import LockerDetailsPage from "./pages/LockerDetailsPage";
 import Notification from "./pages/notification";
 import { SSEProvider } from "./context/SseContext";
 import { getUserProfile } from './utils/jwtUtil';
@@ -53,6 +54,7 @@ function App() {
           <Route path="/page/lockers" element={<LockerRootPage />} />
           <Route path="/page/lockers/manage" element={<LockerManagePage />} />
           <Route path="/page/lockers/register" element={<LockerRegisterPage />} />
+          <Route path="/page/lockerDetails" element={<LockerDetailsPage />} />
           <Route path="/page/reservations/list" element={<ReservationList />} />
           <Route
             path="/page/reservations/detail/:id"
