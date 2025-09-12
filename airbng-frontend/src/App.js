@@ -21,6 +21,9 @@ import LoginPage from "./pages/LoginPage";
 import ChatListPage from "./pages/ChatListPage";
 import ChatStartPage from "./pages/ChatStartPage";
 import ChatRoomPage from "./pages/ChatRoomPage";
+import Notification from "./pages/notification";
+import { SSEProvider } from "./context/SseContext";
+import { getUserProfile } from './utils/jwtUtil';
 import MyInfoPage from "./pages/MyInfoPage";
 
 function App() {
@@ -79,17 +82,24 @@ function App() {
           <Route path="/page/chat/new" element={<ChatStartPage />} />
           <Route path="/page/chat/:convId" element={<ChatRoomPage />} />
           <Route path="/page/mypage/update" element={<MyInfoPage />} />
+          <Route path="/page/notification" element={<Notification />} />
+
+          <Route path="/page/mypage/update" element={<MyInfoPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
     );
   }
 
+  const profile = getUserProfile();
+
   return (
     <BrowserRouter>
       <UnreadProvider>
         <WsPersonalBridge />
-        <MainContent />
+        <SSEProvider memberId={profile?.id || null}>
+            <MainContent />
+        </SSEProvider>
       </UnreadProvider>
     </BrowserRouter>
   );

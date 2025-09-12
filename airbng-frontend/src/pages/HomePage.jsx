@@ -8,12 +8,19 @@ import InfoCard from "../components/home/InfoCard";
 import CategorySection from "../components/home/CategorySection";
 import PopularSection from "../components/home/PopularSection";
 import { getPopularTop5 } from "../api/lockerApi";
+import {useDot} from "../hooks/useDot";
+import { getUserProfile } from '../utils/jwtUtil';
 import { useAuth } from "../context/AuthContext";
 
 function HomePage() {
   const navigate = useNavigate();
   const { isLoggedIn, ready } = useAuth();
 
+    const profile = getUserProfile();
+    const resolvedMemberId =  profile?.id || null;
+    const { hasDot } = useDot(resolvedMemberId);
+
+  // 인기 보관소 상태
   const [popular, setPopular] = useState([]);
   const [loadingPopular, setLoadingPopular] = useState(true);
 
@@ -59,24 +66,24 @@ function HomePage() {
   };
 
   return (
-    <>
-      <div className="top-section">
-        <TopBar />
-        <span className="ring ring--bell" aria-hidden />
-        <span className="ring ring--greeting" aria-hidden />
-        <span className="ring ring--greeting-inner" aria-hidden />
-        <Greeting />
-      </div>
+      <>
+          <div className="top-section">
+            <TopBar hasDot={hasDot}/>
+            <span className="ring ring--bell" aria-hidden />
+            <span className="ring ring--greeting" aria-hidden />
+            <span className="ring ring--greeting-inner" aria-hidden />
+            <Greeting />
+          </div>
 
-      <InfoCard locationName="강남구" />
-      <CategorySection onCategoryClick={handleCategoryClick} />
-      
-      <PopularSection
-        items={popular}
-        loading={loadingPopular}
-        onPopularClick={handlePopularClick}
-      />
-    </>
+          <InfoCard locationName="강남구" />
+          <CategorySection onCategoryClick={handleCategoryClick} />
+
+          <PopularSection
+            items={popular}
+            loading={loadingPopular}
+            onPopularClick={handlePopularClick}
+          />
+       </>
   );
 }
 export default HomePage;
