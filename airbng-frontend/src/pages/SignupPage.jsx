@@ -372,8 +372,8 @@ function SignUpPage() {
   };
 
   return (
-    <div className="page-container">
-      <button className="back-button" onClick={goBack}>
+    <div className="signup-page-container">
+      <button className="signup-back-button" onClick={goBack}>
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
