@@ -14,6 +14,9 @@ import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
 import ReservationList from "./pages/ReservationList";
 import LoginPage from "./pages/LoginPage";
+import Notification from "./pages/notification";
+import { SSEProvider } from "./context/SseContext";
+import { getUserProfile } from './utils/jwtUtil';
 import MyInfoPage from "./pages/MyInfoPage";
 
 function App() {
@@ -62,6 +65,8 @@ function App() {
           <Route path="/page/mypage" element={<MyPage />} />
           <Route path="/page/signup" element={<SignupPage />} />
           <Route path="/page/login" element={<LoginPage />} />
+          <Route path="/page/notification" element={<Notification />} />
+
             <Route path="/page/mypage/update" element={<MyInfoPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
@@ -69,10 +74,14 @@ function App() {
     );
   }
 
+  const profile = getUserProfile();
+
   return (
-    <BrowserRouter>
-      <MainContent />
-    </BrowserRouter>
+      <BrowserRouter>
+          <SSEProvider memberId={profile?.id || null}>
+            <MainContent />
+          </SSEProvider>
+      </BrowserRouter>
   );
 }
 
