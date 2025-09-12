@@ -4,9 +4,7 @@ export default function ChatInput({ onSend, onTyping }) {
   const [text, setText] = useState('');
   const typingTimer = useRef(null);
 
-  const emitTyping = (typing) => {
-    onTyping && onTyping(typing);
-  };
+  const emitTyping = (typing) => onTyping && onTyping(typing);
 
   const handleChange = (e) => {
     setText(e.target.value);
@@ -26,15 +24,21 @@ export default function ChatInput({ onSend, onTyping }) {
   useEffect(() => () => clearTimeout(typingTimer.current), []);
 
   return (
-    <div className="d-flex gap-2 p-2 border-top">
+    <div className="chat-input">
       <input
-        className="form-control"
+        className="chat-input__field input"
         placeholder="메시지를 입력하세요…"
         value={text}
         onChange={handleChange}
-        onKeyDown={(e)=> { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+        }}
       />
-      <button className="btn btn-primary" onClick={send}>전송</button>
+      <button className="chat-input__send" onClick={send}>
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 12l15-7-4 7 4 7-15-7z" fill="currentColor"/>
+        </svg>
+      </button>
     </div>
   );
 }

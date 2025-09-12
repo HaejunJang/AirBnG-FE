@@ -12,7 +12,6 @@ export default function StartConversation() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
 
-  // ?peerId=123&firstText=안녕 사전채움 지원
   useEffect(() => {
     const p = params.get('peerId');
     const t = params.get('firstText');
@@ -32,71 +31,61 @@ export default function StartConversation() {
 
     setLoading(true);
     try {
-      // 1) 방 생성/조회
-      const conv = await getOrCreateConversation(idNum); // { convId, ... }
+      const conv = await getOrCreateConversation(idNum);
       const convId = conv?.convId || conv?.id;
       if (!convId) throw new Error('대화방 생성/조회에 실패했습니다.');
 
-      // 2) 첫 메시지 있으면 REST로 전송(멱등 msgId 포함)
       const t = firstText.trim();
-      if (t) {
-        await sendTextByRest(convId, { text: t, msgId: uuid() });
-      }
+      if (t) await sendTextByRest(convId, { text: t, msgId: uuid() });
 
-      // 3) 방으로 이동
       navigate(`/page/chat/${convId}`, { replace: true });
     } catch (e2) {
       const status = e2?.response?.status;
-      if (status === 400) {
-        setErr('본인과는 대화를 시작할 수 없습니다.');
-      } else if (status === 404) {
-        setErr('상대 사용자를 찾을 수 없습니다.');
-      } else {
-        const msg = e2?.response?.data?.message || e2?.message || '오류가 발생했습니다.';
-        setErr(msg);
-      }
+      if (status === 400) setErr('본인과는 대화를 시작할 수 없습니다.');
+      else if (status === 404) setErr('상대 사용자를 찾을 수 없습니다.');
+      else setErr(e2?.response?.data?.message || e2?.message || '오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-3">
-      <h5 className="mb-3">새 대화 시작</h5>
+    <section className="start-chat">
+      <form onSubmit={handleSubmit} className="start-chat__card">
+        <h5 className="start-chat__title">새 대화 시작</h5>
 
-      <div className="mb-2">
-        <label className="form-label">상대 사용자 ID</label>
-        <input
-          type="number"
-          className="form-control"
-          placeholder="예: 9"
-          value={peerId}
-          onChange={(e) => setPeerId(e.target.value)}
-          required
-          min={1}
-          disabled={loading}
-        />
-      </div>
+        <div className="form-row">
+          <label className="form-label">상대 사용자 ID</label>
+          <input
+            type="number"
+            className="input"
+            placeholder="예: 9"
+            value={peerId}
+            onChange={(e) => setPeerId(e.target.value)}
+            required
+            min={1}
+            disabled={loading}
+          />
+        </div>
 
-      <div className="mb-3">
-        <label className="form-label">첫 메시지 (선택)</label>
-        <textarea
-          className="form-control"
-          rows={3}
-          placeholder="안녕하세요!"
-          value={firstText}
-          onChange={(e) => setFirstText(e.target.value)}
-          disabled={loading}
-        />
-      </div>
+        <div className="form-row">
+          <label className="form-label">첫 메시지 (선택)</label>
+          <textarea
+            className="input"
+            rows={3}
+            placeholder="안녕하세요!"
+            value={firstText}
+            onChange={(e) => setFirstText(e.target.value)}
+            disabled={loading}
+          />
+        </div>
 
-      {err && <div className="alert alert-danger py-2">{err}</div>}
+        {err && <div className="start-chat__error">{err}</div>}
 
-      <div className="d-flex gap-2">
-        <button type="submit" className="btn btn-primary" disabled={loading}>
+        <button type="submit" className="btn btn--primary btn--block" disabled={loading}>
           {loading ? '생성 중…' : '대화 시작'}
         </button>
-      </div>
-    </form>
+      </form>
+    </section>
   );
 }

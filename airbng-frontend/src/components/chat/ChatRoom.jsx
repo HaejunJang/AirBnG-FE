@@ -1,90 +1,142 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import useChatRoom from '../../hooks/useChatRoom';
 import useStomp from '../../hooks/useStomp';
 import usePersonalQueues from '../../hooks/usePersonalQueues';
+import '../../styles/chat.css';
 
 export default function ChatRoom({ convId, meId }) {
   const listRef = useRef(null);
   const [peerTyping, setPeerTyping] = useState(false);
-  const { publish } = useStomp();
+  const typingClearRef = useRef(null);
+  const lastSeenSeqRef = useRef(0);   // 마지막으로 읽음 서버에 보낸 seq 기억
 
-  const { messages, sendMessage, loadMore, hasMore, markAllAsRead } = useChatRoom(convId, meId);
+  const { connected, publish } = useStomp();
+  const { messages, sendMessage, loadMore, hasMore, markAllAsRead, applyAck } =
+    useChatRoom(convId, meId);
 
-  // 개인 큐(ACK/ERROR) 구독 (필요시 UI 반영)
-  usePersonalQueues({
-    onAck: (ack) => {
-      // { msgId, seq, sentAt } — 필요하면 전송 상태 업데이트
-      // console.log('ACK', ack);
-    },
-    onError: (err) => {
-      console.error('WS ERROR', err);
-      // 필요시 토스트/알럿
-    },
+  // 헤더 타이틀 (ChatList에서 state로 넘겨줌)
+  const { state } = useLocation();
+  const title = state?.peerName || '상대';
+  const nav = useNavigate();
+
+  // acks는 전역 브릿지에서 받음(중복 방지). 여기선 read/typing만 쓰자.
+  const personal = usePersonalQueues({
+    onError: (err) => console.error('WS ERROR', err),
   });
 
-  // 방별 개인 큐: READ/ TYPING
-  const { subscribeRead, unsubscribeRead, subscribeTyping, unsubscribeTyping } = useMemo(() => {
-    return require('../../hooks/usePersonalQueues').default.prototype ?? {};
-  }, []); // (주의) 위 한 줄은 타입 가드용. 실제로는 ChatRoomPage에서 훅을 생성해 내려주는 편이 더 깔끔.
-  // ↑ 간단히 하려면 아래처럼 직접 훅 생성해서 사용:
-  const { connected } = useStomp();
-  const personal = usePersonalQueues();
+  useEffect(() => {
+    lastSeenSeqRef.current = 0;   // 방 변경 시 초기화
+  }, [convId]);
 
+  // 전역 브릿지가 쏘는 ws:ack → useChatRoom.applyAck에 연결 (한 줄 훅업)
+  useEffect(() => {
+    const onAck = (e) => applyAck(e.detail);
+    window.addEventListener('ws:ack', onAck);
+    return () => window.removeEventListener('ws:ack', onAck);
+  }, [applyAck]);
+
+  // READ / TYPING
   useEffect(() => {
     if (!connected) return;
-    // 상대 읽음 이벤트
-    personal.subscribeRead?.(convId, (lastSeenSeq) => {
-      // 필요하면 메시지 리스트의 '읽음' 표시 갱신
-      console.log('PEER READ', lastSeenSeq);
-    });
-    // 상대 타이핑 이벤트
+    personal.subscribeRead?.(convId, () => {});
     personal.subscribeTyping?.(convId, (ev) => {
-      setPeerTyping(!!ev?.typing);
+      const isTyping = !!ev?.typing;
+      if (isTyping) {
+        setPeerTyping(true);
+        clearTimeout(typingClearRef.current);
+        typingClearRef.current = setTimeout(() => setPeerTyping(false), 2000);
+      } else {
+        setPeerTyping(false);
+        clearTimeout(typingClearRef.current);
+      }
     });
     return () => {
       personal.unsubscribeRead?.(convId);
       personal.unsubscribeTyping?.(convId);
+      clearTimeout(typingClearRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, convId]);
+  }, [connected, convId, personal]);
 
-  // 새 메시지 오면 바닥으로 스크롤
+  // 스크롤 바닥 고정
   useEffect(() => {
     if (!listRef.current) return;
     listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages]);
 
+  // 1) 방 입장 후, 메시지를 받아오면 곧바로 읽음 처리
+ useEffect(() => {
+    if (!connected || !messages?.length) return;           // 연결 가드
+    const last = messages[messages.length - 1];
+    const lastSeq = last?.seq;
+    if (lastSeq && lastSeq > (lastSeenSeqRef.current || 0)) {
+      lastSeenSeqRef.current = lastSeq;
+      markAllAsRead();
+    }
+  }, [messages, markAllAsRead, connected]);
+
+ // 2) 창을 다시 보고 있을 때도 읽음 유지 (앱 전환/탭 복귀)
+ useEffect(() => {
+   const onFocus = () => markAllAsRead();
+   const onVis = () => { if (document.visibilityState === 'visible') markAllAsRead(); };
+   window.addEventListener('focus', onFocus);
+   document.addEventListener('visibilitychange', onVis);
+   return () => {
+     window.removeEventListener('focus', onFocus);
+     document.removeEventListener('visibilitychange', onVis);
+   };
+ }, [markAllAsRead]);
+
   const onSend = useCallback((t) => {
     sendMessage(t);
-    // 전송 직후 내 화면 기준 읽음 처리(옵션)
     markAllAsRead();
   }, [sendMessage, markAllAsRead]);
 
   const onTyping = useCallback((typing) => {
-    // /app/conversations/{convId}/typing
     publish(`/app/conversations/${convId}/typing`, { typing });
   }, [publish, convId]);
 
   return (
-    <div className="d-flex flex-column" style={{ height: 'calc(100vh - 120px)' }}>
-      <div className="d-flex justify-content-center align-items-center p-2 border-bottom gap-2">
+    <section className="chat-room">
+      {/* Header */}
+      <header className="chat-room__header">
+        <button className="chat-room__back" onClick={() => nav(-1)} aria-label="뒤로">
+          ‹
+        </button>
+        <div className="chat-room__title">{title}</div>
+        <div className="chat-room__more" />
+      </header>
+
+      {/* Typing indicator */}
+      {peerTyping && <div className="chat-room__typing">상대가 입력 중…</div>}
+
+      {/* Messages */}
+      <div ref={listRef} className="chat-room__list">
         {hasMore && (
-          <button className="btn btn-sm btn-outline-secondary" onClick={loadMore}>
-            이전 메시지 더보기
-          </button>
+          <div className="center mb-16">
+            <button className="btn btn--outline" onClick={loadMore}>이전 메시지 더보기</button>
+          </div>
         )}
-        {peerTyping && <span className="text-muted" style={{ fontSize: 12 }}>상대가 입력 중…</span>}
+
+        {messages.map((m, i) => {
+          const prev = i > 0 ? messages[i-1] : null;
+          const showName = !m._isMe && (!prev || prev.senderId !== m.senderId);
+          return (
+            <ChatMessage
+              key={m.seq ?? `${m.sentAt}-${m.msgId}`}
+              me={m._isMe}
+              msg={m}
+              name={state?.peerName || '상대'}
+              showName={showName}
+            />
+          );
+        })}
       </div>
 
-      <div ref={listRef} className="flex-grow-1 overflow-auto p-2">
-        {messages.map((m) => (
-          <ChatMessage key={m.seq ?? `${m.sentAt}-${m.senderId}`} me={m._isMe} msg={m} />
-        ))}
-      </div>
-
+      {/* Input */}
       <ChatInput onSend={onSend} onTyping={onTyping} />
-    </div>
+    </section>
   );
 }

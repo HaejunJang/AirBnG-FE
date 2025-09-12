@@ -4,7 +4,7 @@ import ChatRoom from '../components/chat/ChatRoom';
 
 export default function ChatRoomPage() {
   const { convId } = useParams();
-  const { ready, isLoggedIn, member } = useAuth();
+  const { ready, isLoggedIn, user } = useAuth();
   const location = useLocation();
 
   if (!ready) return <main className="airbng-home">불러오는 중…</main>;
@@ -12,7 +12,7 @@ export default function ChatRoomPage() {
 
   return (
     <main className="airbng-home">
-      <ChatRoom convId={convId} meId={member?.memberId} />
+      <ChatRoom convId={convId} meId={user?.id} />
     </main>
   );
 }

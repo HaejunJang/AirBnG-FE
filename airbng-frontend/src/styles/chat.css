@@ -1,0 +1,415 @@
+/* =============================================================
+   Chat (List + Room)
+   Brand: uses tokens from global.css
+   ============================================================= */
+
+.airbng-chat{
+  background: #f8f9fa;                  /* 바깥 회색 배경 */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.airbng-chat .container{
+  width: var(--app-max-width);
+  background: #fff;                      /* 안쪽 흰 배경 */
+  border-left: 1px solid #e6e9ef;        /* 양측 라인(테두리 느낌) */
+  border-right: 1px solid #e6e9ef;
+  box-shadow: 0 0 20px rgba(0,0,0,.06);  /* 은은한 그림자 */
+  padding-bottom: var(--bottom-nav-height);
+}
+
+/* 채팅 리스트 페이지용 상단 타이틀 바 (보관소와 톤 맞춤) */
+.airbng-chat .page-header{
+  position: sticky; top: 0; z-index: 5;
+  height: var(--header-height);
+  display: grid; place-items: center;
+  font-weight: 800; color: var(--text-strong);
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+
+.airbng-chat .main-content{
+  padding: 0 16px 
+  calc(var(--bottom-nav-height) + 16px);
+}
+
+/* 채팅방 화면은 자체 헤더가 있으니 패딩만 얕게 */
+.airbng-chat .main-content--flush{
+  padding: 12px;
+  padding-bottom: calc(var(--bottom-nav-height) + 12px);
+}
+
+/* 메인 콘텐츠 패딩 값을 변수로 노출(풀폭 계산용) */
+.airbng-chat .main-content { --page-pad: 16px; }
+
+/* 리스트를 컨테이너 좌우 패딩을 무시하고 “꽉 차게” 보이도록 */
+.chat-list--full {
+  /* 카드 느낌 제거, 배경은 흰색으로 빈틈 없이 */
+  background: #fff;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  margin-top: 0 !important;
+
+  /* 좌우 패딩을 상쇄해서 풀폭처럼 보이게 */
+  margin-inline: calc(var(--page-pad, 16px) * -1);
+
+  /* 위아래만 섬세한 구분선 */
+  border-top: 1px solid color-mix(in oklab, var(--primary) 12%, var(--border));
+  border-bottom: 1px solid color-mix(in oklab, var(--primary) 12%, var(--border));
+}
+
+/* 행 높이/밀도는 카톡처럼 조금 넉넉하게 */
+.chat-list--full .chat-item {
+  padding: 16px var(--page-pad, 16px);
+  gap: 14px;
+  border-bottom: 1px solid color-mix(in oklab, var(--primary) 8%, var(--border));
+}
+.chat-list--full .chat-item:last-child { border-bottom: 0; }
+
+/* 아바타도 살짝 키워서 존재감 */
+.chat-list--full .chat-item__avatar { width: 48px; height: 48px; }
+
+/* 호버/포커스/액티브 컬러: 프로젝트 Primary를 은은하게 섞은 톤 */
+@media (hover:hover) {
+  .chat-list--full .chat-item:hover {
+    background:
+      linear-gradient(0deg,
+        color-mix(in oklab, var(--primary) 6%, #fff) 0%,
+        color-mix(in oklab, var(--primary) 6%, #fff) 100%);
+  }
+}
+.chat-list--full .chat-item:active {
+  background: color-mix(in oklab, var(--primary) 12%, #fff);
+  transform: none; /* 모바일 눌림 시 scale 흔들림 제거 */
+}
+
+/* 키보드 접근성도 또렷하게 */
+.chat-list--full .chat-item:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--primary) 40%, #fff);
+  outline-offset: -3px; /* 내부로 */
+}
+
+/* 이름/미리보기 대비감 조금 보강 */
+.chat-list--full .chat-item__name {
+  font-weight: 800;
+}
+.chat-list--full .chat-item__preview {
+  color: color-mix(in oklab, var(--text) 70%, white);
+}
+
+/* 안 읽은 뱃지 살짝 떠 보이게 */
+.chat-list--full .chat-item__badge {
+  box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 4px 10px rgba(0,0,0,.08);
+}
+
+/* ------------------------------
+   Chat List
+------------------------------ */
+.chat-list{
+    background: color-mix(in oklab, var(--primary) 3%, var(--surface));
+    border: 1px solid color-mix(in oklab, var(--primary) 10%, var(--border));
+    /* border-radius: var(--radius-24); */
+    box-shadow: var(--shadow-md);
+    margin-top: 5px;
+    overflow: hidden;
+    margin-top: 0 !important;
+}
+
+/* 아이템 hover 대비 살짝 조정 */
+.chat-item:hover{
+  background: color-mix(in oklab, var(--primary) 7%, #fff);
+}
+
+.chat-item {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background var(--fast), transform var(--fast);
+}
+.chat-item:hover { background: color-mix(in oklab, var(--primary) 6%, #fff); }
+.chat-item:active { transform: scale(.998); }
+.chat-item:last-child { border-bottom: 0; }
+
+.chat-item__avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: color-mix(in oklab, var(--primary) 8%, #eef2ff);
+  color: var(--primary);
+  display: grid; place-items: center;
+  font-weight: 800;
+}
+
+.chat-item__main { min-width: 0; }
+.chat-item__name {
+  font-weight: 700; color: var(--text-strong);
+  font-size: var(--fs-16);
+}
+.chat-item__preview {
+  color: var(--text-muted);
+  font-size: var(--fs-13);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  margin-top: 2px;
+}
+
+.chat-item__meta {
+  display: grid; justify-items: end; align-content: center;
+  gap: 6px;
+  margin-left: 8px;
+}
+.chat-item__time {
+  font-size: var(--fs-12); color: var(--text-muted);
+}
+.chat-item__badge {
+  min-width: 22px; height: 22px; padding: 0 8px;
+  border-radius: 999px;
+  display: inline-grid; place-items: center;
+  font-size: var(--fs-12); font-weight: 700;
+  background: var(--danger); color: #fff;
+}
+
+/* ------------------------------
+   Chat Room
+------------------------------ */
+.chat-room{
+  /* 화면 폭과 네비게이션에 맞춘 카드 배치 */
+  height: calc(100dvh - var(--bottom-nav-height));  /* 위 여백만 차감 */
+  display: grid;
+  grid-template-rows: var(--header-height) 1fr auto;
+  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--primary) 10%, var(--border));
+  border-radius: var(--radius-24);
+  box-shadow: var(--shadow-md);
+  overflow: hidden; /* 둥근 모서리 안으로 내부 스크롤/헤더를 클립 */
+}
+
+.chat-room__header{
+  position: sticky; top: 0; z-index: 5;
+  display: grid; grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  padding: 0 12px;
+  background: color-mix(in oklab, var(--primary) 3%, var(--surface));
+  border-bottom: 1px solid var(--border);
+}
+.chat-room__title {
+  text-align: center; font-weight: 800;
+  font-size: var(--fs-18); color: var(--text-strong);
+}
+.chat-room__back, .chat-room__more {
+  display: inline-grid; place-items: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  color: var(--text);
+}
+.chat-room__back:hover, .chat-room__more:hover {
+  background: color-mix(in oklab, var(--primary) 8%, #eef2ff);
+}
+
+.chat-room__typing {
+  position: sticky; top: var(--header-height);
+  text-align: center; font-size: var(--fs-12);
+  color: var(--text-muted);
+  padding: 6px 0;
+}
+
+/* message list */
+.chat-room__list{
+  padding: 14px;
+  overflow: auto;
+  background:
+    radial-gradient(130% 100% at 50% -20%, rgba(120,220,255,.10) 0%, transparent 60%),
+    var(--surface);
+  scrollbar-width: none;
+}
+.chat-room__list::-webkit-scrollbar{ display:none; }
+
+/* each message row */
+.msg-row{ margin:10px 0; }
+.msg-row--me{ display:flex; justify-content:flex-end; }
+.msg-row--you{
+  display:grid; grid-template-columns: 36px 1fr; gap:8px; align-items:flex-end;
+}
+.msg-avatar{
+  width:36px; height:36px; border-radius:50%;
+  background: color-mix(in oklab, var(--primary) 8%, #eef2ff);
+  color: var(--primary); display:grid; place-items:center; font-weight:800;
+}
+.msg-col{ min-width:0; }
+.msg-name{ font-size:var(--fs-12); color:var(--text-muted); margin:2px 0 4px 6px; }
+
+/* bubbles (기존 유지, 일부 보완) */
+.bubble{ max-width:72%; border-radius:18px; padding:10px 12px; line-height:1.35; box-shadow:var(--shadow-sm); word-break:break-word; white-space:pre-wrap; position:relative; }
+.bubble--you{ background:#fff; color:var(--text); border:1px solid var(--border); border-top-left-radius:6px; }
+.bubble--me{ background:var(--primary); color:#fff; border-top-right-radius:6px; }
+
+/* 말풍선 밖 메타 영역 */
+.msg-meta{
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+}
+.msg-meta--me{ justify-content: flex-end; padding-right: 6px; }
+.msg-meta--you{ justify-content: flex-start; padding-left: 6px; }
+
+/* 안 읽음 배지 "1" */
+.msg-unread{
+  min-width: 18px; height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-grid; place-items: center;
+  font-size: 11px; font-weight: 800;
+  background: var(--danger); color: #fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 4px 10px rgba(0,0,0,.08);
+}
+
+.msg-row--me .bubble-time { text-align: right; }
+
+/* input */
+.chat-input {
+  display: grid; grid-template-columns: 1fr 72px; gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.chat-input__field {
+  composes: input;   /* if you don’t use CSS Modules, just duplicate .input rules from global.css */
+  width: 100%;
+}
+.chat-input__send {
+  composes: btn btn--primary;
+}
+
+/* small utility for invisible composes fallback (no CSS Modules) */
+/* input */
+.chat-input{
+  display:grid; grid-template-columns: 1fr 54px; gap:10px;
+  padding:10px 12px; background:var(--surface); border-top:1px solid var(--border);
+}
+.chat-input__field{
+  width:100%; padding:12px 14px; border-radius:14px;
+  border:1px solid var(--border); background:#fff; color:var(--text);
+}
+.chat-input__field:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px color-mix(in oklab, var(--primary) 18%, transparent);
+}
+.chat-input__send{
+  width:54px; height:44px; border-radius:14px;
+  background:var(--primary); color:#fff; display:grid; place-items:center;
+  box-shadow:var(--shadow-sm);
+}
+.chat-input__send:hover{ transform: translateY(-1px); box-shadow: var(--shadow-md); background:var(--primary-600); }
+
+.fab{
+  position: fixed;
+  /* 컨테이너(중앙에 놓인 max-width)의 우측에서 16px 내부로 */
+  right: calc((100vw - min(100vw, var(--app-max-width))) / 2 + 16px);
+  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 12px);
+  width: 56px; height: 56px; border-radius: 50%;
+  display: grid; place-items: center;
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--fast), box-shadow var(--fast);
+  z-index: 50;
+}
+.fab--primary{ background: var(--primary); color:#fff; }
+.fab:hover{ transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0,0,0,.18); }
+
+/* ------ LoginRequired ------ */
+.auth-required{
+  padding: 48px 16px;
+  text-align: center;
+}
+.auth-required__icon{
+  width: 72px; height: 72px; margin: 0 auto 12px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 36px;
+  background: color-mix(in oklab, var(--primary) 10%, #eef2ff);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+.auth-required__title{
+  font-size: var(--fs-20);
+  font-weight: 800;
+  color: var(--text-strong);
+  margin: 8px 0 4px;
+}
+.auth-required__desc{
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.auth-required__actions{
+  display: flex; gap: 12px; justify-content: center;
+}
+
+/* ------ EmptyState ------ */
+.empty-state{
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--text);
+  background: color-mix(in oklab, var(--primary) 4%, #fff);
+  border: 1px solid color-mix(in oklab, var(--primary) 10%, var(--border));
+  border-radius: var(--radius-16);
+  box-shadow: var(--shadow-sm);
+}
+.empty-state__title{
+  margin-bottom: 10px;
+  color: var(--text-muted);
+}
+.empty-state__action{ margin-top: 6px; }
+
+/* ------ StartConversation ------ */
+.start-chat{
+  /* 화면 가운데 정렬(세로/가로) + 바텀네비 영역 제외 */
+  min-height: calc(100dvh - var(--bottom-nav-height));
+  display: grid;
+  place-items: center;         /* ← 세로까지 중앙 */
+  padding: 16px;
+}
+
+.start-chat__card{
+  width: min(100%, 560px);
+  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--primary) 10%, var(--border));
+  border-radius: var(--radius-24);
+  box-shadow: var(--shadow-md);
+  padding: 22px 20px 20px;
+}
+.start-chat__title{
+  font-size: var(--fs-18);
+  font-weight: 800;
+  color: var(--text-strong);
+  margin-bottom: 12px;
+}
+.form-row{ margin-bottom: 14px; }
+.form-label{
+  display: block;
+  font-size: var(--fs-13);
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.start-chat__error{
+  margin: 6px 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-12);
+  color: #fff;
+  background: color-mix(in oklab, var(--danger) 90%, #000);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 입력 필드 폭은 이미 .input(global.css)로 정의됨.
+   여기에 약간의 카톡 느낌 보강 */
+.start-chat .input{
+  border-radius: 14px;
+}
+.start-chat .input:focus{
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 18%, transparent);
+}
