@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useStomp from './useStomp';
-import { fetchMessages, markRead } from '../api/chatApi';
+import { fetchMessages } from '../api/chatApi';
 import { v4 as uuid } from 'uuid';
+import useConversationTopic from './useConversationTopic';
 
 export default function useChatRoom(convId, meId) {
-  const { connected, subscribe, publish } = useStomp();
+  const { publish } = useStomp();
   const [messages, setMessages] = useState([]);
   const [oldestSeq, setOldestSeq] = useState(null);
-  const unsubRef = useRef(null);
 
   // 초기 메시지 로드
   useEffect(() => {
@@ -24,32 +24,54 @@ export default function useChatRoom(convId, meId) {
     return () => { mounted = false; };
   }, [convId]);
 
-  // 실시간 구독
-  useEffect(() => {
-    if (!connected) return;
-    // 구독 경로: /topic/conversations.{convId}
-    unsubRef.current?.();
-    unsubRef.current = subscribe(`/topic/conversations.${convId}`, (frame) => {
-      const msg = JSON.parse(frame.body);
-      setMessages((prev) => [...prev, msg]);
+  // 실시간 브로드캐스트 구독 (서버에서 /topic/conversations.{convId} 로 쏨)
+  const handleTopic = useCallback((msg) => {
+    setMessages((prev) => {
+      // 중복(같은 msgId) 오면 병합
+      const i = prev.findIndex(m => m.msgId === msg.msgId);
+      if (i >= 0) {
+        const next = prev.slice();
+        next[i] = { ...prev[i], ...msg, _pending: false };
+        return next;
+      }
+      return [...prev, msg];
     });
-    return () => unsubRef.current?.();
-  }, [connected, subscribe, convId]);
+  }, [convId, meId]);
+  useConversationTopic(convId, handleTopic);
 
   // 전송(WS)
   const sendMessage = useCallback((text) => {
-    if (!connected) return;
     const msgId = uuid();
+
+    // 1) 화면에 즉시 추가 (임시 메시지)
+    const temp = {
+      convId,
+      msgId,
+      senderId: meId,
+      text,
+      seq: null,
+      sentAt: new Date().toISOString(),
+      _pending: true, 
+    };
+    setMessages((prev) => [...prev, temp]);
     // /app/conversations/{convId}/text
     publish(`/app/conversations/${convId}/text`, { text, msgId });
-  }, [connected, publish, convId]);
+    return msgId;
+  }, [publish, convId, meId]);
+
+  const applyAck = useCallback((ack) => {
+    if (!ack?.msgId) return;
+    setMessages(prev => prev.map(m => 
+      m.msgId === ack.msgId ? { ...m, seq: ack.seq, sentAt: ack.sentAt, _pending: false } : m
+    ));
+  }, []);
 
   // 읽음 (REST 예시)
-  const markAllAsRead = useCallback(async () => {
+  const markAllAsRead = useCallback(() => {
     const lastSeq = messages.length ? messages[messages.length - 1].seq : null;
     if (lastSeq == null) return;
-    try { await markRead(convId, lastSeq); } catch {/* no-op */}
-  }, [convId, messages]);
+    publish(`/app/conversations/${convId}/read`, { lastSeenSeq: lastSeq });
+  }, [publish, convId, messages]);
 
   // 더보기
   const loadMore = useCallback(async () => {
@@ -67,5 +89,5 @@ export default function useChatRoom(convId, meId) {
     return messages.map((m) => ({ ...m, _isMe: m.senderId === meId }));
   }, [messages, meId]);
 
-  return { messages: withSide, sendMessage, loadMore, hasMore: !!oldestSeq, markAllAsRead };
+  return { messages: withSide, sendMessage, loadMore, hasMore: !!oldestSeq, markAllAsRead, applyAck };
 }

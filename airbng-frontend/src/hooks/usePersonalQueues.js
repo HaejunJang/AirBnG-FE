@@ -8,6 +8,7 @@ function safeJSON(body) {
 export default function usePersonalQueues({
   onAck,           // (ack) => void         // { msgId, seq, sentAt }
   onError,         // (err) => void         // string or object
+  onInboxHint,    // (hint) => void        // { convId, preview, sentAt, fromMe, unreadInc }
 } = {}) {
   const { connected, subscribe } = useStomp();
 
@@ -41,12 +42,37 @@ export default function usePersonalQueues({
       );
     }
 
+    // inbox 힌트 구독: 리스트 실시간 갱신
+    baseUnsubsRef.current.push(
+      subscribe('/user/queue/inbox', frame => {
+        const hint = safeJSON(frame.body);
+        onInboxHint?.(hint);
+        // ChatList가 듣는 브라우저 커스텀 이벤트로 브릿지
+        try {
+          window.dispatchEvent(new CustomEvent('inbox:hint', {
+            detail: {
+              convId: hint?.convId,
+              preview: hint?.preview,
+              sentAt: hint?.sentAt,
+              unreadTotal: hint?.unreadTotal, // 서버가 절대값을 줄 수도, null일 수도
+            }
+          }));
+          // 읽음 전용 힌트(미리보기 없이 unread=0만 내려오면) → 보조 이벤트
+          if (!hint?.preview && hint?.unreadTotal === 0) {
+            window.dispatchEvent(new CustomEvent('inbox:read', {
+              detail: { convId: hint?.convId }
+            }));
+          }
+        } catch {}
+      })
+    );
+
     // cleanup
     return () => {
       baseUnsubsRef.current.forEach(u => u?.());
       baseUnsubsRef.current = [];
     };
-  }, [connected, subscribe, onAck, onError]);
+  }, [connected, subscribe, onAck, onError, onInboxHint]);
 
   /* ===== 2) 방별 개인 큐 동적 구독: READ ===== */
   function subscribeRead(convId, handler) {
@@ -54,7 +80,7 @@ export default function usePersonalQueues({
     unsubscribeRead(convId);
     // /user/queue/read.{convId}
     const unsub = subscribe(`/user/queue/read.${convId}`, frame => {
-      const payload = safeJSON(frame.body); // 보통 lastSeenSeq(long)
+      const payload = safeJSON(frame.body);
       handler?.(payload);
     });
     readSubsRef.current.set(convId, { unsub, handler });
