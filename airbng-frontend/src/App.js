@@ -14,6 +14,7 @@ import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
 import ReservationList from "./pages/ReservationList";
 import LoginPage from "./pages/LoginPage";
+import MyInfoPage from "./pages/MyInfoPage";
 
 function App() {
   function getActiveNav(pathname) {
@@ -61,6 +62,7 @@ function App() {
           <Route path="/page/mypage" element={<MyPage />} />
           <Route path="/page/signup" element={<SignupPage />} />
           <Route path="/page/login" element={<LoginPage />} />
+            <Route path="/page/mypage/update" element={<MyInfoPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
