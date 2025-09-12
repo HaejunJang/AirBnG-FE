@@ -104,8 +104,9 @@
     align-items: center;
     gap: 12px;
     transition: background-color 0.2s;
-    border-radius: 0 25px 25px 0;
-    margin-right: 10px;
+    border-radius: 8PX;
+    width: calc(100% - 20px);
+    margin: 0 10px;
 }
 
 .menuButton:hover {
@@ -133,8 +134,8 @@
 .subMenu {
     background-color: #f8f9fa;
     padding: 5px 0;
-    margin-right: 10px;
-    border-radius: 0 15px 15px 0;
+    margin-right: 0; /* 마진 제거 */
+    border-radius: 0; /* 둥근 모서리 제거 */
 }
 
 .subMenuButton {
@@ -150,6 +151,9 @@
     gap: 8px;
     transition: background-color 0.2s;
     font-size: 0.9rem;
+    border-radius: 6px;
+    width: calc(100% - 30px);
+    margin: 2px 15px;
 }
 
 .subMenuButton:hover {
