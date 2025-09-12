@@ -4,6 +4,22 @@ import { getAccessToken } from './jwtUtil';
 
 let client;
 
+// simple event bus
+const listeners = {
+  connect: new Set(),
+  disconnect: new Set(),
+  error: new Set(),
+};
+
+function emit(type, payload) {
+  listeners[type]?.forEach(fn => { try { fn(payload); } catch {} });
+}
+
+export function onStomp(type, fn) {
+  listeners[type]?.add(fn);
+  return () => listeners[type]?.delete(fn);
+}
+
 export function getStompClient() {
   if (client) return client;
 
@@ -13,14 +29,24 @@ export function getStompClient() {
     heartbeatIncoming: 10000,
     heartbeatOutgoing: 10000,
     debug: (s) => console.debug('[STOMP]', s),
+    connectHeaders: (() => {
+      const t = getAccessToken();
+      return t ? { Authorization: `Bearer ${t}` } : {};
+    })(),
     beforeConnect: () => {
       const t = getAccessToken();
       client.connectHeaders = t ? { Authorization: `Bearer ${t}` } : {};
     },
-    onConnect: () => {
+    onConnected: (frame) => {
       console.log('[STOMP] connected');
-      // 여기서 구독들 하면, 항상 인증된 상태로만 구독됨
-      // client.subscribe('/topic/xxx', (msg)=>{...})
+      emit('connect', frame);
+    },
+    onStompError: (frame) => {
+      console.warn('[STOMP] error', frame);
+      emit('error', frame);
+    },
+    onWebSocketClose: () => {
+      emit('disconnect');
     },
   });
 
