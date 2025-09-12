@@ -23,8 +23,8 @@ const LockerDetails = () => {
     const query = useQuery();
     const queryId = query.get('lockerId');
 
-    const lockerId = paramId || queryId;
-    console.log('lockerId:', lockerId);
+    const lockerId = Number(paramId || queryId);
+    console.log('lockerId:', typeof lockerId);
 
     const [lockerDetail, setLockerDetail] = useState(null);
     const [loading, setLoading] = useState(true);
