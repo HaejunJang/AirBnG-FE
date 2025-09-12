@@ -227,7 +227,9 @@
 .chat-room__list::-webkit-scrollbar{ display:none; }
 
 /* each message row */
-.msg-row{ margin:10px 0; }
+.msg-row--you .bubble { max-width: calc(var(--bubble-max) + 44px); }
+
+.msg-row{ --bubble-max: 72%; margin:10px 0; }
 .msg-row--me{ display:flex; justify-content:flex-end; }
 .msg-row--you{
   display:grid; grid-template-columns: 36px 1fr; gap:8px; align-items:flex-end;
@@ -240,13 +242,56 @@
 .msg-col{ min-width:0; }
 .msg-name{ font-size:var(--fs-12); color:var(--text-muted); margin:2px 0 4px 6px; }
 
+.bubble-row{
+  display:flex; align-items:flex-end; gap:6px;
+  /* 모바일에서 눌림 시 튐 방지 */
+  transform: translateZ(0);
+}
+
+.msg-row--me .bubble-row{ justify-content:flex-end; }
+.msg-row--me .bubble-time{ order: 1; }
+.msg-row--me .bubble{ order: 2; }
+
+.msg-row--you .bubble-row{ justify-content:flex-start; }
+.bubble-meta{ display:flex; align-items:flex-end; gap:6px; }
+
 /* bubbles (기존 유지, 일부 보완) */
-.bubble{ max-width:72%; border-radius:18px; padding:10px 12px; line-height:1.35; box-shadow:var(--shadow-sm); word-break:break-word; white-space:pre-wrap; position:relative; }
-.bubble--you{ background:#fff; color:var(--text); border:1px solid var(--border); border-top-left-radius:6px; }
-.bubble--me{ background:var(--primary); color:#fff; border-top-right-radius:6px; }
+.bubble{ 
+  max-width: var(--bubble-max);
+  display: inline-block;
+  border-radius:18px;
+  padding:10px 12px;
+  line-height:1.35;
+  box-shadow:var(--shadow-sm);
+  word-break:break-word;
+  white-space:pre-wrap;
+}
+.bubble--you{
+  background:#fff; color:var(--text);
+  border:1px solid var(--border); border-top-left-radius:6px;
+}
+.bubble--me{
+  background:var(--primary); color:#fff; border-top-right-radius:6px;
+}
+
+.bubble-time{
+  font-size:11px; line-height:1;
+  color: color-mix(in oklab, var(--text) 60%, #000);
+  opacity:.85;
+  transform: translateY(1px); /* 말풍선 바닥선과 자연스럽게 */
+}
+
+.msg-unread{
+  min-width:18px; height:18px; padding:0 6px;
+  border-radius:999px; display:inline-grid; place-items:center;
+  font-size:11px; font-weight:800;
+  background: var(--danger); color:#fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 4px 10px rgba(0,0,0,.08);
+  transform: translateY(1px);
+}
 
 /* 말풍선 밖 메타 영역 */
-.msg-meta{
+/* .msg-meta{
   margin-top: 4px;
   display: flex;
   align-items: center;
@@ -255,18 +300,8 @@
   color: var(--text-muted);
 }
 .msg-meta--me{ justify-content: flex-end; padding-right: 6px; }
-.msg-meta--you{ justify-content: flex-start; padding-left: 6px; }
+.msg-meta--you{ justify-content: flex-start; padding-left: 6px; } */
 
-/* 안 읽음 배지 "1" */
-.msg-unread{
-  min-width: 18px; height: 18px;
-  padding: 0 6px;
-  border-radius: 999px;
-  display: inline-grid; place-items: center;
-  font-size: 11px; font-weight: 800;
-  background: var(--danger); color: #fff;
-  box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 4px 10px rgba(0,0,0,.08);
-}
 
 .msg-row--me .bubble-time { text-align: right; }
 

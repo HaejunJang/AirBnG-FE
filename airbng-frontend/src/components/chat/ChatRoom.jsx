@@ -11,27 +11,28 @@ export default function ChatRoom({ convId, meId }) {
   const listRef = useRef(null);
   const [peerTyping, setPeerTyping] = useState(false);
   const typingClearRef = useRef(null);
-  const lastSeenSeqRef = useRef(0);   // 마지막으로 읽음 서버에 보낸 seq 기억
+  const lastSeenSeqRef = useRef(0);           // 서버에 보낸 내 마지막 읽음 seq 기억
+  const [myLastReadSeq, setMyLastReadSeq] = useState(0); // NEW: 렌더링용 로컬 상태
 
   const { connected, publish } = useStomp();
   const { messages, sendMessage, loadMore, hasMore, markAllAsRead, applyAck } =
     useChatRoom(convId, meId);
 
-  // 헤더 타이틀 (ChatList에서 state로 넘겨줌)
   const { state } = useLocation();
   const title = state?.peerName || '상대';
   const nav = useNavigate();
 
-  // acks는 전역 브릿지에서 받음(중복 방지). 여기선 read/typing만 쓰자.
   const personal = usePersonalQueues({
     onError: (err) => console.error('WS ERROR', err),
   });
 
+  // 방 변경 시 초기화
   useEffect(() => {
-    lastSeenSeqRef.current = 0;   // 방 변경 시 초기화
+    lastSeenSeqRef.current = 0;
+    setMyLastReadSeq(0); // NEW
   }, [convId]);
 
-  // 전역 브릿지가 쏘는 ws:ack → useChatRoom.applyAck에 연결 (한 줄 훅업)
+  // acks 훅업
   useEffect(() => {
     const onAck = (e) => applyAck(e.detail);
     window.addEventListener('ws:ack', onAck);
@@ -41,7 +42,14 @@ export default function ChatRoom({ convId, meId }) {
   // READ / TYPING
   useEffect(() => {
     if (!connected) return;
-    personal.subscribeRead?.(convId, () => {});
+    personal.subscribeRead?.(convId, (ev) => {
+      const s = Number(ev?.lastReadSeq ?? ev?.seq ?? 0);
+      if (Number.isFinite(s) && s > (lastSeenSeqRef.current || 0)) {
+        lastSeenSeqRef.current = s;
+        setMyLastReadSeq(s);
+      }
+    });
+
     personal.subscribeTyping?.(convId, (ev) => {
       const isTyping = !!ev?.typing;
       if (isTyping) {
@@ -53,6 +61,7 @@ export default function ChatRoom({ convId, meId }) {
         clearTimeout(typingClearRef.current);
       }
     });
+    
     return () => {
       personal.unsubscribeRead?.(convId);
       personal.unsubscribeTyping?.(convId);
@@ -66,31 +75,37 @@ export default function ChatRoom({ convId, meId }) {
     listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages]);
 
-  // 1) 방 입장 후, 메시지를 받아오면 곧바로 읽음 처리
- useEffect(() => {
-    if (!connected || !messages?.length) return;           // 연결 가드
+  // 1) 메시지 수신/로드 시 내 읽음 갱신 → 서버 전송 + 로컬 상태 갱신
+  useEffect(() => {
+    if (!connected || !messages?.length) return;
     const last = messages[messages.length - 1];
-    const lastSeq = last?.seq;
-    if (lastSeq && lastSeq > (lastSeenSeqRef.current || 0)) {
+    const lastSeq = Number(last?.seq ?? 0);
+    if (Number.isFinite(lastSeq) && lastSeq > (lastSeenSeqRef.current || 0)) {
       lastSeenSeqRef.current = lastSeq;
-      markAllAsRead();
+      setMyLastReadSeq(lastSeq);   // 로컬 즉시 반영
+      markAllAsRead();             // 서버 보고 (ACK 오면 위 subscribeRead도 동작)
     }
   }, [messages, markAllAsRead, connected]);
 
- // 2) 창을 다시 보고 있을 때도 읽음 유지 (앱 전환/탭 복귀)
- useEffect(() => {
-   const onFocus = () => markAllAsRead();
-   const onVis = () => { if (document.visibilityState === 'visible') markAllAsRead(); };
-   window.addEventListener('focus', onFocus);
-   document.addEventListener('visibilitychange', onVis);
-   return () => {
-     window.removeEventListener('focus', onFocus);
-     document.removeEventListener('visibilitychange', onVis);
-   };
- }, [markAllAsRead]);
+  // 2) 포커스/가시성 복귀 시에도 유지
+  useEffect(() => {
+    const sync = () => {
+      setMyLastReadSeq(lastSeenSeqRef.current || 0);
+      markAllAsRead();
+    };
+    window.addEventListener('focus', sync);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') sync();
+    });
+    return () => {
+      window.removeEventListener('focus', sync);
+      document.removeEventListener('visibilitychange', () => {});
+    };
+  }, [markAllAsRead]);
 
   const onSend = useCallback((t) => {
     sendMessage(t);
+    setMyLastReadSeq(lastSeenSeqRef.current || 0); // 보낸 직후도 최신으로
     markAllAsRead();
   }, [sendMessage, markAllAsRead]);
 
@@ -121,7 +136,7 @@ export default function ChatRoom({ convId, meId }) {
         )}
 
         {messages.map((m, i) => {
-          const prev = i > 0 ? messages[i-1] : null;
+          const prev = i > 0 ? messages[i - 1] : null;
           const showName = !m._isMe && (!prev || prev.senderId !== m.senderId);
           return (
             <ChatMessage
@@ -130,6 +145,8 @@ export default function ChatRoom({ convId, meId }) {
               msg={m}
               name={state?.peerName || '상대'}
               showName={showName}
+              myLastReadSeq={myLastReadSeq}   // NEW: 전달!
+              // peerLastReadSeq={...}         // 필요하면 여기서도 전달 가능
             />
           );
         })}
