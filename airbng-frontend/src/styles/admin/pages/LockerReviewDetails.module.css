@@ -1,0 +1,470 @@
+/* StorageDetailModal.module.css */
+
+.container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.statusBadge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.statusPending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.statusApproved {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.statusRejected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.imageSliderContainer {
+    position: relative;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.imageSlider {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+}
+
+.imageTrack {
+    display: flex;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.imageSlide {
+    min-width: 100%;
+    height: 100%;
+}
+
+.sliderImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.sliderBtn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background-color 0.2s;
+}
+
+.sliderBtn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.prevBtn {
+    left: 16px;
+}
+
+.nextBtn {
+    right: 16px;
+}
+
+.sliderIndicators {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.activeIndicator {
+    background-color: white;
+}
+
+.infoSection {
+    margin-bottom: 24px;
+}
+
+.infoRow {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.infoItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.infoIcon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #4561DB;
+}
+
+.infoContent {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.infoLabel {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.infoValue {
+    font-size: 1rem;
+    color: #495057;
+}
+
+.priceSection {
+    margin-top: 24px;
+}
+
+.priceTitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 16px;
+}
+
+.priceItems {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.priceItemRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.priceType {
+    font-weight: 500;
+    color: #495057;
+}
+
+.priceAmount {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* 반려 사유 섹션 */
+.rejectReasonSection {
+    margin-top: 24px;
+    padding: 20px;
+    background-color: #fff5f5;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+}
+
+.rejectReasonTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #dc3545;
+    margin-bottom: 12px;
+}
+
+.rejectReasonContent {
+    font-size: 1rem;
+    color: #6c757d;
+    line-height: 1.5;
+}
+
+/* 액션 버튼 섹션 */
+.actionButtonsSection {
+    margin-top: 32px;
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+}
+
+.approveButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.approveButton:hover {
+    background-color: #218838;
+}
+
+.rejectButton {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.rejectButton:hover {
+    background-color: #c82333;
+}
+
+/* 반려 사유 입력 모달 */
+.rejectModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+}
+
+.rejectModalContent {
+    background-color: white;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+}
+
+.rejectModalTitle {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+
+.rejectModalTextarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.rejectModalTextarea:focus {
+    outline: none;
+    border-color: #4561DB;
+    box-shadow: 0 0 0 2px rgba(69, 97, 219, 0.2);
+}
+
+.rejectModalButtons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.rejectModalCancelButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.rejectModalCancelButton:hover {
+    background-color: #5a6268;
+}
+
+.rejectModalConfirmButton {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.rejectModalConfirmButton:hover:not(:disabled) {
+    background-color: #c82333;
+}
+
+.rejectModalConfirmButton:disabled {
+    background-color: #adb5bd;
+    cursor: not-allowed;
+}
+
+/* 이미지 모달 스타일 */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.modalCloseBtn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 1001;
+    transition: background-color 0.2s;
+}
+
+.modalCloseBtn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modalImageContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalImage {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.modalSliderBtn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    z-index: 1001;
+    transition: background-color 0.2s;
+}
+
+.modalSliderBtn:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.modalPrevBtn {
+    left: 20px;
+}
+
+.modalNextBtn {
+    right: 20px;
+}
+
+.modalIndicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 1001;
+}
+
+.modalIndicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.modalActiveIndicator {
+    background-color: white;
+}
