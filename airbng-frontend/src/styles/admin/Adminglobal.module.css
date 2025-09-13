@@ -1,0 +1,14 @@
+/* admin-global.css */
+/* global.css 내용을 복사하고 관리자용으로 수정 */
+:root {
+    --app-max-width: 100%; /* 웹 사이즈 */
+    --header-height: 70px;
+    /* 나머지는 global.css와 동일 */
+}
+
+body {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%; /* 웹 사이즈로 변경 */
+    /* 나머지 스타일들 */
+}

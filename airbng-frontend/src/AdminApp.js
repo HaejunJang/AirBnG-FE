@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminDashboard from './pages/admin/AdminFistPage';
+import {Routes, Route, BrowserRouter} from "react-router-dom";
+import "./styles/admin/Adminglobal.module.css";
 
 // 임시 페이지 컴포넌트들 (실제 페이지가 만들어질 때까지 사용)
 const StorageReviewPage = () => (
@@ -42,16 +43,19 @@ const NetSalesPage = () => (
 
 function AdminApp() {
     return (
-        <Router>
-            <Routes>
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/storage-review" element={<StorageReviewPage />} />
-                <Route path="/admin/sales/period" element={<PeriodSalesPage />} />
-                <Route path="/admin/sales/storage" element={<StorageSalesPage />} />
-                <Route path="/admin/sales/payment" element={<PaymentSalesPage />} />
-                <Route path="/admin/sales/net" element={<NetSalesPage />} />
-            </Routes>
-        </Router>
+        <div className="admin-container">
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/storage-review" element={<StorageReviewPage />} />
+                    <Route path="/admin/sales/period" element={<PeriodSalesPage />} />
+                    <Route path="/admin/sales/storage" element={<StorageSalesPage />} />
+                    <Route path="/admin/sales/payment" element={<PaymentSalesPage />} />
+                    <Route path="/admin/sales/net" element={<NetSalesPage />} />
+                </Routes>
+            </BrowserRouter>
+        </div>
+
     );
 }
 
