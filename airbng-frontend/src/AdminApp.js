@@ -4,7 +4,7 @@ import "./styles/admin/Adminglobal.module.css";
 
 function AdminApp() {
     return (
-        <div className="admin-container">
+        <div>
             <BrowserRouter>
                 <Routes>
                     <Route path="/admin" element={<AdminHomePage/>}/>
