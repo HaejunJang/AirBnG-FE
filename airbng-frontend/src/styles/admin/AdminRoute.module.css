@@ -1,0 +1,62 @@
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 18px;
+    color: #666;
+}
+
+.unauthorized {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    background-color: #f8f9fa;
+}
+
+.unauthorized h2 {
+    color: #dc3545;
+    margin-bottom: 16px;
+    font-size: 24px;
+}
+
+.unauthorized p {
+    color: #666;
+    margin-bottom: 24px;
+    font-size: 16px;
+}
+
+.authButton {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.authButton:hover {
+    background-color: #0056b3;
+}
+
+.notFound {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    background-color: #f8f9fa;
+}
+
+.notFound h2 {
+    color: #343a40;
+    margin-bottom: 16px;
+    font-size: 24px;
+}
