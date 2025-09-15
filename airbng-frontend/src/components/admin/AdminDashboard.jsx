@@ -1,4 +1,3 @@
-// components/AdminDashboard.jsx
 import React from 'react';
 import styles from '../../styles/admin/pages/AdminDashboard.module.css';
 

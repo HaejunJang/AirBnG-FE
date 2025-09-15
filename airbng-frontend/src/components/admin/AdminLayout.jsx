@@ -9,11 +9,9 @@ const AdminLayout = ({ children, title = 'AirBnG' }) => {
 
     return (
         <div className={styles.pageContainer}>
-            {/* 상단 헤더 */}
             <Header title={title} />
 
             <div className={styles.container}>
-                {/* 사이드바 */}
                 <AdminSidebar
                     activeMenu={activeMenu}
                     setActiveMenu={setActiveMenu}
@@ -21,7 +19,6 @@ const AdminLayout = ({ children, title = 'AirBnG' }) => {
                     setActiveSubMenu={setActiveSubMenu}
                 />
 
-                {/* 메인 컨텐츠 */}
                 <div className={styles.mainContent}>
                     <div className={styles.contentWrapper}>
                         {children}
