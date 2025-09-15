@@ -35,7 +35,7 @@ export default function ChatList() {
   // 채팅방에서 쏜 힌트/읽음 이벤트로 즉시 반영
   useEffect(() => {
     const onHint = (e) => {
-      const { convId, preview, sentAt, fromMe, unreadTotal } = e.detail || {};
+      const { convId, preview, sentAt, unreadTotal } = e.detail || {};
       setItems((prev) => {
         if (!Array.isArray(prev)) return prev;
         const idx = prev.findIndex(it => it.convId === convId);
@@ -80,10 +80,16 @@ export default function ChatList() {
     ) : (
       <ul className="chat-list chat-list--full">
         {items.map(inbox => {
-          const name = inbox.peerName ?? inbox.peerNickname ?? '상대';
-          const initial = (name || '상').slice(0, 1);
+          const displayName = inbox.peerNickname || inbox.peerName || '상대';
+          const initial = (displayName || '상').slice(0, 1);
           const open = () =>
-            navigate(`/page/chat/${inbox.convId}`, { state: { peerName: name } });
+            navigate(`/page/chat/${inbox.convId}`, {
+              state: {
+                peerName: displayName,
+                peerNickname: inbox.peerNickname,
+                peerProfileUrl: inbox.peerProfileUrl,   
+              }
+            });
 
           return (
             <li
@@ -94,10 +100,16 @@ export default function ChatList() {
               onClick={open}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open()}
             >
-              <div className="chat-item__avatar">{initial}</div>
+              <div className="chat-item__avatar">
+                {inbox.peerProfileUrl ? (
+                  <img src={inbox.peerProfileUrl} alt={displayName} />
+                ) : (
+                  <div className="chat-item__avatar-fallback">{initial}</div>
+                )}
+              </div>
 
               <div className="chat-item__main">
-                <div className="chat-item__name">{name}</div>
+                <div className="chat-item__name">{displayName}</div>
                 <LastPreview lastMessage={inbox.lastMessage} />
               </div>
 

@@ -1,4 +1,3 @@
-// src/api/chatApi.js
 import { httpAuth } from './http';
 
 const unwrap = (res) => {
@@ -25,6 +24,11 @@ export const getConversationByPeer = async (peerId) => {
 export const getPeerIdOf = async (convId) => {
   const res = await httpAuth.get(`/chat/conversations/${convId}/peer`);
   return unwrap(res); // Long
+};
+
+export const getPeerProfile = async (convId) => {
+  const res = await httpAuth.get(`/chat/conversations/${convId}/peer`);
+  return unwrap(res); // { id, name, nickname, profileUrl, displayName? }
 };
 
 /* ===== Inbox ===== */
@@ -95,4 +99,29 @@ export const mePresence = async () => {
 export const isOnlineBulk = async (ids = []) => {
   const res = await httpAuth.get(`/chat/presence`, { params: { ids: ids.join(',') } });
   return unwrap(res); // { [id]: boolean }
+};
+
+export const fetchOnlineUsers = async ({ limit = 50, q = '' } = {}) => {
+  const res = await httpAuth.get('/chat/presence/online-users', { params: { limit, q } });
+  return unwrap(res); // [{ id, name, nickname, imageUrl, state }]
+};
+
+// 페이지형 온라인 유저 목록
+export const fetchOnlineUsersPage = async ({
+  offset = 0,
+  size = 20,
+  q = '',
+  includeMe = false
+} = {}) => {
+  const res = await httpAuth.get('/chat/presence/online-users', {
+    params: { offset, size, q, includeMe }
+  });
+  // { items: UserCardResponse[], nextOffset, hasMore }
+  return unwrap(res);
+};
+
+// 30초 버킷 touch를 위한 핑
+export const pingPresence = async () => {
+  const res = await httpAuth.post('/chat/presence/ping');
+  return unwrap(res);
 };

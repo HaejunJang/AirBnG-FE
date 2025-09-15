@@ -5,6 +5,7 @@ function ChatMessage({
   msg,
   name,
   showName,
+  avatarUrl,
   peerLastReadSeq,   // 상대가 읽은 마지막 seq (내 말풍선의 1 판단에만 사용)
 }) {
   const seoulTimeFmt = useMemo(
@@ -62,7 +63,13 @@ function ChatMessage({
   // 상대 메시지: 1은 절대 표시하지 않음 (카톡 규칙)
   return (
     <div className="msg-row msg-row--you">
-      <div className="msg-avatar">{initial}</div>
+      <div className="msg-avatar">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt={name || '상대'} />
+        ) : (
+          <div className="msg-avatar__fallback">{initial}</div>
+        )}
+      </div>
       <div className="msg-col">
         {showName && <div className="msg-name">{name}</div>}
         <div className="bubble-row">

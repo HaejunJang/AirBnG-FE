@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import useChatRoom from '../../hooks/useChatRoom';
 import useStomp from '../../hooks/useStomp';
 import usePersonalQueues from '../../hooks/usePersonalQueues';
+import usePeer from '../../hooks/usePeer';
 import { markRead as markReadApi } from '../../api/chatApi';
 import '../../styles/chat.css';
 
@@ -19,12 +20,14 @@ export default function ChatRoom({ convId, meId }) {
   const reportSeenRef = useRef(null);
 
   const { connected, publish } = useStomp();
-  const { messages, sendMessage, loadMore, hasMore, markAllAsRead, applyAck } =
+  const { messages, sendMessage, loadMore, hasMore, applyAck } =
     useChatRoom(convId, meId);
 
-  const { state } = useLocation();
-  const title = state?.peerName || '상대';
+  // const { state } = useLocation();
+  // const title = state?.peerName || '상대';
   const nav = useNavigate();
+
+  const { displayName, profileUrl } = usePeer(convId);
 
   const personal = usePersonalQueues({
     onError: (err) => console.error('WS ERROR', err),
@@ -178,7 +181,7 @@ export default function ChatRoom({ convId, meId }) {
     if (!connected) return;
     const lastSeq = lastValidSeqOf(messages);
     reportSeenRef.current?.(lastSeq);
-  }, [connected]);
+  }, [connected, messages]);
 
   // 2) 포커스/가시성 복귀 시에도 유지
   useEffect(() => {
@@ -229,7 +232,7 @@ export default function ChatRoom({ convId, meId }) {
         <button className="chat-room__back" onClick={() => nav(-1)} aria-label="뒤로">
           ‹
         </button>
-        <div className="chat-room__title">{title}</div>
+        <div className="chat-room__title">{displayName}</div>
         <div className="chat-room__more" />
       </header>
 
@@ -252,9 +255,10 @@ export default function ChatRoom({ convId, meId }) {
               key={m.seq ?? `${m.sentAt}-${m.msgId}`}
               me={m._isMe}
               msg={m}
-              name={state?.peerName || '상대'}
+              name={displayName}          
               showName={showName}
-              myLastReadSeq={myLastReadSeq}   
+              avatarUrl={!m._isMe ? profileUrl : undefined} 
+              myLastReadSeq={myLastReadSeq}
               peerLastReadSeq={peerLastReadSeq}        
             />
           );
