@@ -1,7 +1,6 @@
 import React from 'react';
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
-import AdminHomePage from "./pages/admin/AdminHomePage";
 import AdminRoute from "./components/admin/AdminRoute";
 import styles from "./styles/admin/AdminRoute.module.css";
 import AdminDashboard from './pages/admin/AdminFistPage';
@@ -52,7 +51,7 @@ function AdminApp() {
                 <Route path="/admin/login" element={<AdminLoginPage/>}/>
                 <Route path="/admin/home" element={
                   <AdminRoute>
-                    <AdminHomePage/>
+                    <AdminDashboard/>
                   </AdminRoute>
                 } />
                 <Route path="/admin" element={<Navigate to="/admin/home" replace />}/>
