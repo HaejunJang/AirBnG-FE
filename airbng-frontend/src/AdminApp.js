@@ -3,8 +3,8 @@ import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminRoute from "./components/admin/AdminRoute";
 import styles from "./styles/admin/AdminRoute.module.css";
-import AdminDashboard from './pages/admin/AdminFistPage';
 import "./styles/admin/Adminglobal.module.css";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 
 // 임시 페이지 컴포넌트들 (실제 페이지가 만들어질 때까지 사용)
 const StorageReviewPage = () => (
@@ -42,36 +42,63 @@ const NetSalesPage = () => (
     </div>
 );
 
-
-
 function AdminApp() {
     return (
         <BrowserRouter>
             <Routes>
+                {/* 로그인 페이지는 레이아웃 제외 */}
                 <Route path="/admin/login" element={<AdminLoginPage/>}/>
+
+                {/* 모든 관리자 페이지는 자동으로 레이아웃 적용 */}
                 <Route path="/admin/home" element={
-                  <AdminRoute>
-                    <AdminDashboard/>
-                  </AdminRoute>
-                } />
-                <Route path="/admin" element={<Navigate to="/admin/home" replace />}/>
+                    <AdminDashboardPage/>
+                }/>
+
+                <Route path="/admin/storage-review" element={
+                    <AdminRoute>
+                        <StorageReviewPage/>
+                    </AdminRoute>
+                }/>
+
+                <Route path="/admin/sales/period" element={
+                    <AdminRoute>
+                        <PeriodSalesPage/>
+                    </AdminRoute>
+                }/>
+
+                <Route path="/admin/sales/storage" element={
+                    <AdminRoute>
+                        <StorageSalesPage/>
+                    </AdminRoute>
+                }/>
+
+                <Route path="/admin/sales/payment" element={
+                    <AdminRoute>
+                        <PaymentSalesPage/>
+                    </AdminRoute>
+                }/>
+
+                <Route path="/admin/sales/net" element={
+                    <AdminRoute>
+                        <NetSalesPage/>
+                    </AdminRoute>
+                }/>
+
+                <Route path="/admin" element={<Navigate to="/admin/home" replace/>}/>
 
                 <Route path="/admin/*" element={
-                    <div className={styles.notFound}>
-                        <h2>페이지를 찾을 수 없습니다</h2>
-                        <button
-                            className={styles.authButton}
-                            onClick={() => window.location.href = '/admin/home'}
-                        >
-                            관리자 홈으로
-                        </button>
-                    </div>
+                    <AdminRoute>
+                        <div className={styles.notFound}>
+                            <h2>페이지를 찾을 수 없습니다</h2>
+                            <button
+                                className={styles.authButton}
+                                onClick={() => window.location.href = '/admin/home'}
+                            >
+                                관리자 홈으로
+                            </button>
+                        </div>
+                    </AdminRoute>
                 }/>
-                <Route path="/admin/storage-review" element={<StorageReviewPage />} />
-                <Route path="/admin/sales/period" element={<PeriodSalesPage />} />
-                <Route path="/admin/sales/storage" element={<StorageSalesPage />} />
-                <Route path="/admin/sales/payment" element={<PaymentSalesPage />} />
-                <Route path="/admin/sales/net" element={<NetSalesPage />} />
             </Routes>
         </BrowserRouter>
     );
