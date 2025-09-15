@@ -113,11 +113,74 @@ export function AuthProvider({ children }) {
 
         setUserProfile(nextUser);
         setUser(nextUser);
-
-        // ✅ rememberMe 저장
         setRememberMe(!!remember);
 
+        //const isAdmin = body?.role == 'ADMIN' || nextUser.roles.includes('ADMIN');
+
         return { ok: true, status: res.status, data: body };
+    }, [buildUser]);
+
+    // 관리자 로그인 함수 추가
+    const adminLogin = useCallback(async (credentials) => {
+        const res = await httpPublic.post('/login', credentials, { withCredentials: true });
+
+        const body = res.data?.result ?? res.data?.data ?? res.data;
+        const retryAfterHeader = res.headers?.['retry-after'];
+        const remainFromBody = Number(body?.remainSeconds ?? 0);
+        const retryAfter = Number(retryAfterHeader ?? remainFromBody ?? 0);
+
+        if (!(res.status >= 200 && res.status < 300)) {
+            return {
+                ok: false,
+                status: res.status,
+                code: res.data?.code,
+                message: res.data?.message ?? body?.message,
+                retryAfter,
+                data: body
+            };
+        }
+
+        const authHeader = res.headers['authorization'] || res.headers['Authorization'];
+        if (!authHeader?.startsWith('Bearer ')) {
+            return { ok: false, status: res.status, message: '로그인 응답에 토큰이 없습니다.' };
+        }
+
+        const token = authHeader.slice('Bearer '.length).trim();
+
+        // 관리자 권한 체크
+        const baseUser = buildUser(token) || {};
+        const userRole = body?.role || baseUser.roles?.[0];
+
+        // 관리자가 아니면 로그인 거부
+        if (userRole !== 'ADMIN') {
+            return {
+                ok: false,
+                status: 403,
+                message: '관리자 권한이 필요합니다.',
+                code: 'ADMIN_REQUIRED'
+            };
+        }
+
+        setAccessToken(token);
+
+        const nextUser = {
+            id: body?.memberId ?? body?.id ?? baseUser.id ?? null,
+            nickname: body?.nickname ?? baseUser.nickname ?? '',
+            roles: [userRole], // 관리자 역할 설정
+        };
+
+        setUserProfile(nextUser);
+        setUser(nextUser);
+
+        // 관리자는 자동로그인 비활성화 (보안상 좋음)
+        setRememberMe(false);
+
+        return {
+            ok: true,
+            status: res.status,
+            data: body,
+            isAdmin: true
+        };
     }, [buildUser]);
 
     const logout = useCallback(async () => {
@@ -135,6 +198,15 @@ export function AuthProvider({ children }) {
         setUserProfile(updatedUser);
     }, [user]);
 
+    // 2. 권한 체크 유틸리티 함수들 추가
+    const isAdmin = useCallback(() => {
+        return user?.roles?.includes('ADMIN') || false;
+    }, [user]);
+
+    const hasRole = useCallback((role) => {
+        return user?.roles?.includes(role) || false;
+    }, [user]);
+
     const token = getAccessToken();
     const validToken = Boolean(token) && !isExpired(token);
 
@@ -143,10 +215,13 @@ export function AuthProvider({ children }) {
         ready,
         isLoggedIn: Boolean(user?.id) && validToken,
         login,
+        adminLogin,
         logout,
         setUser,
         updateUser, // 새로 추가된 함수
-    }), [user, ready, validToken, login, logout, updateUser]);
+        isAdmin,      // 관리자 여부 체크 함수
+        hasRole,      // 특정 역할 체크 함수
+    }), [user, ready, validToken, login, adminLogin, logout, updateUser, isAdmin, hasRole]);
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
