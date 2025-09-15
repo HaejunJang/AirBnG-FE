@@ -1,6 +1,9 @@
 import React from 'react';
+import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminRoute from "./components/admin/AdminRoute";
+import styles from "./styles/admin/AdminRoute.module.css";
 import AdminDashboard from './pages/admin/AdminFistPage';
-import {Routes, Route, BrowserRouter} from "react-router-dom";
 import "./styles/admin/Adminglobal.module.css";
 
 // 임시 페이지 컴포넌트들 (실제 페이지가 만들어질 때까지 사용)
@@ -43,19 +46,34 @@ const NetSalesPage = () => (
 
 function AdminApp() {
     return (
-        <div className="admin-container">
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/admin/storage-review" element={<StorageReviewPage />} />
-                    <Route path="/admin/sales/period" element={<PeriodSalesPage />} />
-                    <Route path="/admin/sales/storage" element={<StorageSalesPage />} />
-                    <Route path="/admin/sales/payment" element={<PaymentSalesPage />} />
-                    <Route path="/admin/sales/net" element={<NetSalesPage />} />
-                </Routes>
-            </BrowserRouter>
-        </div>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/admin/login" element={<AdminLoginPage/>}/>
+                <Route path="/admin/home" element={
+                  <AdminRoute>
+                    <AdminDashboard/>
+                  </AdminRoute>
+                } />
+                <Route path="/admin" element={<Navigate to="/admin/home" replace />}/>
 
+                <Route path="/admin/*" element={
+                    <div className={styles.notFound}>
+                        <h2>페이지를 찾을 수 없습니다</h2>
+                        <button
+                            className={styles.authButton}
+                            onClick={() => window.location.href = '/admin/home'}
+                        >
+                            관리자 홈으로
+                        </button>
+                    </div>
+                }/>
+                <Route path="/admin/storage-review" element={<StorageReviewPage />} />
+                <Route path="/admin/sales/period" element={<PeriodSalesPage />} />
+                <Route path="/admin/sales/storage" element={<StorageSalesPage />} />
+                <Route path="/admin/sales/payment" element={<PaymentSalesPage />} />
+                <Route path="/admin/sales/net" element={<NetSalesPage />} />
+            </Routes>
+        </BrowserRouter>
     );
 }
 
