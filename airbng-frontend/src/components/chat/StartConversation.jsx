@@ -78,68 +78,69 @@ export default function StartConversation() {
     // try { const user = await lookupMemberByNickname(q); return user; } catch { return null; }
   }, [onlineUsers]);
 
+  // 추가: targetId로 바로 방 만들고(또는 조회) 이동
+  const startWithUserId = useCallback(
+    async (targetId, cardHint = null, initialText = null) => {
+      setErr('');
+      setLoading(true);
+      try {
+        const conv = await getOrCreateConversation(targetId);
+        const convId = conv?.convId ?? conv?.id;
+        if (!convId) throw new Error('대화방 생성/조회에 실패했습니다.');
+
+        // 첫 메시지(선택). 바로 대화는 null 전달해서 생략
+        const t = (initialText ?? '').trim();
+        if (t) await sendTextByRest(convId, { text: t, msgId: uuid() });
+
+        const card =
+          cardHint ||
+          selectedUser ||
+          onlineUsers.find(u => u.id === targetId) ||
+          null;
+
+        navigate(`/page/chat/${convId}`, {
+          replace: true,
+          state: {
+            peerName: card?.nickname || card?.name,
+            peerNickname: card?.nickname,
+            peerProfileUrl: card?.imageUrl,
+          },
+        });
+      } catch (e2) {
+        const status = e2?.response?.status;
+        if (status === 400) setErr('본인과는 대화를 시작할 수 없습니다.');
+        else if (status === 404) setErr('상대 사용자를 찾을 수 없습니다.');
+        else setErr(e2?.response?.data?.message || e2?.message || '오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate, onlineUsers, selectedUser]
+  );
+
+  // 폼 제출(입력값으로 시작) → 공통 헬퍼 호출
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErr('');
-    setLoading(true);
+    let targetId = null;
+    const key = String(peerKey || '').trim();
 
-    try {
-      let targetId = null;
-      const key = String(peerKey || '').trim();
-
-      // 숫자면 ID로
-      if (/^\d+$/.test(key)) {
-        targetId = Number(key);
-      } else {
-        // 닉네임으로 해석
-        const user = await resolveByNickname(key);
-        if (!user) {
-          throw new Error('해당 닉네임의 온라인 사용자를 찾지 못했어요.');
-        }
-        targetId = user.id;
-      }
-
-      if (!targetId || targetId < 1) {
-        throw new Error('상대 사용자 식별값이 올바르지 않습니다.');
-      }
-
-      const conv = await getOrCreateConversation(targetId);
-      const convId = conv?.convId || conv?.id;
-      if (!convId) throw new Error('대화방 생성/조회에 실패했습니다.');
-
-      const t = firstText.trim();
-      if (t) await sendTextByRest(convId, { text: t, msgId: uuid() });
-
-      // 네비게이션 시 카드 정보 같이 넘기기(닉네임 우선)
-      const card =
-        selectedUser ||
-        onlineUsers.find(u => u.id === targetId) || null;
-
-      navigate(`/page/chat/${convId}`, {
-        replace: true,
-        state: {
-          peerName: card?.nickname || card?.name,     // ← 닉네임 우선
-          peerNickname: card?.nickname,
-          peerProfileUrl: card?.imageUrl,
-        }
-      });
-    } catch (e2) {
-      const status = e2?.response?.status;
-      if (status === 400) setErr('본인과는 대화를 시작할 수 없습니다.');
-      else if (status === 404) setErr('상대 사용자를 찾을 수 없습니다.');
-      else setErr(e2?.response?.data?.message || e2?.message || '오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
+    if (/^\d+$/.test(key)) {
+      targetId = Number(key);
+    } else {
+      const user = await resolveByNickname(key);
+      if (!user) throw new Error('해당 닉네임의 온라인 사용자를 찾지 못했어요.');
+      targetId = user.id;
     }
+    await startWithUserId(targetId, null, firstText); // ← 여기!
+  };
+
+  // “바로 대화” → 즉시 시작 (첫 메시지 없이)
+  const handleQuickStart = async (u) => {
+    if (loading) return;
+    await startWithUserId(u.id, u, null); // ← firstText 없이 즉시 이동
   };
 
   const handlePick = (u) => setPeerKey(String(u.nickname || u.id));
-  const handleQuickStart = async (u) => {
-    if (loading) return;
-    setPeerKey(String(u.nickname || u.id));
-    setFirstText('');
-    await handleSubmit({ preventDefault() {} });
-  };
 
   return (
     <section className="start-chat">
