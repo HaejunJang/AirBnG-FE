@@ -45,7 +45,7 @@ export default function useOnlineUsersInfinite({
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || '온라인 목록을 불러오지 못했습니다.');
     } finally {
-      loadingRef.current = false;   // 🔧 반드시 원복!
+      loadingRef.current = false;
       setLoading(false);
     }
   }, [size, includeMe]);
