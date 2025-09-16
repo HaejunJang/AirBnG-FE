@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import styles from '../../styles/admin/pages/LockerReviewDetails.module.css';
+import lockeraddress from "../../assets/location.svg"
+import lockerusername from "../../assets/lockeruser.svg"
+import lockertel from "../../assets/call.svg"
 
 const StorageDetailModal = ({ storage, status, onApprove, onReject }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -96,6 +99,7 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject }) => {
 
     if (!storage) return null;
 
+
     return (
         <div className={styles.container}>
             {/* 헤더 */}
@@ -166,7 +170,8 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject }) => {
             <div className={styles.infoSection}>
                 <div className={styles.infoRow}>
                     <div className={styles.infoItem}>
-                        <div className={styles.infoIcon}>📍</div>
+                        <div className={styles.infoIcon}><img src={lockeraddress} alt="주소" />
+                        </div>
                         <div className={styles.infoContent}>
                             <span className={styles.infoLabel}>주소</span>
                             <span className={styles.infoValue}>
@@ -178,7 +183,8 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject }) => {
 
                 <div className={styles.infoRow}>
                     <div className={styles.infoItem}>
-                        <div className={styles.infoIcon}>👤</div>
+                        <div className={styles.infoIcon}><img src={lockerusername} alt="호스트" />
+                        </div>
                         <div className={styles.infoContent}>
                             <span className={styles.infoLabel}>호스트</span>
                             <span className={styles.infoValue}>{storage.keeperName}</span>
@@ -188,7 +194,8 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject }) => {
 
                 <div className={styles.infoRow}>
                     <div className={styles.infoItem}>
-                        <div className={styles.infoIcon}>📞</div>
+                        <div className={styles.infoIcon}><img src={lockertel} alt="전화번호" />
+                        </div>
                         <div className={styles.infoContent}>
                             <span className={styles.infoLabel}>전화번호</span>
                             <span className={styles.infoValue}>
