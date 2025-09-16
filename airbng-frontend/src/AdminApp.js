@@ -6,7 +6,7 @@ import styles from "./styles/admin/AdminRoute.module.css";
 import "./styles/admin/Adminglobal.module.css";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import SalesOverviewPage from "./components/admin/SalesOverviewPage";
-import StorageReviewPage from "./components/admin/StorageReviewPage";
+import StorageReviewPage from "./pages/admin/StorageReviewPage";
 import PeriodSalesPage from "./pages/admin/PeriodSalesPage";
 import StorageSalesPage from "./pages/admin/StorageSalesPage";
 import PaymentSalesPage from "./pages/admin/PaymentSalesPage";
@@ -16,10 +16,7 @@ function AdminApp() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* 로그인 페이지는 레이아웃 제외 */}
                 <Route path="/admin/login" element={<AdminLoginPage/>}/>
-
-                {/* 모든 관리자 페이지는 자동으로 레이아웃 적용 */}
                 <Route path="/admin/home" element={
                     <AdminDashboardPage/>
                 }/>

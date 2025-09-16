@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../../styles/admin/layout/AdminLayout.module.css';
+import styles from '../../styles/admin/pages/AdminDashboard.module.css';
 
 const StorageReviewPage = () => {
     return (
