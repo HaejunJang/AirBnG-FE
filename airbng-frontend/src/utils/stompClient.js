@@ -37,7 +37,7 @@ export function getStompClient() {
       const t = getAccessToken();
       client.connectHeaders = t ? { Authorization: `Bearer ${t}` } : {};
     },
-    onConnected: (frame) => {
+    onConnect: (frame) => {
       console.log('[STOMP] connected');
       emit('connect', frame);
     },
@@ -45,8 +45,15 @@ export function getStompClient() {
       console.warn('[STOMP] error', frame);
       emit('error', frame);
     },
+    onWebSocketError: (ev) => {
+      console.warn('[STOMP] ws error', ev);
+      emit('error', ev);
+    },
     onWebSocketClose: () => {
       emit('disconnect');
+    },
+    onDisconnect: (frame) => {
+      emit('disconnect', frame);
     },
   });
 

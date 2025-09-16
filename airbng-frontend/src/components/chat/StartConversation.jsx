@@ -13,6 +13,10 @@ import { v4 as uuid } from 'uuid';
 
 export default function StartConversation() {
   const navigate = useNavigate();
+  const back = useCallback(() => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/page/chat', { replace: true });
+  }, [navigate]);
   const [params] = useSearchParams();
 
   // 입력을 “ID 또는 닉네임”으로 통합
@@ -221,6 +225,12 @@ export default function StartConversation() {
 
   return (
     <section className="start-chat">
+      <header className="chat-room__header">
+        <button className="chat-room__back" onClick={back} aria-label="뒤로">‹</button>
+        <div className="chat-room__title">새 대화</div>
+        <div className="chat-room__more" />
+      </header>
+
       <div className="start-chat__grid">
         {/* 왼쪽: 온라인 사용자 */}
         <aside className="start-chat__aside">

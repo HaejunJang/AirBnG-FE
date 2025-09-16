@@ -72,6 +72,65 @@
 .chat-item:active { transform: scale(.998); }
 .chat-item:last-child { border-bottom: 0; }
 
+/* ===== StartConversation 전용 헤더 보정 ===== */
+
+/* start-chat 내부에서 쓰는 헤더는 컨테이너 패딩(-16px)만큼 좌우를 벌려 '풀블리드'로 보이게 */
+.start-chat > .chat-room__header {
+  /* 상단 고정 */
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+
+  /* 컨테이너 패딩을 상쇄해서 가로 꽉 차게 */
+  margin: calc(-1 * 16px) calc(-1 * 16px) 12px;
+  padding:
+    calc(6px + env(safe-area-inset-top, 0px))
+    12px  /* 좌우 */
+    6px;  /* 아래 */
+
+  /* 높이/배경/경계 */
+  min-height: var(--header-height, 56px);
+  background: color-mix(in oklab, var(--primary) 3%, var(--surface));
+  border-bottom: 1px solid var(--border);
+
+  /* 살짝 둥근 하단 모서리로 섹션과 자연스럽게 연결 */
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+
+/* 뒤로가기 버튼 터치 영역/아이콘 크기 업 */
+.chat-room__back {
+  width: 40px;
+  height: 40px;
+  font-size: 30px;      /* '‹' 문자 크기 */
+  line-height: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  margin-top: -10px;
+}
+.chat-room__back:hover {
+  background: color-mix(in oklab, var(--primary) 10%, #eef2ff);
+}
+
+/* 제목은 중앙에서 또렷하게 */
+.chat-room__title {
+  text-align: center;
+  font-weight: 800;
+  font-size: var(--fs-18, 18px);
+  color: var(--text-strong);
+  letter-spacing: .2px;
+  margin-left: 5px;
+}
+
+/* 우측 '더보기' 자리(비워둬도 높이 균형 유지) */
+.chat-room__more {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
 /* 아바타(이미지/이니셜) */
 .chat-item__avatar,
 .chat-item__avatar-fallback {

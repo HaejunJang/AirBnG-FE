@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
@@ -9,36 +9,74 @@ import usePeer from '../../hooks/usePeer';
 import { markRead as markReadApi } from '../../api/chatApi';
 import '../../styles/chat.css';
 
+const PEER_ACTIVE_WINDOW_MS = 8000;
+const PRESENCE_PING_MS = 20000;
+const RELOAD_FLAG = 'chat:reloading';
+const PRESENCE_GRACE_MS = 600; // 입장 직후 배지 보류 시간
+
 export default function ChatRoom({ convId, meId }) {
   const listRef = useRef(null);
+
   const [peerTyping, setPeerTyping] = useState(false);
   const typingClearRef = useRef(null);
+
   const lastSeenSeqRef = useRef(0);
   const [myLastReadSeq, setMyLastReadSeq] = useState(0);
   const [peerLastReadSeq, setPeerLastReadSeq] = useState(0);
+
   const [peerInRoom, setPeerInRoom] = useState(false);
+  const [presenceSettled, setPresenceSettled] = useState(false);
+
+  const peerActiveAtRef = useRef(0);
+  const peerDecayTimerRef = useRef(null);
+
   const reportSeenRef = useRef(null);
 
   const { connected, publish } = useStomp();
   const { messages, sendMessage, loadMore, hasMore, applyAck } =
-    useChatRoom(convId, meId);
+    useChatRoom(convId, meId, { ready: connected });
 
   const nav = useNavigate();
   const { displayName, profileUrl } = usePeer(convId);
-  const personal = usePersonalQueues({ onError: (err) => console.error('WS ERROR', err) });
 
-  // sentAt → sentAtMs 정규화
-  const normalizeMs = (x) =>
-    typeof x?.sentAtMs === 'number'
-      ? x.sentAtMs
-      : (x?.sentAt ? Date.parse(x.sentAt) : undefined);
-
-  // 토픽/ACK를 업서트용 패치로 변환
-  const toAckPatch = (m) => ({
-    msgId: m?.msgId,
-    seq: m?.seq,
-    sentAtMs: normalizeMs(m),
+  const personal = usePersonalQueues({
+    onError: (err) => console.error('WS ERROR', err),
+    onAck: (ack) => {
+      const patch = {
+        msgId: ack?.msgId,
+        seq: ack?.seq,
+        sentAtMs: ack?.sentAtMs ?? (ack?.sentAt ? Date.parse(ack.sentAt) : undefined),
+      };
+      if (patch.msgId) applyAck(patch);
+    },
   });
+
+  const pokePeerInRoom = useCallback(() => {
+    peerActiveAtRef.current = Date.now();
+    setPeerInRoom(true);
+    setPresenceSettled(true); // 이벤트를 받았다는 건 handshake 완료
+    clearTimeout(peerDecayTimerRef.current);
+    peerDecayTimerRef.current = setTimeout(() => {
+      if (Date.now() - peerActiveAtRef.current >= PEER_ACTIVE_WINDOW_MS) {
+        setPeerInRoom(false);
+      }
+    }, PEER_ACTIVE_WINDOW_MS + 50);
+    // 미세 최적화: 존재 신호를 받았으면 즉시 읽은 것으로 간주
+    setPeerLastReadSeq(prev => {
+      // messages는 클로저 값이므로 안전하게 한 번 더 계산하고, 더 큰 값만 적용
+      // (과도하게 앞지르지 않도록 마지막 유효 seq 기준)
+      // 필요 없으면 이 블록은 생략 가능
+      try {
+        const arr = messages || [];
+        let lastValid = 0;
+        for (let i = arr.length - 1; i >= 0; i--) {
+          const s = Number(arr[i]?.seq);
+          if (Number.isFinite(s)) { lastValid = s; break; }
+        }
+        return lastValid ? Math.max(prev, lastValid) : prev;
+      } catch { return prev; }
+    });
+  }, []);
 
   const lastValidSeqOf = (arr = []) => {
     for (let i = arr.length - 1; i >= 0; i--) {
@@ -63,75 +101,66 @@ export default function ChatRoom({ convId, meId }) {
     };
   }, [convId, publish]);
 
-  // 방 전환 시 초기화
+  // 방 전환 초기화
   useEffect(() => {
     lastSeenSeqRef.current = 0;
     setMyLastReadSeq(0);
     setPeerLastReadSeq(0);
+    setPeerInRoom(false);
+    setPresenceSettled(false);
+    clearTimeout(peerDecayTimerRef.current);
   }, [convId]);
 
-  // WS: ACK → 업서트
+  // 같은 탭 새로고침 감지용 플래그
   useEffect(() => {
-    const onAck = (e) => {
-      const patch = toAckPatch(e.detail || {});
-      if (!patch.msgId) return;
-      applyAck(patch);
+    const onBeforeUnload = () => {
+      try { sessionStorage.setItem(RELOAD_FLAG, '1'); } catch {}
     };
-    window.addEventListener('ws:ack', onAck);
-    return () => window.removeEventListener('ws:ack', onAck);
-  }, [applyAck]);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, []);
 
-  // WS: MSG → 내 펜딩과 동기화 + 상대 최신 seq 추적
+  // 최근 수신이 상대면 presence
   useEffect(() => {
-    const onMsg = (e) => {
-      const m = e?.detail;
-      if (!m || m.convId !== convId) return;
+    if (!messages?.length) return;
+    const m = messages[messages.length - 1];
+    if (m && Number(m.senderId) !== Number(meId)) {
+      pokePeerInRoom();
+    }
+  }, [messages, meId, pokePeerInRoom]);
 
-      const patch = toAckPatch(m);
-      if (patch.msgId) applyAck(patch);
-
-      if (!m._isMe) {
-        setPeerInRoom(true);
-        const s = Number(m.seq);
-        if (Number.isFinite(s)) setPeerLastReadSeq((prev) => Math.max(prev, s));
-      }
-    };
-    window.addEventListener('ws:msg', onMsg);
-    return () => window.removeEventListener('ws:msg', onMsg);
-  }, [convId, applyAck]);
-
-  // 초기 messages로 상대 읽음 베이스라인
+  // 초기 메시지로 상대 읽음 베이스라인
   useEffect(() => {
     if (!messages?.length) return;
     setPeerLastReadSeq((prev) => {
       if (prev) return prev;
       const lastPeerMsg = [...messages].reverse()
-        .find((m) => !m._isMe && Number.isFinite(Number(m.seq)));
+        .find((m) => Number(m.senderId) !== Number(meId) && Number.isFinite(Number(m.seq)));
       return lastPeerMsg ? Number(lastPeerMsg.seq) : 0;
     });
-  }, [messages]);
+  }, [messages, meId]);
 
-  // READ / TYPING
+  // 개인큐: READ/TYPING
   useEffect(() => {
     personal.subscribeRead?.(convId, (ev) => {
       const s = Number(ev?.lastReadSeq ?? ev?.seq ?? ev?.last_seen_seq ?? NaN);
       const readerId = ev?.userId ?? ev?.readerId ?? ev?.reader ?? ev?.uid;
       if (!Number.isFinite(s)) return;
 
-      if (readerId === meId) {
+      if (Number(readerId) === Number(meId)) {
         if (s > (lastSeenSeqRef.current || 0)) {
           lastSeenSeqRef.current = s;
           setMyLastReadSeq(s);
         }
       } else {
-        setPeerInRoom(true);
+        pokePeerInRoom();
         setPeerLastReadSeq((prev) => (s > prev ? s : prev));
       }
     });
 
     personal.subscribeTyping?.(convId, (ev) => {
+      pokePeerInRoom(); // true/false 모두 presence
       const isTyping = !!ev?.typing;
-      if (isTyping) setPeerInRoom(true);
       setPeerTyping(isTyping);
       clearTimeout(typingClearRef.current);
       if (isTyping) {
@@ -144,22 +173,16 @@ export default function ChatRoom({ convId, meId }) {
       personal.unsubscribeTyping?.(convId);
       clearTimeout(typingClearRef.current);
     };
-  }, [connected, convId, personal, meId]);
+  }, [connected, convId, personal, meId, pokePeerInRoom]);
 
-  // 같은 방에 있으면 상대는 최신까지 읽은 것으로 추정
+  // 같은 방이면 상대는 최신까지 읽은 것으로 간주
   useEffect(() => {
     if (!peerInRoom || !messages?.length) return;
-    let lastValid = null;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const s = Number(messages[i]?.seq);
-      if (Number.isFinite(s)) { lastValid = s; break; }
-    }
-    if (Number.isFinite(lastValid)) {
-      setPeerLastReadSeq((prev) => Math.max(prev, lastValid));
-    }
+    const lastSeq = lastValidSeqOf(messages);
+    if (lastSeq) setPeerLastReadSeq((prev) => Math.max(prev, lastSeq));
   }, [peerInRoom, messages]);
 
-  // 스크롤 바닥 고정
+  // 스크롤 바닥
   useEffect(() => {
     if (!listRef.current) return;
     listRef.current.scrollTop = listRef.current.scrollHeight;
@@ -172,16 +195,44 @@ export default function ChatRoom({ convId, meId }) {
     reportSeenRef.current?.(lastSeq);
   }, [messages]);
 
-  // 연결 직후에도 한번 동기화
+  // 연결 직후: presence keepalive + 초기 read sync + handshake 유예
   useEffect(() => {
     if (!connected) return;
-    const lastSeq = lastValidSeqOf(messages);
-    reportSeenRef.current?.(lastSeq);
-  }, [connected, messages]);
 
-  // 포커스/가시성 복귀 시 동기화
+    const ping = () => publish(`/app/conversations/${convId}/typing`, { typing: false });
+
+    ping(); // 즉시 존재 핑
+    const doSync = () => {
+      const lastSeq = lastValidSeqOf(messages);
+      reportSeenRef.current?.(lastSeq);
+    };
+    doSync();
+    const syncTimer = setTimeout(doSync, 200);
+
+    // 새로고침 직후면 즉시 플래그 해제 + 배지 억제 완료 상태로
+    try {
+      if (sessionStorage.getItem(RELOAD_FLAG)) {
+        sessionStorage.removeItem(RELOAD_FLAG);
+        setPresenceSettled(true);
+      }
+    } catch {}
+
+    // handshake 유예가 끝난 뒤부터 배지 계산 활성화
+    const grace = setTimeout(() => setPresenceSettled(true), PRESENCE_GRACE_MS);
+
+    const keep = setInterval(ping, PRESENCE_PING_MS);
+
+    return () => {
+      clearInterval(keep);
+      clearTimeout(syncTimer);
+      clearTimeout(grace);
+    };
+  }, [connected, convId, publish]);
+
+  // 가시성 복귀 시 동기화
   useEffect(() => {
     const sync = () => {
+      publish(`/app/conversations/${convId}/typing`, { typing: false });
       const lastSeq = lastValidSeqOf(messages);
       reportSeenRef.current?.(lastSeq);
     };
@@ -192,14 +243,14 @@ export default function ChatRoom({ convId, meId }) {
       window.removeEventListener('focus', sync);
       document.removeEventListener('visibilitychange', onVis);
     };
-  }, [messages]);
+  }, [messages, publish, convId]);
 
-  // 전송
   const onSend = useCallback((text) => {
-    sendMessage(text); // useChatRoom에서 로컬 펜딩 + 서버 전송
+    sendMessage(text);
+    publish(`/app/conversations/${convId}/typing`, { typing: false });
     const lastSeq = lastValidSeqOf(messages);
     reportSeenRef.current?.(lastSeq);
-  }, [sendMessage, messages]);
+  }, [sendMessage, messages, publish, convId]);
 
   const onTyping = useCallback((typing) => {
     publish(`/app/conversations/${convId}/typing`, { typing });
@@ -224,17 +275,20 @@ export default function ChatRoom({ convId, meId }) {
 
         {messages.map((m, i) => {
           const prev = i > 0 ? messages[i - 1] : null;
-          const showName = !m._isMe && (!prev || prev.senderId !== m.senderId);
+          const showName = Number(m.senderId) !== Number(meId) && (!prev || prev.senderId !== m.senderId);
+          const isMine = Number(m?.senderId) === Number(meId);
+
           return (
             <ChatMessage
-              key={m.msgId}                 // msgId 고정
-              me={m._isMe}
+              key={m.msgId}
+              me={isMine}
               msg={m}
               name={displayName}
               showName={showName}
-              avatarUrl={!m._isMe ? profileUrl : undefined}
-              myLastReadSeq={myLastReadSeq}
+              avatarUrl={Number(m.senderId) !== Number(meId) ? profileUrl : undefined}
               peerLastReadSeq={peerLastReadSeq}
+              peerInRoom={peerInRoom}
+              presenceSettled={presenceSettled}
             />
           );
         })}
