@@ -8,7 +8,7 @@ export default function WsPersonalBridge() {
     },
     onError: (err) => console.error('[WS ERROR]', err),
     onInboxHint: (hint) => {
-        // console.debug('[INBOX HINT]', hint);
+        console.debug('[INBOX HINT]', hint);
     },
   });
   return null;

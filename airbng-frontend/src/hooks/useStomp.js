@@ -18,7 +18,6 @@ export default function useStomp() {
   const [connected, setConnected] = useState(clientRef.current?.connected ?? false);
   const [status, setStatus] = useState(connected ? 'connected' : 'idle');
 
-  /* ---------- helpers ---------- */
   const canPublish = () => !!clientRef.current && clientRef.current.connected;
 
   const flushOutbox = useCallback(() => {
@@ -28,7 +27,8 @@ export default function useStomp() {
     outboxRef.current = []; // 먼저 비우고 보냄(중복 방지)
     for (const it of items) {
       try { c.publish({ destination: it.dest, body: it.body, headers: it.headers }); }
-      catch (e) { /* 실패하면 다시 큐적재(최대치 유지) */ 
+      catch (e) {
+        // 실패 시 다시 큐 적재(최대치 유지)
         if (outboxRef.current.length < MAX_QUEUE) outboxRef.current.push(it);
       }
     }
@@ -133,7 +133,7 @@ export default function useStomp() {
     };
   }, []);
 
-  /* ---------- publish: 끊겨 있으면 큐 적재, 연결되면 즉시 보내기 ---------- */
+  /* ---------- publish: 끊겨 있으면 큐 적재, 연결되면 즉시 ---------- */
   const publish = useMemo(() => {
     return (destination, bodyObj, headers = {}) => {
       const client = clientRef.current;
@@ -148,7 +148,7 @@ export default function useStomp() {
       if (outboxRef.current.length < MAX_QUEUE) {
         outboxRef.current.push({ dest: destination, body, headers: { ...baseHeaders, ...headers } });
       } else {
-        // 큐가 가득차면 가장 오래된 것 버리고 적재(선택)
+        // 큐가 가득차면 가장 오래된 것 버리고 적재
         outboxRef.current.shift();
         outboxRef.current.push({ dest: destination, body, headers: { ...baseHeaders, ...headers } });
       }
@@ -156,7 +156,6 @@ export default function useStomp() {
     };
   }, []);
 
-  // 필요하면 외부에서 강제 flush 하고 싶을 때 쓰라고 노출
   const flush = useCallback(() => flushOutbox(), [flushOutbox]);
 
   return { client: clientRef.current, connected, status, subscribe, publish, flush };

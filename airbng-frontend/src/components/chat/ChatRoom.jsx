@@ -159,6 +159,7 @@ export default function ChatRoom({ convId, meId }) {
     });
 
     personal.subscribeTyping?.(convId, (ev) => {
+      console.log('[TYPING EVT]', ev);
       pokePeerInRoom(); // true/false 모두 presence
       const isTyping = !!ev?.typing;
       setPeerTyping(isTyping);
@@ -253,7 +254,9 @@ export default function ChatRoom({ convId, meId }) {
   }, [sendMessage, messages, publish, convId]);
 
   const onTyping = useCallback((typing) => {
-    publish(`/app/conversations/${convId}/typing`, { typing });
+    // publish(`/app/conversations/${convId}/typing`, { typing });
+    const ok = publish(`/app/conversations/${convId}/typing`, { typing });
+    console.log('[STOMP PUBLISH]', { dest: `/app/conversations/${convId}/typing`, typing, ok });
   }, [publish, convId]);
 
   return (
@@ -264,9 +267,9 @@ export default function ChatRoom({ convId, meId }) {
         <div className="chat-room__more" />
       </header>
 
-      {peerTyping && <div className="chat-room__typing">상대가 입력 중…</div>}
-
       <div ref={listRef} className="chat-room__list">
+        {peerTyping && <div className="chat-room__typing">상대가 입력 중…</div>}
+
         {hasMore && (
           <div className="center mb-16">
             <button className="btn btn--outline" onClick={loadMore}>이전 메시지 더보기</button>
