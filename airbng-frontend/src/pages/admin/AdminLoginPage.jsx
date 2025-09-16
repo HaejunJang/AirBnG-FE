@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import styles from '../../styles/admin/AdminLogin.module.css';
+import styles from '../../styles/admin/pages/AdminLoginPage.module.css';
 
 const COOLDOWN_KEY = 'adminLoginCooldownUntil';
 const FAIL_COUNT_KEY = 'adminLoginFailCount';
