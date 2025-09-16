@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 import { GoChecklist } from "react-icons/go";
 import { FiTrendingUp } from "react-icons/fi";
@@ -8,14 +8,12 @@ import { LuBuilding } from "react-icons/lu";
 import { BiMoneyWithdraw } from "react-icons/bi";
 import styles from '../../../styles/admin/layout/AdminSidebar.module.css';
 
-const AdminSidebar = ({
-                          activeMenu,
-                          setActiveMenu,
-                          activeSubMenu,
-                          setActiveSubMenu
-                      }) => {
+const AdminSidebar = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [activeMenu, setActiveMenu] = useState('보관소 심사');
+    const [activeSubMenu, setActiveSubMenu] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
 
     const menuItems = [
         {
@@ -47,6 +45,28 @@ const AdminSidebar = ({
         }
     ];
 
+    // URL 기반으로 활성 메뉴 설정
+    useEffect(() => {
+        const currentPath = location.pathname;
+
+        if (currentPath.includes('/admin/storage-review')) {
+            setActiveMenu('보관소 심사');
+            setActiveSubMenu('');
+        } else if (currentPath.includes('/admin/sales')) {
+            setActiveMenu('매출');
+            // 서브메뉴 설정
+            if (currentPath.includes('/admin/sales/period')) {
+                setActiveSubMenu('기간별매출');
+            } else if (currentPath.includes('/admin/sales/storage')) {
+                setActiveSubMenu('보관소별 매출');
+            } else if (currentPath.includes('/admin/sales/net')) {
+                setActiveSubMenu('순매출');
+            } else {
+                setActiveSubMenu('');
+            }
+        }
+    }, [location.pathname]);
+
     const handleMenuClick = (item) => {
         setActiveMenu(item.name);
 
@@ -55,6 +75,8 @@ const AdminSidebar = ({
             navigate(item.path);
         } else {
             setActiveSubMenu('');
+            // 매출 메뉴의 경우 개요 페이지로 이동
+            navigate('/admin/sales');
         }
     };
 

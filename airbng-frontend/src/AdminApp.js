@@ -5,42 +5,12 @@ import AdminRoute from "./components/admin/AdminRoute";
 import styles from "./styles/admin/AdminRoute.module.css";
 import "./styles/admin/Adminglobal.module.css";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-
-// 임시 페이지 컴포넌트들 (실제 페이지가 만들어질 때까지 사용)
-const StorageReviewPage = () => (
-    <div style={{ padding: '20px' }}>
-        <h1>보관소 심사 페이지</h1>
-        <p>보관소 승인 및 심사 관리 페이지입니다.</p>
-    </div>
-);
-
-const PeriodSalesPage = () => (
-    <div style={{ padding: '20px' }}>
-        <h1>기간별 매출 페이지</h1>
-        <p>기간별 매출 현황을 확인할 수 있습니다.</p>
-    </div>
-);
-
-const StorageSalesPage = () => (
-    <div style={{ padding: '20px' }}>
-        <h1>보관소별 매출 페이지</h1>
-        <p>각 보관소의 매출을 비교할 수 있습니다.</p>
-    </div>
-);
-
-const PaymentSalesPage = () => (
-    <div style={{ padding: '20px' }}>
-        <h1>결제 수단별 매출 페이지</h1>
-        <p>결제 수단별 매출 현황을 분석할 수 있습니다.</p>
-    </div>
-);
-
-const NetSalesPage = () => (
-    <div style={{ padding: '20px' }}>
-        <h1>순매출 페이지</h1>
-        <p>순매출 및 수익률을 분석할 수 있습니다.</p>
-    </div>
-);
+import SalesOverviewPage from "./components/admin/SalesOverviewPage";
+import StorageReviewPage from "./components/admin/StorageReviewPage";
+import PeriodSalesPage from "./pages/admin/PeriodSalesPage";
+import StorageSalesPage from "./pages/admin/StorageSalesPage";
+import PaymentSalesPage from "./pages/admin/PaymentSalesPage";
+import NetSalesPage from "./pages/admin/NetSalesPage";
 
 function AdminApp() {
     return (
@@ -59,6 +29,12 @@ function AdminApp() {
                         <StorageReviewPage/>
                     </AdminRoute>
                 }/>
+
+                <Route path="/admin/sales" element={
+                    <AdminRoute>
+                        <SalesOverviewPage />
+                    </AdminRoute>
+                } />
 
                 <Route path="/admin/sales/period" element={
                     <AdminRoute>
