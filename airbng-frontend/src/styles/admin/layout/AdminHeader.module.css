@@ -1,0 +1,21 @@
+.topHeader {
+    background-color: #4561DB;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.headerContent {
+    padding: 0 20px;
+    width: 100%;
+}
+
+.headerTitle {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}

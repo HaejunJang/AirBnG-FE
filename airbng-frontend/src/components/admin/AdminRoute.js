@@ -1,8 +1,9 @@
 import { useAuth } from '../../context/AuthContext';
 import { Navigate, useLocation } from 'react-router-dom';
 import styles from '../../styles/admin/AdminRoute.module.css';
+import AdminLayout from "./AdminLayout";
 
-function AdminRoute({ children }) {
+function AdminRoute({ children, excludeLayout = false }) {
     const { isLoggedIn, isAdmin, ready } = useAuth();
     const location = useLocation();
 
@@ -32,7 +33,16 @@ function AdminRoute({ children }) {
         );
     }
 
-    return children;
+    // excludeLayout이 true면 레이아웃 없이 children만 반환
+    if (excludeLayout) {
+        return children;
+    }
+
+    return (
+        <AdminLayout>
+            {children}
+        </AdminLayout>
+    );
 }
 
 export default AdminRoute;
