@@ -13,8 +13,8 @@ export default function ChatRoom({ convId, meId }) {
   const listRef = useRef(null);
   const [peerTyping, setPeerTyping] = useState(false);
   const typingClearRef = useRef(null);
-  const lastSeenSeqRef = useRef(0);           // 서버에 보낸 내 마지막 읽음 seq 기억
-  const [myLastReadSeq, setMyLastReadSeq] = useState(0); // NEW: 렌더링용 로컬 상태
+  const lastSeenSeqRef = useRef(0);
+  const [myLastReadSeq, setMyLastReadSeq] = useState(0);
   const [peerLastReadSeq, setPeerLastReadSeq] = useState(0);
   const [peerInRoom, setPeerInRoom] = useState(false);
   const reportSeenRef = useRef(null);
@@ -23,14 +23,21 @@ export default function ChatRoom({ convId, meId }) {
   const { messages, sendMessage, loadMore, hasMore, applyAck } =
     useChatRoom(convId, meId);
 
-  // const { state } = useLocation();
-  // const title = state?.peerName || '상대';
   const nav = useNavigate();
-
   const { displayName, profileUrl } = usePeer(convId);
+  const personal = usePersonalQueues({ onError: (err) => console.error('WS ERROR', err) });
 
-  const personal = usePersonalQueues({
-    onError: (err) => console.error('WS ERROR', err),
+  // sentAt → sentAtMs 정규화
+  const normalizeMs = (x) =>
+    typeof x?.sentAtMs === 'number'
+      ? x.sentAtMs
+      : (x?.sentAt ? Date.parse(x.sentAt) : undefined);
+
+  // 토픽/ACK를 업서트용 패치로 변환
+  const toAckPatch = (m) => ({
+    msgId: m?.msgId,
+    seq: m?.seq,
+    sentAtMs: normalizeMs(m),
   });
 
   const lastValidSeqOf = (arr = []) => {
@@ -41,81 +48,71 @@ export default function ChatRoom({ convId, meId }) {
     return 0;
   };
 
-  // READ 보고 함수 (과거 seq면 중복 보고 방지)
+  // READ 보고
   useEffect(() => {
     reportSeenRef.current = async (seq) => {
       if (!Number.isFinite(seq) || seq <= (lastSeenSeqRef.current || 0)) return;
       lastSeenSeqRef.current = seq;
       setMyLastReadSeq(seq);
       try {
-        // 1) REST: 서버 상태 저장
-       await markReadApi(convId, seq);
-       // 2) WS: 브로커 경유 브로드캐스트 (상대에게 바로 반영)
-       publish(`/app/conversations/${convId}/read`, { lastSeenSeq: seq });
+        await markReadApi(convId, seq);
+        publish(`/app/conversations/${convId}/read`, { lastSeenSeq: seq });
       } catch (e) {
         console.warn('markRead failed', e);
       }
     };
   }, [convId, publish]);
 
-  // 방 변경 시 초기화
+  // 방 전환 시 초기화
   useEffect(() => {
     lastSeenSeqRef.current = 0;
     setMyLastReadSeq(0);
-    setPeerLastReadSeq(0); 
+    setPeerLastReadSeq(0);
   }, [convId]);
 
-  // acks 훅업
+  // WS: ACK → 업서트
   useEffect(() => {
-    const onAck = (e) => applyAck(e.detail);
+    const onAck = (e) => {
+      const patch = toAckPatch(e.detail || {});
+      if (!patch.msgId) return;
+      applyAck(patch);
+    };
     window.addEventListener('ws:ack', onAck);
     return () => window.removeEventListener('ws:ack', onAck);
   }, [applyAck]);
 
-  // 메시지 처음(또는 새로 로드) 되었을 때 1회 베이스라인 설정
-  useEffect(() => {
-    if (!messages?.length) return;
-    setPeerLastReadSeq(prev => {
-      if (prev) return prev;
-      const lastPeerMsg = [...messages].reverse()
-        .find(m => !m._isMe && Number.isFinite(Number(m.seq)));
-      return lastPeerMsg ? Number(lastPeerMsg.seq) : 0;
-    });
-  }, [messages]);
-
+  // WS: MSG → 내 펜딩과 동기화 + 상대 최신 seq 추적
   useEffect(() => {
     const onMsg = (e) => {
       const m = e?.detail;
       if (!m || m.convId !== convId) return;
+
+      const patch = toAckPatch(m);
+      if (patch.msgId) applyAck(patch);
+
       if (!m._isMe) {
-        setPeerInRoom(true);                  // ← presence 신호
+        setPeerInRoom(true);
         const s = Number(m.seq);
-        if (Number.isFinite(s)) {
-          setPeerLastReadSeq(prev => Math.max(prev, s));
-        }
+        if (Number.isFinite(s)) setPeerLastReadSeq((prev) => Math.max(prev, s));
       }
     };
     window.addEventListener('ws:msg', onMsg);
     return () => window.removeEventListener('ws:msg', onMsg);
-  }, [convId]);
+  }, [convId, applyAck]);
 
+  // 초기 messages로 상대 읽음 베이스라인
   useEffect(() => {
     if (!messages?.length) return;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const m = messages[i];
-      if (!m._isMe) {
-        const s = Number(m.seq);
-        if (Number.isFinite(s)) {
-          setPeerLastReadSeq(prev => Math.max(prev, s));
-        }
-        break;
-      }
-    }
+    setPeerLastReadSeq((prev) => {
+      if (prev) return prev;
+      const lastPeerMsg = [...messages].reverse()
+        .find((m) => !m._isMe && Number.isFinite(Number(m.seq)));
+      return lastPeerMsg ? Number(lastPeerMsg.seq) : 0;
+    });
   }, [messages]);
 
   // READ / TYPING
   useEffect(() => {
-    // READ: 상대가 읽었다면 즉시 최대값으로 갱신
     personal.subscribeRead?.(convId, (ev) => {
       const s = Number(ev?.lastReadSeq ?? ev?.seq ?? ev?.last_seen_seq ?? NaN);
       const readerId = ev?.userId ?? ev?.readerId ?? ev?.reader ?? ev?.uid;
@@ -127,15 +124,14 @@ export default function ChatRoom({ convId, meId }) {
           setMyLastReadSeq(s);
         }
       } else {
-        setPeerInRoom(true);                              // ← presence 신호
-        setPeerLastReadSeq(prev => (s > prev ? s : prev));
+        setPeerInRoom(true);
+        setPeerLastReadSeq((prev) => (s > prev ? s : prev));
       }
     });
 
-    // TYPING: 같은 방에 있다는 강한 신호 → 현재 대화 끝까지 읽은 것으로 취급
     personal.subscribeTyping?.(convId, (ev) => {
       const isTyping = !!ev?.typing;
-      if (isTyping) setPeerInRoom(true);                 // ← presence 신호
+      if (isTyping) setPeerInRoom(true);
       setPeerTyping(isTyping);
       clearTimeout(typingClearRef.current);
       if (isTyping) {
@@ -150,16 +146,16 @@ export default function ChatRoom({ convId, meId }) {
     };
   }, [connected, convId, personal, meId]);
 
+  // 같은 방에 있으면 상대는 최신까지 읽은 것으로 추정
   useEffect(() => {
     if (!peerInRoom || !messages?.length) return;
-    // 뒤에서부터 유효 seq 하나 찾기 (pending 방지)
     let lastValid = null;
     for (let i = messages.length - 1; i >= 0; i--) {
       const s = Number(messages[i]?.seq);
       if (Number.isFinite(s)) { lastValid = s; break; }
     }
     if (Number.isFinite(lastValid)) {
-      setPeerLastReadSeq(prev => Math.max(prev, lastValid));
+      setPeerLastReadSeq((prev) => Math.max(prev, lastValid));
     }
   }, [peerInRoom, messages]);
 
@@ -169,54 +165,38 @@ export default function ChatRoom({ convId, meId }) {
     listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages]);
 
-  // 1) 메시지 수신/로드 시 내 읽음 갱신 → 서버 전송 + 로컬 상태 갱신
+  // 메시지 변화 시 내 READ 보고
   useEffect(() => {
     if (!messages?.length) return;
     const lastSeq = lastValidSeqOf(messages);
     reportSeenRef.current?.(lastSeq);
   }, [messages]);
 
-  // STOMP가 연결되자마자도 마지막 유효 seq로 READ 재보고 (idempotent)
+  // 연결 직후에도 한번 동기화
   useEffect(() => {
     if (!connected) return;
     const lastSeq = lastValidSeqOf(messages);
     reportSeenRef.current?.(lastSeq);
   }, [connected, messages]);
 
-  // 2) 포커스/가시성 복귀 시에도 유지
+  // 포커스/가시성 복귀 시 동기화
   useEffect(() => {
     const sync = () => {
       const lastSeq = lastValidSeqOf(messages);
       reportSeenRef.current?.(lastSeq);
     };
+    const onVis = () => { if (document.visibilityState === 'visible') sync(); };
     window.addEventListener('focus', sync);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') sync();
-    });
+    document.addEventListener('visibilitychange', onVis);
     return () => {
       window.removeEventListener('focus', sync);
-      document.removeEventListener('visibilitychange', () => {});
+      document.removeEventListener('visibilitychange', onVis);
     };
   }, [messages]);
 
-  useEffect(() => {
-    const onRead = (e) => {
-      const r = e?.detail;
-      if (!r || r.convId !== convId) return;
-      const s = Number(r.lastReadSeq ?? r.seq);
-      if (!Number.isFinite(s)) return;
-      // 상대가 읽은 값이면 즉시 반영
-      if (r.userId && r.userId !== meId) {
-        setPeerLastReadSeq(prev => Math.max(prev, s));
-      }
-    };
-    window.addEventListener('ws:read', onRead);
-    return () => window.removeEventListener('ws:read', onRead);
-  }, [convId, meId]);
-
-  const onSend = useCallback((t) => {
-    sendMessage(t);
-    // 방에 머무르는 동안은 "마지막까지 읽음" 상태를 유지
+  // 전송
+  const onSend = useCallback((text) => {
+    sendMessage(text); // useChatRoom에서 로컬 펜딩 + 서버 전송
     const lastSeq = lastValidSeqOf(messages);
     reportSeenRef.current?.(lastSeq);
   }, [sendMessage, messages]);
@@ -227,19 +207,14 @@ export default function ChatRoom({ convId, meId }) {
 
   return (
     <section className="chat-room">
-      {/* Header */}
       <header className="chat-room__header">
-        <button className="chat-room__back" onClick={() => nav(-1)} aria-label="뒤로">
-          ‹
-        </button>
+        <button className="chat-room__back" onClick={() => nav(-1)} aria-label="뒤로">‹</button>
         <div className="chat-room__title">{displayName}</div>
         <div className="chat-room__more" />
       </header>
 
-      {/* Typing indicator */}
       {peerTyping && <div className="chat-room__typing">상대가 입력 중…</div>}
 
-      {/* Messages */}
       <div ref={listRef} className="chat-room__list">
         {hasMore && (
           <div className="center mb-16">
@@ -252,20 +227,19 @@ export default function ChatRoom({ convId, meId }) {
           const showName = !m._isMe && (!prev || prev.senderId !== m.senderId);
           return (
             <ChatMessage
-              key={m.seq ?? `${m.sentAt}-${m.msgId}`}
+              key={m.msgId}                 // msgId 고정
               me={m._isMe}
               msg={m}
-              name={displayName}          
+              name={displayName}
               showName={showName}
-              avatarUrl={!m._isMe ? profileUrl : undefined} 
+              avatarUrl={!m._isMe ? profileUrl : undefined}
               myLastReadSeq={myLastReadSeq}
-              peerLastReadSeq={peerLastReadSeq}        
+              peerLastReadSeq={peerLastReadSeq}
             />
           );
         })}
       </div>
 
-      {/* Input */}
       <ChatInput onSend={onSend} onTyping={onTyping} />
     </section>
   );

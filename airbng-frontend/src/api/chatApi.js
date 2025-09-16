@@ -31,6 +31,31 @@ export const getPeerProfile = async (convId) => {
   return unwrap(res); // { id, name, nickname, profileUrl, displayName? }
 };
 
+/* ===== Directory (offline 포함) ===== */
+export const getDirectoryUser = async (userId) => {
+  const res = await httpAuth.get(`/chat/directory/users/${userId}`);
+  return unwrap(res); // UserCardResponse
+};
+
+export const getDirectoryUsers = async (ids = []) => {
+  const res = await httpAuth.get(`/chat/directory/users`, {
+    params: { ids: ids.join(',') },
+  });
+  return unwrap(res); // UserCardResponse[]
+};
+
+export const lookupUserByNickname = async (nickname) => {
+  const res = await httpAuth.get(`/chat/directory/lookup`, {
+    params: { nickname },
+  });
+  return unwrap(res); // UserCardResponse (정확 일치), 없으면 404
+};
+
+export const suggestUsers = async ({ q, limit = 10, includeMe = false } = {}) => {
+  const res = await httpAuth.get('/chat/directory/suggest', { params: { q, limit, includeMe } });
+  return unwrap(res); // UserCardResponse[]
+};
+
 /* ===== Inbox ===== */
 export const fetchInbox = async ({ page = 0, size = 30 } = {}) => {
   const res = await httpAuth.get(`/chat/inbox`, { params: { page, size } });

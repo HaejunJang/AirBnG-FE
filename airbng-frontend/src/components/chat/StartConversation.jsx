@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getOrCreateConversation, sendTextByRest, fetchOnlineUsers } from '../../api/chatApi';
+import {
+  getOrCreateConversation,
+  sendTextByRest,
+  lookupUserByNickname,
+  getDirectoryUser,
+  suggestUsers,
+} from '../../api/chatApi';
 import useOnlineUsersInfinite from '../../hooks/useOnlineUsersInfinite';
 import usePresencePing from '../../hooks/usePresencePing';
 import { v4 as uuid } from 'uuid';
@@ -10,11 +16,20 @@ export default function StartConversation() {
   const [params] = useSearchParams();
 
   // 입력을 “ID 또는 닉네임”으로 통합
-  const [peerKey, setPeerKey] = useState('');    // <- 숫자(아이디) 또는 문자열(닉네임)
+  const [peerKey, setPeerKey] = useState('');
   const [firstText, setFirstText] = useState('');
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [keyword, setKeyword] = useState('');
+
+  // 오프라인 포함 미리보기/조회상태
+  const [offlineCard, setOfflineCard] = useState(null);
+  const [resolving, setResolving] = useState(false);
+
+  // 자동완성 상태
+  const [suggest, setSuggest] = useState([]);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [suggestLoading, setSuggestLoading] = useState(false);
 
   // 25초 간격 핑(30초 버킷 맞춤)
   usePresencePing({ intervalMs: 25000 });
@@ -29,8 +44,8 @@ export default function StartConversation() {
   } = useOnlineUsersInfinite({ search: keyword, size: 20, includeMe: false, autoRefreshMs: 15000 });
 
   useEffect(() => {
-    const p = params.get('peerId');      // 쿼리에 id가 오면 그대로 사용
-    const n = params.get('nickname');    // 쿼리에 nickname이 오면 우선 사용
+    const p = params.get('peerId');
+    const n = params.get('nickname');
     const t = params.get('firstText');
     if (n) setPeerKey(n);
     else if (p) setPeerKey(p);
@@ -42,43 +57,99 @@ export default function StartConversation() {
     if (Number.isFinite(idNum) && idNum > 0) {
       return byId.get(idNum) || null;
     }
-    // 닉네임으로 입력 중인 경우, 현재 화면의 온라인 목록에서 미리 보여주기
     const trimmed = String(peerKey || '').trim().toLowerCase();
     if (!trimmed) return null;
-    return onlineUsers.find(
-      u => (u.nickname || '').toLowerCase() === trimmed
-    ) || null;
+    return onlineUsers.find(u => (u.nickname || '').toLowerCase() === trimmed) || null;
   }, [peerKey, byId, onlineUsers]);
 
-  // 닉네임으로 유저 찾기(온라인 우선, 없으면 서버에 한 번 더 질의)
-  const resolveByNickname = useCallback(async (nick) => {
-    const q = String(nick || '').trim();
-    if (!q) return null;
+  // Directory 카드 → 온라인목록 형태로 정규화
+  const normalizeCard = useCallback((c) => {
+    if (!c) return null;
+    return { id: c.id, name: c.name, nickname: c.nickname, imageUrl: c.imageUrl, state: c.state };
+  }, []);
 
-    // 1) 메모리(현재 로드된 온라인 목록)에서 완전 일치
-    const localHit = onlineUsers.find(
-      u => (u.nickname || '').toLowerCase() === q.toLowerCase()
-    );
-    if (localHit) return localHit;
+  // 닉네임으로 유저 찾기 (온라인 완전일치 → 디렉토리 조회)
+  const resolveByNickname = useCallback(
+    async (nick) => {
+      const q = String(nick || '').trim();
+      if (!q) return null;
+      const localHit = onlineUsers.find(u => (u.nickname || '').toLowerCase() === q.toLowerCase());
+      if (localHit) return localHit;
+      try {
+        const card = await lookupUserByNickname(q);
+        return normalizeCard(card);
+      } catch {
+        return null;
+      }
+    },
+    [onlineUsers, normalizeCard]
+  );
 
-    // 2) 서버 쿼리(온라인 사용자 도메인)
-    try {
-      const server = await fetchOnlineUsers({ limit: 5, q });
-      const exact = (Array.isArray(server) ? server : []).find(
-        u => (u.nickname || '').toLowerCase() === q.toLowerCase()
-      );
-      if (exact) return exact;
-      // 완전 일치가 없으면 첫 결과라도 반환할지 말지는 정책 선택 — 여기선 엄격 모드라 null
-      return null;
-    } catch {
-      return null;
-    }
+  // 입력값이 온라인에 없으면 디렉토리(ID/닉네임)로 디바운스 조회 → 오프라인 미리보기
+  useEffect(() => {
+    let cancelled = false;
+    setOfflineCard(null);
 
-    // 오프라인까지 포함해 전역 닉네임 검색을 원하면:
-    // try { const user = await lookupMemberByNickname(q); return user; } catch { return null; }
-  }, [onlineUsers]);
+    const key = String(peerKey || '').trim();
+    if (!key) return;
+    if (selectedUser) return; // 온라인 완전일치면 미리보기 불필요
 
-  // 추가: targetId로 바로 방 만들고(또는 조회) 이동
+    const run = async () => {
+      setResolving(true);
+      try {
+        let card = null;
+        if (/^\d+$/.test(key)) card = await getDirectoryUser(Number(key));
+        else card = await lookupUserByNickname(key);
+        if (!cancelled && card) setOfflineCard(normalizeCard(card));
+      } catch {
+        if (!cancelled) setOfflineCard(null);
+      } finally {
+        if (!cancelled) setResolving(false);
+      }
+    };
+
+    const t = setTimeout(run, 300);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [peerKey, selectedUser, normalizeCard]);
+
+  const previewUser = selectedUser || offlineCard;
+
+  // 자동완성: 디바운스 Suggest
+  useEffect(() => {
+    let cancelled = false;
+    setSuggest([]);
+    setSuggestOpen(false);
+
+    const key = String(peerKey || '').trim();
+    if (!key || /^\d+$/.test(key)) return; // 숫자는 suggest 생략(정책)
+    const exactOnline = onlineUsers.find(u => (u.nickname || '').toLowerCase() === key.toLowerCase());
+    if (exactOnline) return;
+
+    const run = async () => {
+      setSuggestLoading(true);
+      setSuggestOpen(true);
+      try {
+        const list = await suggestUsers({ q: key, limit: 8 });
+        if (!cancelled) { setSuggest(list || []); setSuggestOpen(true); }
+      } catch {
+        if (!cancelled) { setSuggest([]); setSuggestOpen(false); }
+      } finally {
+        if (!cancelled) setSuggestLoading(false);
+      }
+    };
+
+    const t = setTimeout(run, 250);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [peerKey, onlineUsers]);
+
+  const pickSuggest = (u) => {
+    setPeerKey(u.nickname || String(u.id)); // 입력 채우기
+    setSuggestOpen(false);
+    // 바로 시작하려면 아래 사용:
+    startWithUserId(u.id, u, firstText || null);
+  };
+
+  // targetId로 바로 방 만들고 이동
   const startWithUserId = useCallback(
     async (targetId, cardHint = null, initialText = null) => {
       setErr('');
@@ -88,22 +159,17 @@ export default function StartConversation() {
         const convId = conv?.convId ?? conv?.id;
         if (!convId) throw new Error('대화방 생성/조회에 실패했습니다.');
 
-        // 첫 메시지(선택). 바로 대화는 null 전달해서 생략
         const t = (initialText ?? '').trim();
         if (t) await sendTextByRest(convId, { text: t, msgId: uuid() });
 
-        const card =
-          cardHint ||
-          selectedUser ||
-          onlineUsers.find(u => u.id === targetId) ||
-          null;
-
+        const card = cardHint || selectedUser || onlineUsers.find(u => u.id === targetId) || null;
         navigate(`/page/chat/${convId}`, {
           replace: true,
           state: {
             peerName: card?.nickname || card?.name,
             peerNickname: card?.nickname,
             peerProfileUrl: card?.imageUrl,
+            peerOnline: card?.state === 'online',
           },
         });
       } catch (e2) {
@@ -118,26 +184,37 @@ export default function StartConversation() {
     [navigate, onlineUsers, selectedUser]
   );
 
-  // 폼 제출(입력값으로 시작) → 공통 헬퍼 호출
+  // 폼 제출(입력값으로 시작)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let targetId = null;
-    const key = String(peerKey || '').trim();
+    setErr('');
 
-    if (/^\d+$/.test(key)) {
-      targetId = Number(key);
-    } else {
-      const user = await resolveByNickname(key);
-      if (!user) throw new Error('해당 닉네임의 온라인 사용자를 찾지 못했어요.');
-      targetId = user.id;
+    let targetId = null;
+    let hintCard = null;
+
+    try {
+      const key = String(peerKey || '').trim();
+
+      if (/^\d+$/.test(key)) {
+        targetId = Number(key);
+        try { hintCard = normalizeCard(await getDirectoryUser(targetId)); } catch {}
+      } else {
+        const user = await resolveByNickname(key);
+        if (!user) throw new Error('해당 닉네임의 사용자를 찾지 못했어요. (온라인/오프라인 포함)');
+        targetId = user.id;
+        hintCard = user;
+      }
+
+      if (!targetId || targetId < 1) throw new Error('상대 사용자 식별값이 올바르지 않습니다.');
+      await startWithUserId(targetId, hintCard || offlineCard, firstText);
+    } catch (e2) {
+      setErr(e2?.response?.data?.message || e2?.message || '오류가 발생했습니다.');
     }
-    await startWithUserId(targetId, null, firstText); // ← 여기!
   };
 
-  // “바로 대화” → 즉시 시작 (첫 메시지 없이)
   const handleQuickStart = async (u) => {
     if (loading) return;
-    await startWithUserId(u.id, u, null); // ← firstText 없이 즉시 이동
+    await startWithUserId(u.id, u, null);
   };
 
   const handlePick = (u) => setPeerKey(String(u.nickname || u.id));
@@ -145,7 +222,7 @@ export default function StartConversation() {
   return (
     <section className="start-chat">
       <div className="start-chat__grid">
-        {/* 위쪽: 온라인 사용자 */}
+        {/* 왼쪽: 온라인 사용자 */}
         <aside className="start-chat__aside">
           <div className="start-chat__aside-header">
             <h5 className="start-chat__title">온라인 사용자</h5>
@@ -186,6 +263,7 @@ export default function StartConversation() {
                     type="button"
                     className="btn btn--xs btn--ghost"
                     onClick={(e) => { e.stopPropagation(); handleQuickStart(u); }}
+                    disabled={loading}
                   >
                     바로 대화
                   </button>
@@ -196,7 +274,6 @@ export default function StartConversation() {
                 <li className="user-empty">온라인 사용자가 없습니다.</li>
               )}
 
-              {/* 무한스크롤 센티넬 */}
               <li ref={sentinelRef} style={{ height: 1 }} />
             </ul>
 
@@ -208,23 +285,78 @@ export default function StartConversation() {
           </div>
         </aside>
 
-        {/* 아래쪽: 새 대화 시작 */}
+        {/* 오른쪽: 새 대화 시작 */}
         <form onSubmit={handleSubmit} className="start-chat__card">
           <h5 className="start-chat__title">새 대화 시작</h5>
 
           <div className="form-row">
             <label className="form-label">상대 ID 또는 닉네임</label>
-            <input
-              type="text"                 // ← number → text
-              className="input"
-              placeholder="예: 9 또는 nick123"
-              value={peerKey}
-              onChange={(e) => setPeerKey(e.target.value)}
-              disabled={loading}
-            />
-            {selectedUser && (
+
+            <div className="typeahead-wrap">
+              <input
+                type="text"
+                className="input"
+                placeholder="예: 9 또는 nick123 (오프라인 포함)"
+                value={peerKey}
+                onChange={(e) => { setPeerKey(e.target.value); setSuggestOpen(true); }}
+                disabled={loading}
+                onBlur={() => setTimeout(() => setSuggestOpen(false), 150)}
+                onFocus={() => ( (suggest.length > 0) || suggestLoading ) && setSuggestOpen(true)}
+              />
+
+              {/* 단일 팝오버 컨테이너 */}
+              {suggestOpen && (
+                <div className="typeahead-pop" onMouseDown={(e) => e.preventDefault()}>
+                  {suggestLoading ? (
+                    <div className="typeahead__loading">검색중…</div>
+                  ) : (suggest.length > 0) ? (
+                    <ul className="typeahead-list" role="listbox">
+                      {suggest.map(u => (
+                        <li
+                          key={u.id}
+                          className="typeahead__item"
+                          onClick={() => pickSuggest(u)}
+                        >
+                          <div className="typeahead__avatar">
+                            {u.imageUrl
+                              ? <img src={u.imageUrl} alt={u.nickname || u.name || `user-${u.id}`} />
+                              : <div className="typeahead__fallback">{(u.nickname || u.name || 'U').slice(0,1)}</div>}
+                            <span className={`dot ${u.state === 'online' ? 'dot--on' : 'dot--off'}`} />
+                          </div>
+
+                          <div className="typeahead__meta">
+                            <div className="typeahead__name">
+                              {u.nickname || u.name}
+                              {u.state === 'offline' && <span className="badge-off">오프라인</span>}
+                            </div>
+                            <div className="typeahead__sub">#{u.id}{u.name ? ` · ${u.name}` : ''}</div>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="btn btn--xs"
+                            onClick={(e) => { e.stopPropagation(); startWithUserId(u.id, u, null); }}
+                          >
+                            시작
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="typeahead__empty">검색 결과가 없어요 (온라인/오프라인 포함)</div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 입력 도움말 */}
+            <p className="form-hint">오프라인 사용자도 닉네임&ID로 검색돼요. 회색 점은 오프라인을 의미해요.</p>
+
+            {previewUser && (
               <div className="start-chat__selected">
-                선택됨: <b>{selectedUser.nickname || selectedUser.name}</b> (#{selectedUser.id})
+                선택됨: <b>{previewUser.nickname || previewUser.name}</b> (#{previewUser.id})
+                {previewUser.state === 'offline' && ' · 오프라인'}
+                {resolving && ' · 확인 중…'}
               </div>
             )}
           </div>

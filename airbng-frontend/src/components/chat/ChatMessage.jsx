@@ -19,7 +19,11 @@ function ChatMessage({
     []
   );
 
-  const t = msg?.sentAt ? new Date(msg.sentAt) : new Date();
+  const ms = typeof msg?.sentAtMs === 'number'
+  ? msg.sentAtMs
+  : (msg?.sentAt ? Date.parse(msg.sentAt) : Date.now());
+
+  const t = new Date(ms);
   const timeLabel = seoulTimeFmt.format(t);
 
   // 안전한 숫자 변환

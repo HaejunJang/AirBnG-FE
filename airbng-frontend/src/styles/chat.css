@@ -309,6 +309,114 @@
   .start-chat__aside { min-height: 300px; }
 }
 
+/* --- Typeahead (unified popover, prettier) --- */
+.typeahead-wrap { position: relative; z-index: 20; }
+
+.typeahead-pop {
+  position: absolute;
+  inset: calc(100% + 8px) 0 auto 0; /* top / left-right */
+  background: #fff;
+  border: 1px solid color-mix(in oklab, var(--primary) 12%, var(--border));
+  border-radius: 14px;
+  box-shadow:
+    0 10px 30px rgba(20,20,40,.12),
+    0 2px 12px rgba(20,20,40,.06);
+  overflow: hidden;
+  animation: typeahead-pop-in .12s ease-out;
+}
+
+@keyframes typeahead-pop-in {
+  from { transform: translateY(-2px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+
+.typeahead-list {
+  max-height: 320px;
+  overflow: auto;
+  padding: 4px;
+  margin: 0;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: #c9ced8 transparent;
+}
+.typeahead-list::-webkit-scrollbar{ width: 10px; }
+.typeahead-list::-webkit-scrollbar-thumb{
+  background: #c9ced8; border-radius: 999px; border: 2px solid #fff;
+}
+.typeahead-list::-webkit-scrollbar-track{ background: transparent; }
+
+.typeahead__loading,
+.typeahead__empty {
+  padding: 18px 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* 아이템 */
+.typeahead__item {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: background .12s ease, transform .06s ease;
+}
+.typeahead__item + .typeahead__item { margin-top: 2px; }
+.typeahead__item:hover { background: color-mix(in oklab, var(--primary) 6%, #fff); }
+.typeahead__item:active { transform: scale(.998); }
+
+/* 아바타 + 상태점 */
+.typeahead__avatar { width: 44px; height: 44px; position: relative; }
+.typeahead__avatar img,
+.typeahead__fallback {
+  width: 44px; height: 44px; border-radius: 50%;
+  object-fit: cover; display: grid; place-items: center;
+  font-weight: 800; background: #f5f7fb; color: var(--primary);
+  box-shadow: inset 0 0 0 1px #eef1f5;
+}
+.dot { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; }
+.dot--on  { background: #26d07c; box-shadow: 0 0 0 4px rgba(38,208,124,.15); }
+.dot--off { background: #c7ccd7; }
+
+/* 텍스트 */
+.typeahead__name{
+  display: flex;              /* 텍스트 + 칩을 한 줄로 */
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;        /* 줄바꿈 금지 */
+  overflow: hidden;           /* 영역 넘치면 숨김 */
+  text-overflow: ellipsis;    /* 말줄임 */
+}
+.typeahead__sub  { margin-top: 2px; font-size: 12px; color: color-mix(in oklab, var(--text) 65%, white); }
+
+/* “오프라인” 배지 */
+.badge-off {
+  margin-left: 8px;
+  font-size: 11px; font-weight: 800;
+  padding: 2px 6px; border-radius: 999px;
+  background: #f3f4f8; color: #7a8190;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* 팝오버의 '시작' 버튼(작은 고스트 스타일) */
+.typeahead-pop .btn--xs {
+  padding: 6px 10px; font-size: 12px; border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--primary) 18%, var(--border));
+  background: #fff; color: var(--text);
+}
+.typeahead-pop .btn--xs:hover { background: color-mix(in oklab, var(--primary) 8%, #fff); }
+
+
+/* 입력 도움말 */
+.form-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 /* =============================================================
    FAB
    ============================================================= */
