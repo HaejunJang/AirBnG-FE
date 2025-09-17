@@ -71,3 +71,4 @@ export const getStorageDetail = (storage) => ({
     // 반려 사유가 있는 경우 포함
     rejectReason: storage.rejectReason || null
 });
+
