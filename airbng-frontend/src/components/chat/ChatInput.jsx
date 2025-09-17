@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import uploadIcon from '../../assets/img_upload_ic.svg';
 
 const IDLE_MS = 1500;
 const THROTTLE_MS = 800;
@@ -83,7 +84,9 @@ export default function ChatInput({ onSend, onTyping, onAttach }) {
 
   return (
     <div className="chat-input">
-      <button className="chat-input__attach" onClick={openPicker} aria-label="첨부">📎</button>
+      <button className="chat-input__attach" onClick={openPicker} aria-label="첨부">
+        <img src={uploadIcon} alt="" />
+      </button>
       <input ref={fileRef} type="file" multiple onChange={onFileChange} hidden />
       <input
         className="chat-input__field input"

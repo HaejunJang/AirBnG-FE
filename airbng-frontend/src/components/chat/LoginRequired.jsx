@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import '../../styles/chat.css';
 
 export default function LoginRequired({ kind = '채팅' }) {
   const location = useLocation();

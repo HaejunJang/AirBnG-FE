@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import ChatMessage from './ChatMessage';
@@ -8,6 +8,7 @@ import useStomp from '../../hooks/useStomp';
 import usePersonalQueues from '../../hooks/usePersonalQueues';
 import usePeer from '../../hooks/usePeer';
 import { markRead as markReadApi, uploadAttachment } from '../../api/chatApi'; // ← 추가
+import { decorateWithDividers } from '../../utils/chatDate';
 import '../../styles/chat.css';
 
 const PEER_ACTIVE_WINDOW_MS = 8000;
@@ -267,10 +268,24 @@ export default function ChatRoom({ convId, meId }) {
           </div>
         )}
 
-        {messages.map((m, i) => {
-          const prev = i > 0 ? messages[i - 1] : null;
-          const showName = Number(m.senderId) !== Number(meId) && (!prev || prev.senderId !== m.senderId);
-          const isMine = Number(m?.senderId) === Number(meId);
+        {useMemo(() => decorateWithDividers(messages), [messages]).map((it, i, arr) => {
+          if (it.kind === 'divider') {
+            return (
+              <div key={`d-${it.key}-${i}`} className="date-chip">
+                <span>{it.label}</span>
+              </div>
+            );
+          }
+          const m = it; // kind: 'message'
+          // 직전 'message'만 찾아서 이름 표시 여부 계산
+          let prevMsg = null;
+          for (let j = i - 1; j >= 0; j--) {
+            if (arr[j] && arr[j].kind === 'message') { prevMsg = arr[j]; break; }
+          }
+          const showName =
+            Number(m.senderId) !== Number(meId) &&
+            (!prevMsg || prevMsg.senderId !== m.senderId);
+          const isMine = Number(m.senderId) === Number(meId);
 
           return (
             <ChatMessage
