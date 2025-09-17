@@ -287,3 +287,29 @@
 .summaryOwnerName {
     color: #6c757d;
 }
+
+/* Loading 스타일 - LockerReview.module.css에 추가 */
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1rem;
+}
+
+/* 버튼 비활성화 스타일 개선 */
+.approveButton:disabled,
+.rejectButton:disabled,
+.rejectModalConfirmButton:disabled,
+.rejectModalCancelButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 페이지네이션 로딩 상태 */
+.pagination .disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
