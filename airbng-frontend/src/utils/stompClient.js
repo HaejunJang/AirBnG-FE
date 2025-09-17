@@ -28,7 +28,7 @@ export function getStompClient() {
     reconnectDelay: 5000,
     heartbeatIncoming: 10000,
     heartbeatOutgoing: 10000,
-    debug: (s) => console.debug('[STOMP]', s),
+    // debug: (s) => console.debug('[STOMP]', s),
     connectHeaders: (() => {
       const t = getAccessToken();
       return t ? { Authorization: `Bearer ${t}` } : {};
@@ -38,7 +38,7 @@ export function getStompClient() {
       client.connectHeaders = t ? { Authorization: `Bearer ${t}` } : {};
     },
     onConnect: (frame) => {
-      console.log('[STOMP] connected');
+      // console.log('[STOMP] connected');
       emit('connect', frame);
     },
     onStompError: (frame) => {

@@ -1,18 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuid } from 'uuid';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import useChatRoom from '../../hooks/useChatRoom';
 import useStomp from '../../hooks/useStomp';
 import usePersonalQueues from '../../hooks/usePersonalQueues';
 import usePeer from '../../hooks/usePeer';
-import { markRead as markReadApi } from '../../api/chatApi';
+import { markRead as markReadApi, uploadAttachment } from '../../api/chatApi'; // ← 추가
 import '../../styles/chat.css';
 
 const PEER_ACTIVE_WINDOW_MS = 8000;
 const PRESENCE_PING_MS = 20000;
 const RELOAD_FLAG = 'chat:reloading';
-const PRESENCE_GRACE_MS = 600; // 입장 직후 배지 보류 시간
+const PRESENCE_GRACE_MS = 600;
 
 export default function ChatRoom({ convId, meId }) {
   const listRef = useRef(null);
@@ -33,8 +34,8 @@ export default function ChatRoom({ convId, meId }) {
   const reportSeenRef = useRef(null);
 
   const { connected, publish } = useStomp();
-  const { messages, sendMessage, loadMore, hasMore, applyAck } =
-    useChatRoom(convId, meId, { ready: connected });
+  const { messages, sendMessage, loadMore, hasMore, applyAck, pushLocal } =
+    useChatRoom(convId, meId, { ready: connected }); // ← pushLocal 사용
 
   const nav = useNavigate();
   const { displayName, profileUrl } = usePeer(convId);
@@ -54,18 +55,13 @@ export default function ChatRoom({ convId, meId }) {
   const pokePeerInRoom = useCallback(() => {
     peerActiveAtRef.current = Date.now();
     setPeerInRoom(true);
-    setPresenceSettled(true); // 이벤트를 받았다는 건 handshake 완료
+    setPresenceSettled(true);
     clearTimeout(peerDecayTimerRef.current);
     peerDecayTimerRef.current = setTimeout(() => {
-      if (Date.now() - peerActiveAtRef.current >= PEER_ACTIVE_WINDOW_MS) {
-        setPeerInRoom(false);
-      }
+      if (Date.now() - peerActiveAtRef.current >= PEER_ACTIVE_WINDOW_MS) setPeerInRoom(false);
     }, PEER_ACTIVE_WINDOW_MS + 50);
-    // 미세 최적화: 존재 신호를 받았으면 즉시 읽은 것으로 간주
+
     setPeerLastReadSeq(prev => {
-      // messages는 클로저 값이므로 안전하게 한 번 더 계산하고, 더 큰 값만 적용
-      // (과도하게 앞지르지 않도록 마지막 유효 seq 기준)
-      // 필요 없으면 이 블록은 생략 가능
       try {
         const arr = messages || [];
         let lastValid = 0;
@@ -76,7 +72,7 @@ export default function ChatRoom({ convId, meId }) {
         return lastValid ? Math.max(prev, lastValid) : prev;
       } catch { return prev; }
     });
-  }, []);
+  }, [messages]);
 
   const lastValidSeqOf = (arr = []) => {
     for (let i = arr.length - 1; i >= 0; i--) {
@@ -111,22 +107,11 @@ export default function ChatRoom({ convId, meId }) {
     clearTimeout(peerDecayTimerRef.current);
   }, [convId]);
 
-  // 같은 탭 새로고침 감지용 플래그
-  useEffect(() => {
-    const onBeforeUnload = () => {
-      try { sessionStorage.setItem(RELOAD_FLAG, '1'); } catch {}
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, []);
-
   // 최근 수신이 상대면 presence
   useEffect(() => {
     if (!messages?.length) return;
     const m = messages[messages.length - 1];
-    if (m && Number(m.senderId) !== Number(meId)) {
-      pokePeerInRoom();
-    }
+    if (m && Number(m.senderId) !== Number(meId)) pokePeerInRoom();
   }, [messages, meId, pokePeerInRoom]);
 
   // 초기 메시지로 상대 읽음 베이스라인
@@ -159,14 +144,11 @@ export default function ChatRoom({ convId, meId }) {
     });
 
     personal.subscribeTyping?.(convId, (ev) => {
-      console.log('[TYPING EVT]', ev);
-      pokePeerInRoom(); // true/false 모두 presence
+      pokePeerInRoom();
       const isTyping = !!ev?.typing;
       setPeerTyping(isTyping);
       clearTimeout(typingClearRef.current);
-      if (isTyping) {
-        typingClearRef.current = setTimeout(() => setPeerTyping(false), 2000);
-      }
+      if (isTyping) typingClearRef.current = setTimeout(() => setPeerTyping(false), 2000);
     });
 
     return () => {
@@ -196,13 +178,13 @@ export default function ChatRoom({ convId, meId }) {
     reportSeenRef.current?.(lastSeq);
   }, [messages]);
 
-  // 연결 직후: presence keepalive + 초기 read sync + handshake 유예
+  // 연결 직후
   useEffect(() => {
     if (!connected) return;
 
     const ping = () => publish(`/app/conversations/${convId}/typing`, { typing: false });
+    ping();
 
-    ping(); // 즉시 존재 핑
     const doSync = () => {
       const lastSeq = lastValidSeqOf(messages);
       reportSeenRef.current?.(lastSeq);
@@ -210,7 +192,6 @@ export default function ChatRoom({ convId, meId }) {
     doSync();
     const syncTimer = setTimeout(doSync, 200);
 
-    // 새로고침 직후면 즉시 플래그 해제 + 배지 억제 완료 상태로
     try {
       if (sessionStorage.getItem(RELOAD_FLAG)) {
         sessionStorage.removeItem(RELOAD_FLAG);
@@ -218,33 +199,11 @@ export default function ChatRoom({ convId, meId }) {
       }
     } catch {}
 
-    // handshake 유예가 끝난 뒤부터 배지 계산 활성화
     const grace = setTimeout(() => setPresenceSettled(true), PRESENCE_GRACE_MS);
-
     const keep = setInterval(ping, PRESENCE_PING_MS);
 
-    return () => {
-      clearInterval(keep);
-      clearTimeout(syncTimer);
-      clearTimeout(grace);
-    };
-  }, [connected, convId, publish]);
-
-  // 가시성 복귀 시 동기화
-  useEffect(() => {
-    const sync = () => {
-      publish(`/app/conversations/${convId}/typing`, { typing: false });
-      const lastSeq = lastValidSeqOf(messages);
-      reportSeenRef.current?.(lastSeq);
-    };
-    const onVis = () => { if (document.visibilityState === 'visible') sync(); };
-    window.addEventListener('focus', sync);
-    document.addEventListener('visibilitychange', onVis);
-    return () => {
-      window.removeEventListener('focus', sync);
-      document.removeEventListener('visibilitychange', onVis);
-    };
-  }, [messages, publish, convId]);
+    return () => { clearInterval(keep); clearTimeout(syncTimer); clearTimeout(grace); };
+  }, [connected, convId, publish, messages]);
 
   const onSend = useCallback((text) => {
     sendMessage(text);
@@ -254,10 +213,42 @@ export default function ChatRoom({ convId, meId }) {
   }, [sendMessage, messages, publish, convId]);
 
   const onTyping = useCallback((typing) => {
-    // publish(`/app/conversations/${convId}/typing`, { typing });
-    const ok = publish(`/app/conversations/${convId}/typing`, { typing });
-    console.log('[STOMP PUBLISH]', { dest: `/app/conversations/${convId}/typing`, typing, ok });
+    publish(`/app/conversations/${convId}/typing`, { typing });
   }, [publish, convId]);
+
+  // ===== 첨부 업로드(낙관적 → 서버 교체) =====
+  const onAttach = useCallback(async (files) => {
+    for (const file of files) {
+      const isImage = /^image\//.test(file.type) || /\.(png|jpg|jpeg|gif|webp)$/i.test(file.name);
+      const kind = isImage ? 'image' : 'file';
+      const msgId = uuid();
+
+      // 1) 낙관적 메시지
+      const localUrl = isImage ? URL.createObjectURL(file) : undefined;
+      pushLocal({
+        convId, msgId,
+        senderId: meId, senderName: 'me',
+        type: kind,
+        attachments: [{
+          attachmentId: `local-${msgId}`,
+          kind, mime: file.type, size: file.size,
+          imageUrl: localUrl, fileName: file.name,
+        }],
+        text: null,
+        _pending: true,
+        sentAtMs: Date.now(),
+      });
+
+      // 2) 업로드
+      try {
+        await uploadAttachment(convId, file, { kind, msgId });
+        // 성공 시 서버 브로드캐스트로 정식 메시지가 들어오며 기존 낙관적이 교체됨(applyAck 로직)
+      } catch (e) {
+        console.error('upload failed', e);
+        applyAck({ msgId, failed: true }); // UI에 실패 표시
+      }
+    }
+  }, [convId, meId, pushLocal, applyAck]);
 
   return (
     <section className="chat-room">
@@ -297,7 +288,7 @@ export default function ChatRoom({ convId, meId }) {
         })}
       </div>
 
-      <ChatInput onSend={onSend} onTyping={onTyping} />
+      <ChatInput onSend={onSend} onTyping={onTyping} onAttach={onAttach} />
     </section>
   );
 }

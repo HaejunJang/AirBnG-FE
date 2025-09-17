@@ -1,38 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-/**
- * 입력 타이핑 이벤트 전송 컴포넌트
- * - 타이핑 true를 쓰로틀링(중복 전송 방지)
- * - 입력 멈추면 일정 시간 후 false 자동 전송(아이들 타이머)
- * - 전송/blur 시 즉시 false
- */
-const IDLE_MS = 1500;   // 입력 멈추고 1.5s 후 typing:false
-const THROTTLE_MS = 800; // typing:true 과다 송신 방지
+const IDLE_MS = 1500;
+const THROTTLE_MS = 800;
 
-export default function ChatInput({ onSend, onTyping }) {
+export default function ChatInput({ onSend, onTyping, onAttach }) {
   const [text, setText] = useState('');
   const idleTimerRef = useRef(null);
   const lastTrueAtRef = useRef(0);
+  const fileRef = useRef(null);
 
   const emitTypingTrue = useCallback(() => {
     const now = Date.now();
     if (now - lastTrueAtRef.current >= THROTTLE_MS) {
-      console.log('[TYPING SEND]', { typing: true, at: new Date().toISOString() });
       onTyping?.(true);
       lastTrueAtRef.current = now;
     }
   }, [onTyping]);
 
-  const emitTypingFalse = useCallback(() => {
-    console.log('[TYPING SEND]', { typing: false, at: new Date().toISOString() });
-    onTyping?.(false);
-  }, [onTyping]);
+  const emitTypingFalse = useCallback(() => { onTyping?.(false); }, [onTyping]);
 
   const scheduleIdle = useCallback(() => {
     clearTimeout(idleTimerRef.current);
-    idleTimerRef.current = setTimeout(() => {
-      emitTypingFalse();
-    }, IDLE_MS);
+    idleTimerRef.current = setTimeout(() => emitTypingFalse(), IDLE_MS);
   }, [emitTypingFalse]);
 
   const handleChange = (e) => {
@@ -47,25 +36,55 @@ export default function ChatInput({ onSend, onTyping }) {
     onSend?.(t);
     setText('');
     clearTimeout(idleTimerRef.current);
-    emitTypingFalse(); // 전송 즉시 false
+    emitTypingFalse();
   }, [text, onSend, emitTypingFalse]);
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      send();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   };
 
-  const handleBlur = () => {
-    clearTimeout(idleTimerRef.current);
-    emitTypingFalse();
+  const handleBlur = () => { clearTimeout(idleTimerRef.current); emitTypingFalse(); };
+
+  // --- 첨부 ---
+  const openPicker = () => fileRef.current?.click();
+  const onFileChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length) onAttach?.(files);
+    e.target.value = ''; // 같은 파일 재선택 허용
   };
+
+  // 붙여넣기 이미지/파일
+  useEffect(() => {
+    const onPaste = (e) => {
+      const files = Array.from(e.clipboardData?.files || []);
+      if (files.length) onAttach?.(files);
+    };
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [onAttach]);
+
+  // 드래그 앤 드롭
+  useEffect(() => {
+    const prevent = (e) => { e.preventDefault(); e.stopPropagation(); };
+    const onDrop = (e) => {
+      prevent(e);
+      const files = Array.from(e.dataTransfer?.files || []);
+      if (files.length) onAttach?.(files);
+    };
+    window.addEventListener('dragover', prevent);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('dragover', prevent);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, [onAttach]);
 
   useEffect(() => () => clearTimeout(idleTimerRef.current), []);
 
   return (
     <div className="chat-input">
+      <button className="chat-input__attach" onClick={openPicker} aria-label="첨부">📎</button>
+      <input ref={fileRef} type="file" multiple onChange={onFileChange} hidden />
       <input
         className="chat-input__field input"
         placeholder="메시지를 입력하세요…"

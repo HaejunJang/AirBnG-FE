@@ -282,14 +282,18 @@
    Chat Input
    ============================================================= */
 .chat-input {
-  display: grid; grid-template-columns: 1fr 54px; gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr 44px 54px;            /* 입력창이 남은 영역 꽉, 버튼 2개 고정폭 */
+  grid-template-areas: "field attach send";        /* 원하는 순서 고정 */
+  gap: 10px;
+  align-items: center;
   padding: 10px 12px;
   background: var(--surface);
   border-top: 1px solid var(--border);
 }
 .chat-input__field {
   width: 100%; padding: 12px 14px; border-radius: 14px;
-  border: 1px solid var(--border); background: #fff; color: var(--text);
+  border: 1px solid var(--border); background: #fff; color: var(--text); grid-area: field;
 }
 .chat-input__field:focus {
   border-color: var(--primary);
@@ -298,9 +302,114 @@
 .chat-input__send {
   width: 54px; height: 44px; border-radius: 14px;
   background: var(--primary); color: #fff; display: grid; place-items: center;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm); grid-area: send;
 }
 .chat-input__send:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); background: var(--primary-600); }
+
+/* =============================================================
+   Attachments (images & files)
+   ============================================================= */
+
+/* 첨부 버튼 */
+.chat-input__attach {
+  width: 44px; height: 44px; border-radius: 14px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border);
+  background: #fff; color: var(--text);
+  box-shadow: var(--shadow-sm); grid-area: attach;
+}
+.chat-input__attach:hover {
+  background: color-mix(in oklab, var(--primary) 8%, #fff);
+}
+
+/* ---------- Images ---------- */
+.msg-image-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f6f7fb;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+/* skeleton */
+.msg-image--empty {
+  width: clamp(180px, 48vw, 320px);
+  height: clamp(120px, 32vw, 260px);
+  background:
+    linear-gradient(90deg, #f0f2f6 25%, #f7f9fc 37%, #f0f2f6 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* 실제 이미지 */
+.msg-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(48vh, 520px);
+  object-fit: contain;
+  animation: fadeIn .18s ease-out both;
+}
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+/* 업로드 중/실패 상태 오버레이 */
+.msg-image-wrap[data-pending="true"]::after {
+  content: "업로드 중…";
+  position: absolute; inset: auto 8px 8px auto;
+  padding: 4px 8px; font-size: 11px; font-weight: 700;
+  color: #fff; background: color-mix(in oklab, var(--primary) 70%, #000);
+  border-radius: 999px;
+}
+.msg-image-wrap[data-failed="true"] {
+  outline: 2px solid color-mix(in oklab, var(--danger) 90%, #000);
+}
+.msg-error { color: color-mix(in oklab, var(--danger) 85%, #000); font-size: 12px; margin-top: 6px; }
+
+/* hover 살짝 확대 (포인터 있는 환경만) */
+@media (hover:hover) {
+  .msg-image-wrap:hover .msg-image { transform: scale(1.005); transition: transform .15s ease; }
+}
+
+/* ---------- Files ---------- */
+.msg-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in oklab, var(--primary) 30%, var(--border));
+  background: #fff;
+  max-width: 100%;
+}
+.msg-file a {
+  color: var(--text-strong);
+  text-decoration: underline;
+  max-width: min(58vw, 360px);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.msg-file__size { opacity: .65; font-size: 12px; }
+
+/* 대기/실패 */
+.msg-file[data-pending="true"] { opacity: .75; }
+.msg-file[data-failed="true"] {
+  border-color: color-mix(in oklab, var(--danger) 90%, var(--border));
+  background: color-mix(in oklab, var(--danger) 2%, #fff);
+}
+
+/* 내 버블 안(보라 계열 배경)에서도 링크/텍스트 가독성 보장 */
+.bubble--me .msg-file { background: color-mix(in oklab, #fff 10%, var(--primary)); border-color: rgba(255,255,255,.55); }
+.bubble--me .msg-file a,
+.bubble--me .msg-file__size { color: #fff; text-decoration: underline; }
+
+/* 이미지가 버블을 너무 밀지 않도록: 버블 내부 최대폭 제어 보완 */
+.msg-row .bubble .msg-image-wrap,
+.msg-row .bubble .msg-file { max-width: min(100%, var(--bubble-max)); }
 
 /* =============================================================
    Start Conversation

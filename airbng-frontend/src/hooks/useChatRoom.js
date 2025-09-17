@@ -21,14 +21,14 @@ export default function useChatRoom(convId, meId, { ready = true } = {}) {
   const [messages, setMessages] = useState([]);
   const [oldestSeq, setOldestSeq] = useState(null);
 
-  // ACK 전 임시 큐 & 타이머
+  // ACK 전 임시 큐 & 타이머 (텍스트 메시지용)
   const outboxRef = useRef([]); // [{msgId,text,sentAt:number}]
   const timersRef = useRef(new Map()); // msgId -> timeoutId
   const ensureSave = () => saveOutbox(convId, meId, outboxRef.current);
 
   // === 공통 플러시 함수 ===
   const _publishText = useCallback((text, msgId) => {
-    publish(`/app/conversations/${convId}/text`, { text, msgId });
+    return publish(`/app/conversations/${convId}/text`, { text, msgId });
   }, [publish, convId]);
 
   const flushOutbox = useCallback(() => {
@@ -90,13 +90,13 @@ export default function useChatRoom(convId, meId, { ready = true } = {}) {
     return () => { mounted = false; };
   }, [convId, meId, dropPending, flushOutbox]);
 
-  // 토픽 수신(정상 저장된 메시지 에코)
+  // 토픽 수신(정상 저장된 메시지 에코) — 첨부/텍스트 공통
   const handleTopic = useCallback((msg) => {
     setMessages((prev) => {
       const i = prev.findIndex(m => m.msgId === msg.msgId);
       if (i >= 0) {
         const next = prev.slice();
-        next[i] = { ...prev[i], ...msg, _pending: false };
+        next[i] = { ...prev[i], ...msg, _pending: false, failed: false };
         return next;
       }
       return [...prev, msg];
@@ -106,6 +106,13 @@ export default function useChatRoom(convId, meId, { ready = true } = {}) {
   }, [dropPending]);
   useConversationTopic(convId, handleTopic);
 
+  // ===== 새 API: 첨부 낙관적 메시지 추가 =====
+  // ChatRoom.onAttach에서 사용. outbox/timer 없음(HTTP 업로드 → 토픽으로 교체됨).
+  const pushLocal = useCallback((messageLike) => {
+    setMessages((prev) => [...prev, messageLike]);
+  }, []);
+
+  // 텍스트 메시지 전송
   const sendMessage = useCallback((text) => {
     const msgId = uuid();
     const sentAtNum = Date.now();
@@ -117,22 +124,17 @@ export default function useChatRoom(convId, meId, { ready = true } = {}) {
     };
     setMessages((prev) => [...prev, temp]);
 
-    // 보내고, "못 보냈을 때만" outbox에 기록
+    // 보내고, "못 보냈을 때만" outbox에 기록 (보냈더라도 안전타임아웃은 건다)
     const sentNow = _publishText(text, msgId);
     if (!sentNow) {
       outboxRef.current.push({ msgId, text, sentAt: sentAtNum });
       ensureSave();
-      const t = setTimeout(() => dropPending(msgId), ACK_TIMEOUT_MS);
-      timersRef.current.set(msgId, t);
-    } else {
-      // 보냈으면 ACK만 기다렸다가 dropPending(ack)에서 정리됨
-      // 혹시 ACK가 끝내 안 오면(서버 이슈) 임시 뷰만 남을 수 있으니,
-      // "보냈을 때만" 약한 안전장치(예: 30초 후 펜딩 제거) 넣고 싶으면 여기에서만 타이머를 건다.
-      const t = setTimeout(() => dropPending(msgId), ACK_TIMEOUT_MS);
-      timersRef.current.set(msgId, t);
     }
-      return msgId;
-    }, [convId, meId, _publishText, dropPending]);
+    const t = setTimeout(() => dropPending(msgId), ACK_TIMEOUT_MS);
+    timersRef.current.set(msgId, t);
+
+    return msgId;
+  }, [convId, meId, _publishText, dropPending]);
 
   // 브라우저가 offline -> online 되면 즉시 플러시
   useEffect(() => {
@@ -156,10 +158,26 @@ export default function useChatRoom(convId, meId, { ready = true } = {}) {
   // ACK 병합 + 정리
   const applyAck = useCallback((ack) => {
     if (!ack?.msgId) return;
-    setMessages(prev => prev.map(m =>
-      m.msgId === ack.msgId ? { ...m, seq: ack.seq, sentAt: ack.sentAt ?? m.sentAt, _pending: false } : m
-    ));
-    dropPending(ack.msgId);
+
+    setMessages(prev => prev.map(m => {
+      if (m.msgId !== ack.msgId) return m;
+      return {
+        ...m,
+        // 성공 ACK면 seq/sentAt 갱신, 실패면 그대로 유지
+        seq: (ack.failed ? m.seq : (ack.seq ?? m.seq)),
+        sentAt: ack.sentAt ?? m.sentAt,
+        _pending: !!ack.pending ? true : false,
+        failed: !!ack.failed,
+      };
+    }));
+
+    // ⬇실패 ACK일 때는 "지우지 않는다" (사용자에게 재시도 기회 제공)
+    if (!ack.failed) {
+      dropPending(ack.msgId);
+    } else {
+      const t = timersRef.current.get(ack.msgId);
+      if (t) { clearTimeout(t); timersRef.current.delete(ack.msgId); }
+    }
   }, [dropPending]);
 
   // 더보기
@@ -186,5 +204,6 @@ export default function useChatRoom(convId, meId, { ready = true } = {}) {
     };
   }, []);
 
-  return { messages: withSide, sendMessage, loadMore, hasMore: !!oldestSeq, applyAck };
+  // hasMore: 더 가져올 이전 seq가 있으면 true
+  return { messages: withSide, sendMessage, loadMore, hasMore: !!oldestSeq, applyAck, pushLocal };
 }
