@@ -8,6 +8,7 @@ import EmptyLockerCTA from "../components/locker/EmptyLockerCTA";
 import {
   hasMyLocker,
   getMyLocker,
+  getLockerViewStatus,
   toggleLockerActivation,
   deleteLocker,
 } from "../api/lockerApi";
@@ -20,7 +21,10 @@ export default function LockerRootPage() {
   const [loading, setLoading] = useState(true);
   const [hasLocker, setHasLocker] = useState(false);
   const [locker, setLocker] = useState(null);
-  const navigate = useNavigate();
+  const [lockerStatus, setLockerStatus] = useState("REGISTER");
+  const [canRegister, setCanRegister] = useState(false);
+
+    const navigate = useNavigate();
 
   const load = useCallback(async () => {
     try {
@@ -34,6 +38,21 @@ export default function LockerRootPage() {
         setLocker(unbox(meRes));
       } else {
         setLocker(null);
+
+          // 등록 가능 여부 확인
+          try {
+              const statusRes = await getLockerViewStatus();
+              const status = unbox(statusRes);
+              // REJECTED도 등록 가능
+              setCanRegister(
+                  status?.reviewStatus === "REGISTER" || status?.reviewStatus === "REJECTED"
+              );
+          } catch (err) {
+
+              console.error("Locker status fetch failed", err);
+          }
+              setCanRegister(true);
+
       }
     } finally {
       setLoading(false);
@@ -45,6 +64,7 @@ export default function LockerRootPage() {
     if (!isLoggedIn) {
       setHasLocker(false);
       setLocker(null);
+      setCanRegister(false);
       setLoading(false);
       return;
     }
@@ -58,7 +78,7 @@ export default function LockerRootPage() {
 
   const handleDetail = useCallback(() => {
     if (!locker?.lockerId) return;
-    navigate(`/page/lockers/${locker.lockerId}`);
+      navigate(`/page/lockerDetails?lockerId=${locker.lockerId}`);
   }, [navigate, locker]);
 
   const handleToggle = useCallback(async () => {
@@ -75,7 +95,12 @@ export default function LockerRootPage() {
     if (!locker?.lockerId) return;
     if (!window.confirm("정말 삭제하시겠습니까? 삭제된 정보는 복구할 수 없습니다.")) return;
     await deleteLocker(locker.lockerId);
-    await load();
+
+    setLocker(null);
+    setHasLocker(false);
+    setCanRegister(true);
+
+      await load();
   }, [locker, load]);
 
   if (!ready) return null;
@@ -96,7 +121,17 @@ export default function LockerRootPage() {
               onDelete={handleDelete} // 현재 없음 - 나중에 추가
             />
           ) : (
-            <EmptyLockerCTA onRegister={() => navigate("/page/lockers/register")} />
+            // <EmptyLockerCTA onRegister={() => navigate("/page/lockers/register")} />
+              <EmptyLockerCTA
+                  onRegister={() => {
+                      if (!canRegister) {
+                          alert("심사 중인 보관소가 있습니다. 심사를 기다려주세요.");
+                          return;
+                      }
+                      navigate("/page/lockers/register");
+                  }}
+                  disabled={!canRegister}
+              />
           )}
         </main>
       </div>
