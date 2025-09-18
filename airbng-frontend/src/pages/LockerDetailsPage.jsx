@@ -27,6 +27,9 @@ const LockerDetails = () => {
   const [modalImageIndex, setModalImageIndex] = useState(0);
   const [isZzimed, setIsZzimed] = useState(false);
   const [isZzimLoading, setIsZzimLoading] = useState(false);
+  const [isMyLocker, setIsMyLocker] = useState(false);
+  const [userLoading, setUserLoading] = useState(true);
+
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -34,6 +37,17 @@ const LockerDetails = () => {
 
   // 모달 훅 사용
   const { loginModal, showLoginModal, hideLoginModal } = useModal();
+
+  // 🔥 사용자 정보 로딩 완료 체크
+  useEffect(() => {
+    // useAuth에서 사용자 정보 로딩이 완료되었는지 체크
+    // 일반적으로 AuthContext에서 loading 상태를 제공하지만, 없다면 간단한 타이머로 처리
+    const timer = setTimeout(() => {
+      setUserLoading(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [user]);
 
   // bottom-nav 숨기기/보이기 처리
   useEffect(() => {
@@ -55,9 +69,14 @@ const LockerDetails = () => {
     navigate("/page/login");
   };
 
+  const checkIfMyLocker = (keeperId, currentUserId) => {
+    console.log("내 보관소 체크:", { keeperId, currentUserId });
+    return keeperId && currentUserId && keeperId === currentUserId;
+  };
+
   // 찜 상태 확인 API 호출
   const checkZzimStatus = async () => {
-    if (!lockerId || !memberId) return;
+    if (!lockerId || !memberId || isMyLocker) return;
 
     try {
       const response = await checkZzimExists(lockerId, memberId);
@@ -110,6 +129,8 @@ const LockerDetails = () => {
       return;
     }
 
+    if (isMyLocker) return;
+
     try {
       await getReservationForm(lockerId);
       window.location.href = `/page/reservations/form?lockerId=${lockerId}`;
@@ -159,6 +180,8 @@ const LockerDetails = () => {
               lockerName: apiData.result.lockerName,
               address: apiData.result.address,
               addressDetail: apiData.result.addressDetail,
+              keeperId: apiData.result.keeperId,
+              isMyLocker: checkIfMyLocker(apiData.result.keeperId, memberId),
             })
           );
         } else {
@@ -176,14 +199,23 @@ const LockerDetails = () => {
     };
 
     loadLockerDetails(lockerId);
-  }, [lockerId]);
+  }, [lockerId, memberId]);
+
+  // 내 보관소 체크 로직
+  useEffect(() => {
+    if (!userLoading && lockerDetail && lockerDetail.keeperId) {
+      const myLockerStatus = checkIfMyLocker(lockerDetail.keeperId, memberId);
+      console.log("내 보관소 상태 업데이트:", myLockerStatus);
+      setIsMyLocker(myLockerStatus);
+    }
+  }, [lockerDetail, memberId, userLoading]);
 
   // 보관소 상세 정보 로딩 완료 후 찜 상태 확인
   useEffect(() => {
     if (lockerDetail && memberId) {
       checkZzimStatus();
     }
-  }, [lockerDetail, memberId]);
+  }, [lockerDetail, memberId, checkZzimStatus]);
 
   const formatPhoneNumber = (phone) => {
     if (!phone) return "";
@@ -503,7 +535,8 @@ const LockerDetails = () => {
     </div>
   );
 
-  if (loading) return <Loader message="보관소 정보를 불러오는 중..." />;
+  if (loading || userLoading)
+    return <Loader message="보관소 정보를 불러오는 중..." />;
   if (error) return <Loader message={error} isError />;
   if (!lockerDetail)
     return <Loader message="보관소 정보를 찾을 수 없습니다." isError />;
@@ -525,9 +558,9 @@ const LockerDetails = () => {
           <button
             className={`${styles.zzimBtn} ${isZzimed ? styles.active : ""} ${
               isZzimLoading ? styles.loading : ""
-            }`}
+            } ${isMyLocker ? styles.disabled : ""}`}
             onClick={toggleZzim}
-            disabled={isZzimLoading}
+            disabled={isZzimLoading || isMyLocker} // 내 보관소면 찜 비활성화
             aria-label={isZzimed ? "찜 취소" : "찜 하기"}
           >
             {isZzimLoading ? (
@@ -546,12 +579,16 @@ const LockerDetails = () => {
           </button>
           <button
             className={`${styles.reserveBtn} ${
-              !isAvailable ? styles.disabled : ""
+              !isAvailable || isMyLocker ? styles.disabled : ""
             }`}
             onClick={handleReserveClick}
-            disabled={!isAvailable}
+            disabled={!isAvailable || isMyLocker} // 이용 불가거나 내 보관소면 비활성화
           >
-            {isAvailable ? "보관소 선택" : "이용 불가"}
+            {isMyLocker
+              ? "내 보관소 선택 불가"
+              : isAvailable
+              ? "보관소 선택"
+              : "이용 불가"}
           </button>
         </div>
       </div>
