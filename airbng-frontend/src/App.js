@@ -59,8 +59,6 @@ function App() {
             element={<LockerRegisterPage />}
           />
 
-          <Route path="/page/lockerDetails" element={<LockerDetailsPage />} />
-
           <Route
             path="/page/lockers/:lockerId"
             element={<LockerDetailsPage />}
