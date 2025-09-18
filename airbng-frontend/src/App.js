@@ -58,7 +58,14 @@ function App() {
             path="/page/lockers/register"
             element={<LockerRegisterPage />}
           />
+
           <Route path="/page/lockerDetails" element={<LockerDetailsPage />} />
+
+          <Route
+            path="/page/lockers/:lockerId"
+            element={<LockerDetailsPage />}
+          />
+
           <Route path="/page/reservations/list" element={<ReservationList />} />
           <Route
             path="/page/reservations/detail/:id"
@@ -74,6 +81,7 @@ function App() {
           <Route path="/page/notification" element={<Notification />} />
 
           <Route path="/page/mypage/update" element={<MyInfoPage />} />
+
           <Route path="/page/mypage/wallet" element={<MyWallet />} />
           <Route
             path="/page/mypage/account/add"
