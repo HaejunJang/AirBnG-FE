@@ -65,7 +65,7 @@ function App() {
             path="/page/lockers/:lockerId"
             element={<LockerDetailsPage />}
           />
-
+          <Route path="/page/lockerDetails" element={<LockerDetailsPage />} />
           <Route path="/page/reservations/list" element={<ReservationList />} />
           <Route
             path="/page/reservations/detail/:id"
