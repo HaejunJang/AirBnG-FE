@@ -1,4 +1,4 @@
-/* 전역 토큰(global.css)을 사용: --app-max-width, --header-height, --icon-size, --surface, --border, --text, --fast */
+/* 전역 토큰(global.css)을 사용: --app-max-width, --header-height, --header-icon-size, --surface, --border, --text, --fast */
 
 /* 헤더 컴포넌트 */
 .common-header {
@@ -27,15 +27,15 @@
   font-size: var(--fs-20);
   line-height: 20px;
   justify-self: center;
-  flex-grow: 1;
 }
 
 /* 아이콘/스페이서 */
 .back-icon,
+.home-icon,
 .back-spacer,
 .header-spacer {
-  width: var(--icon-size);
-  height: var(--icon-size);
+  width: var(--header-icon-size);
+  height: var(--header-icon-size);
   flex-shrink: 0;
 }
 
@@ -43,13 +43,17 @@
   cursor: pointer;
   justify-self: start;
   transition: opacity var(--fast);
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .home-icon,
 .menu-icon {
   cursor: pointer;
-  width: var(--icon-size);
-  height: var(--icon-size);
+  width: var(--header-icon-size);
+  height: var(--header-icon-size);
   transition: opacity var(--fast);
 }
 
