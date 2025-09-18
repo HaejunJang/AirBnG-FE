@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { walletApi } from "../api/myWalletApi";
 import styles from "../styles/pages/MyWallet.module.css";
+import plusIcon from "../assets/plusIcon.svg";
+import minusIcon from "../assets/minusIcon.svg";
+import historyIcon from "../assets/historyIcon.svg";
+import cardIcon from "../assets/cardIcon.svg";
 
 export default function MyWallet() {
   const { user, isLoggedIn } = useAuth();
@@ -173,7 +177,7 @@ export default function MyWallet() {
         {/* 지갑 카드 */}
         <div className={styles.walletCard}>
           <div className={styles.walletHeader}>
-            <span className={styles.walletIcon}>💳</span>
+            <img src={cardIcon} alt="충전" className={styles.walletIcon} />
             <h2 className={styles.walletTitle}>짐페이</h2>
           </div>
           <div className={styles.walletBalance}>
@@ -182,22 +186,33 @@ export default function MyWallet() {
               {formatWon(walletData?.balance)}
             </h1>
           </div>
-        </div>
-
-        {/* 액션 버튼들 */}
-        <div className={styles.actionButtons}>
-          <button className={styles.actionBtn} onClick={goToCharge}>
-            <span className={styles.actionBtnIcon}>⬆️</span>
-            <span className={styles.actionBtnText}>충전</span>
-          </button>
-          <button className={styles.actionBtn} onClick={goToWithdraw}>
-            <span className={styles.actionBtnIcon}>⬇️</span>
-            <span className={styles.actionBtnText}>출금</span>
-          </button>
-          <button className={styles.actionBtn} onClick={goToHistory}>
-            <span className={styles.actionBtnIcon}>📋</span>
-            <span className={styles.actionBtnText}>사용내역</span>
-          </button>
+          {/* 지갑 카드 내부 액션 버튼들 */}
+          <div className={styles.walletActionButtons}>
+            <button className={styles.walletActionBtn} onClick={goToCharge}>
+              <img
+                src={plusIcon}
+                alt="충전"
+                className={styles.walletActionBtnIcon}
+              />
+              <span className={styles.walletActionBtnText}>충전</span>
+            </button>
+            <button className={styles.walletActionBtn} onClick={goToWithdraw}>
+              <img
+                src={minusIcon}
+                alt="출금"
+                className={styles.walletActionBtnIcon}
+              />
+              <span className={styles.walletActionBtnText}>출금</span>
+            </button>
+            <button className={styles.walletActionBtn} onClick={goToHistory}>
+              <img
+                src={historyIcon}
+                alt="거래내역"
+                className={styles.walletActionBtnIcon}
+              />
+              <span className={styles.walletActionBtnText}>내역</span>
+            </button>
+          </div>
         </div>
 
         {/* 연동 계좌 섹션 */}
@@ -210,7 +225,7 @@ export default function MyWallet() {
                 onClick={goToAddAccount}
                 style={{ fontSize: "12px", padding: "6px 12px" }}
               >
-                + 계좌 추가
+                + 계좌 등록
               </button>
             )}
           </div>

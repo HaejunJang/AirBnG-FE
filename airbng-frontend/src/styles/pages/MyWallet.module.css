@@ -71,7 +71,7 @@
 .walletCard {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 20px;
-  padding: 25px;
+  padding: 25px 25px 20px 25px; /* 아래 패딩 조정 */
   margin-bottom: 20px;
   color: white;
   position: relative;
@@ -132,10 +132,50 @@
 }
 
 /* 액션 버튼들 */
-.actionButtons {
+/* .actionButtons {
   display: flex;
   gap: 12px;
   margin-bottom: 30px;
+} */
+.walletActionButtons {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+.walletActionBtn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.walletActionBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.walletActionBtn:active {
+  transform: translateY(0);
+}
+
+.walletActionBtnIcon {
+  font-size: 16px;
+}
+
+.walletActionBtnText {
+  font-size: 14px;
 }
 
 .actionBtn {
