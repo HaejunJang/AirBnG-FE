@@ -49,6 +49,7 @@ export function AuthProvider({ children }) {
           id: u.id ?? saved?.id ?? null,
           nickname: u.nickname || saved?.nickname || "",
           roles: u.roles && u.roles.length ? u.roles : saved?.roles || [],
+          profileImageUrl: saved?.profileImageUrl || "",
         });
         setReady(true);
         return;
@@ -71,6 +72,7 @@ export function AuthProvider({ children }) {
               id: u.id ?? saved?.id ?? null,
               nickname: u.nickname || saved?.nickname || "",
               roles: u.roles && u.roles.length ? u.roles : saved?.roles || [],
+              profileImageUrl: saved?.profileImageUrl || "",
             });
           } else {
             clearTokens();
