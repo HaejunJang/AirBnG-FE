@@ -50,8 +50,9 @@ export default function LockerRootPage() {
           } catch (err) {
 
               console.error("Locker status fetch failed", err);
-          }
               setCanRegister(true);
+          }
+
 
       }
     } finally {
