@@ -37,8 +37,12 @@ const LockerDetails = () => {
 
   // 모달 훅 사용
   const { loginModal, showLoginModal, hideLoginModal } = useModal();
+  const originScroll = window.scrollY;
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-  // 🔥 사용자 정보 로딩 완료 체크
+  // 사용자 정보 로딩 완료 체크
   useEffect(() => {
     // useAuth에서 사용자 정보 로딩이 완료되었는지 체크
     // 일반적으로 AuthContext에서 loading 상태를 제공하지만, 없다면 간단한 타이머로 처리
@@ -109,7 +113,7 @@ const LockerDetails = () => {
       setIsZzimLoading(true);
       const response = await toggleZzimApi(lockerId, memberId);
       const data = response.data || response;
-      if (data.code === 1000) {
+      if (data.code === 1000 || data.code === 7000 || data.code === 7001) {
         await checkZzimStatus();
       } else {
         throw new Error(data.message || "찜 처리 중 오류 발생");
@@ -526,9 +530,18 @@ const LockerDetails = () => {
     );
   };
 
+  // const handleBack = (originScroll) => {
+  //   window.scrollTo(originScroll);
+  //   navigate(-1);
+  // };
+
   const Loader = ({ message, isError }) => (
     <div className={styles.container}>
-      <Header headerTitle="보관소 상세" showBackButton={true} />
+      <Header
+        headerTitle="보관소 상세"
+        showBackButton={true}
+        // onBack={handleBack}
+      />
       <div className={styles.content}>
         <div className={isError ? styles.error : styles.loading}>{message}</div>
       </div>
