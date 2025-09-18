@@ -435,6 +435,78 @@
   transform: translateY(-1px);
 }
 
+/* 계좌 액션 영역 */
+.accountActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 메뉴 컨테이너 */
+.menuContainer {
+  position: relative;
+}
+
+/* 메뉴 버튼 */
+.menuButton {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+}
+
+.menuButton:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+/* 드롭다운 */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  display: block;
+}
+
+.dropdownItem:hover {
+  background: #f8f9fa;
+}
+
+.dropdownItem:last-child {
+  color: #dc3545;
+}
+
+.dropdownItem:last-child:hover {
+  background: #fff5f5;
+}
 /* 반응형 */
 @media (max-width: 414px) {
   .container {

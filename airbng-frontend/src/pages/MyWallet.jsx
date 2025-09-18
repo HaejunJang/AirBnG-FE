@@ -36,6 +36,36 @@ export default function MyWallet() {
         return require("../assets/bank-default.svg").default;
     }
   };
+  // 상태 관리 부분에 추가
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  // 드롭다운 토글 함수
+  const toggleDropdown = (accountId) => {
+    setActiveDropdown(activeDropdown === accountId ? null : accountId);
+  };
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveDropdown(null);
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // 메뉴 액션 함수들
+  const handleSetPrimary = (accountId) => {
+    console.log("주계좌 변경:", accountId);
+    setActiveDropdown(null);
+    // TODO: API 연동
+  };
+
+  const handleDeleteAccount = (accountId) => {
+    console.log("계좌 삭제:", accountId);
+    setActiveDropdown(null);
+    // TODO: API 연동
+  };
 
   // 금액 포맷터
   const formatWon = (amount) => {
@@ -232,7 +262,7 @@ export default function MyWallet() {
 
           {hasAccounts ? (
             <div>
-              {/* 주계좌 우선 표시 */}
+              {/* 주계좌 */}
               {primaryAccount && (
                 <div className={styles.accountCard}>
                   <div className={styles.accountHeader}>
@@ -252,7 +282,32 @@ export default function MyWallet() {
                         </div>
                       </div>
                     </div>
-                    <span className={styles.primaryBadge}>주계좌</span>
+                    <div className={styles.accountActions}>
+                      <span className={styles.primaryBadge}>주계좌</span>
+                      <div className={styles.menuContainer}>
+                        <button
+                          className={styles.menuButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDropdown(primaryAccount.accountId);
+                          }}
+                        >
+                          ⋯
+                        </button>
+                        {activeDropdown === primaryAccount.accountId && (
+                          <div className={styles.dropdown}>
+                            <button
+                              className={styles.dropdownItem}
+                              onClick={() =>
+                                handleDeleteAccount(primaryAccount.accountId)
+                              }
+                            >
+                              계좌 삭제하기
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <div className={styles.accountDetails}>
                     <p className={styles.accountNumber}>
@@ -284,6 +339,37 @@ export default function MyWallet() {
                             {account.bankCodes?.[0]?.korName || "은행"}은행
                           </div>
                         </div>
+                      </div>
+                      <div className={styles.menuContainer}>
+                        <button
+                          className={styles.menuButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDropdown(account.accountId);
+                          }}
+                        >
+                          ⋯
+                        </button>
+                        {activeDropdown === account.accountId && (
+                          <div className={styles.dropdown}>
+                            <button
+                              className={styles.dropdownItem}
+                              onClick={() =>
+                                handleSetPrimary(account.accountId)
+                              }
+                            >
+                              주계좌 변경
+                            </button>
+                            <button
+                              className={styles.dropdownItem}
+                              onClick={() =>
+                                handleDeleteAccount(account.accountId)
+                              }
+                            >
+                              계좌 삭제하기
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className={styles.accountDetails}>
