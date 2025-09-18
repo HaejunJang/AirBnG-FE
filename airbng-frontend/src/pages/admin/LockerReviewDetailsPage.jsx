@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
-import { approveLockerReview, rejectLockerReview } from '../../api/admin/adminApi';
 import styles from '../../styles/admin/pages/LockerReviewDetails.module.css';
 import lockeraddress from "../../assets/location.svg"
 import lockerusername from "../../assets/lockeruser.svg"
 import lockertel from "../../assets/call.svg"
+import { approveLockerReview, rejectLockerReview } from '../../api/admin/adminApi'; // API 함수 import
 
-const StorageDetailModal = ({ storage, status, onRefresh }) => {
+const StorageDetailModal = ({ storage, status, onApprove, onReject, onStatusChange }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalImageIndex, setModalImageIndex] = useState(0);
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Debug logging - remove in production
+    console.log('StorageDetailModal received storage:', storage);
+    console.log('StorageDetailModal received storage:', storage.result.address);
+    console.log('StorageDetailModal received status:', status);
 
     const formatPhoneNumber = (phone) => {
         if (!phone) return '';
@@ -22,17 +27,17 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
     };
 
     const nextImage = () => {
-        if (storage?.images && storage.images.length > 1) {
+        if (storage?.result.images && storage.result.images.length > 1) {
             setCurrentImageIndex((prev) =>
-                prev === storage.images.length - 1 ? 0 : prev + 1
+                prev === storage.result.images.length - 1 ? 0 : prev + 1
             );
         }
     };
 
     const prevImage = () => {
-        if (storage?.images && storage.images.length > 1) {
+        if (storage?.result.images && storage.result.images.length > 1) {
             setCurrentImageIndex((prev) =>
-                prev === 0 ? storage.images.length - 1 : prev - 1
+                prev === 0 ? storage.result.images.length - 1 : prev - 1
             );
         }
     };
@@ -48,17 +53,17 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
     };
 
     const nextModalImage = () => {
-        if (storage?.images && storage.images.length > 1) {
+        if (storage?.result.images && storage.result.images.length > 1) {
             setModalImageIndex((prev) =>
-                prev === storage.images.length - 1 ? 0 : prev + 1
+                prev === storage.result.images.length - 1 ? 0 : prev + 1
             );
         }
     };
 
     const prevModalImage = () => {
-        if (storage?.images && storage.images.length > 1) {
+        if (storage?.result.images && storage.result.images.length > 1) {
             setModalImageIndex((prev) =>
-                prev === 0 ? storage.images.length - 1 : prev - 1
+                prev === 0 ? storage.result.images.length - 1 : prev - 1
             );
         }
     };
@@ -66,37 +71,57 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
     const getStatusBadgeClass = () => {
         switch (status) {
             case '대기중':
+            case 'WAITING':
                 return styles.statusPending;
             case '승인됨':
+            case 'APPROVED':
                 return styles.statusApproved;
             case '반려됨':
+            case 'REJECTED':
                 return styles.statusRejected;
             default:
                 return styles.statusPending;
         }
     };
 
-    const handleApprove = async () => {
-        if (!storage?.lockerReviewId || !storage?.memberId) {
-            alert('필요한 정보가 없습니다.');
-            return;
+    const getStatusText = () => {
+        switch (status) {
+            case 'WAITING':
+                return '대기중';
+            case 'APPROVED':
+                return '승인됨';
+            case 'REJECTED':
+                return '반려됨';
+            default:
+                return status;
         }
+    };
+
+    const handleApprove = async () => {
+        if (isLoading) return;
 
         try {
-            setLoading(true);
-            const response = await approveLockerReview(storage.lockerReviewId, storage.memberId);
+            setIsLoading(true);
 
-            if (response.data) {
-                alert('보관소가 승인되었습니다.');
-                if (onRefresh) {
-                    onRefresh();
-                }
+            // API 호출
+            await approveLockerReview(storage.result.lockerId, storage.result.memberId);
+
+            // 성공 시 콜백 호출
+            if (onApprove) {
+                onApprove(storage);
             }
+
+            // 상태 변경 알림
+            if (onStatusChange) {
+                onStatusChange(storage.result.lockerId, 'APPROVED');
+            }
+
+            alert('보관소가 승인되었습니다.');
         } catch (error) {
-            console.error('승인 처리 중 오류 발생:', error);
-            alert('승인 처리 중 오류가 발생했습니다.');
+            console.error('보관소 승인 실패:', error);
+            alert('보관소 승인에 실패했습니다. 다시 시도해주세요.');
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -105,33 +130,32 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
     };
 
     const handleRejectConfirm = async () => {
-        if (!rejectReason.trim()) {
-            alert('반려 사유를 입력해주세요.');
-            return;
-        }
-
-        if (!storage?.lockerReviewId || !storage?.memberId) {
-            alert('필요한 정보가 없습니다.');
-            return;
-        }
+        if (!rejectReason.trim() || isLoading) return;
 
         try {
-            setLoading(true);
-            const response = await rejectLockerReview(storage.lockerReviewId, storage.memberId, rejectReason);
+            setIsLoading(true);
 
-            if (response.data) {
-                alert('보관소가 반려되었습니다.');
-                setShowRejectModal(false);
-                setRejectReason('');
-                if (onRefresh) {
-                    onRefresh();
-                }
+            // API 호출
+            await rejectLockerReview(storage.result.lockerId, storage.result.memberId, rejectReason);
+
+            // 성공 시 콜백 호출
+            if (onReject) {
+                onReject(storage, rejectReason);
             }
+
+            // 상태 변경 알림
+            if (onStatusChange) {
+                onStatusChange(storage.result.lockerId, 'REJECTED', rejectReason);
+            }
+
+            setShowRejectModal(false);
+            setRejectReason('');
+            alert('보관소가 반려되었습니다.');
         } catch (error) {
-            console.error('반려 처리 중 오류 발생:', error);
-            alert('반려 처리 중 오류가 발생했습니다.');
+            console.error('보관소 반려 실패:', error);
+            alert('보관소 반려에 실패했습니다. 다시 시도해주세요.');
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -140,20 +164,28 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
         setRejectReason('');
     };
 
-    if (!storage) return null;
+    if (!storage) {
+        return <div className={styles.container}>보관소 정보를 불러올 수 없습니다.</div>;
+    }
+
+    // 백엔드 응답에 맞는 필드명 사용
+    const keeperName = storage.result.memberName;
+    const keeperPhone = storage.result.memberPhone;
+    const reviewComment = storage.result.reviewComment;
+    const priceInfo = storage.result.jimTypeResults || storage.result.jimTypes; // 백엔드 응답에 따라 둘 다 지원
 
     return (
         <div className={styles.container}>
             {/* 헤더 */}
             <div className={styles.header}>
-                <h2 className={styles.title}>{storage.lockerName}</h2>
+                <h2 className={styles.title}>{storage.result.lockerName || 'Unknown Locker'}</h2>
                 <span className={`${styles.statusBadge} ${getStatusBadgeClass()}`}>
-                    {status}
+                    {getStatusText()}
                 </span>
             </div>
 
             {/* 이미지 슬라이더 */}
-            {storage.images && storage.images.length > 0 && (
+            {storage.result.images && storage.result.images.length > 0 && (
                 <div className={styles.imageSliderContainer}>
                     <div className={styles.imageSlider}>
                         <div
@@ -162,7 +194,7 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
                                 transform: `translateX(-${currentImageIndex * 100}%)`
                             }}
                         >
-                            {storage.images.map((img, idx) => (
+                            {storage.result.images.map((img, idx) => (
                                 <div key={idx} className={styles.imageSlide}>
                                     <img
                                         src={img}
@@ -174,7 +206,7 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
                             ))}
                         </div>
 
-                        {storage.images.length > 1 && (
+                        {storage.result.images.length > 1 && (
                             <>
                                 <button
                                     className={`${styles.sliderBtn} ${styles.prevBtn}`}
@@ -191,9 +223,9 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
                             </>
                         )}
 
-                        {storage.images.length > 1 && (
+                        {storage.result.images.length > 1 && (
                             <div className={styles.sliderIndicators}>
-                                {storage.images.map((_, idx) => (
+                                {storage.result.images.map((_, idx) => (
                                     <div
                                         key={idx}
                                         className={`${styles.indicator} ${
@@ -212,12 +244,13 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
             <div className={styles.infoSection}>
                 <div className={styles.infoRow}>
                     <div className={styles.infoItem}>
-                        <div className={styles.infoIcon}><img src={lockeraddress} alt="주소" />
+                        <div className={styles.infoIcon}>
+                            <img src={lockeraddress} alt="주소" />
                         </div>
                         <div className={styles.infoContent}>
                             <span className={styles.infoLabel}>주소</span>
                             <span className={styles.infoValue}>
-                                {storage.address} {storage.addressDetail}
+                                {storage.result.address} {storage.result.addressDetail}
                             </span>
                         </div>
                     </div>
@@ -225,23 +258,25 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
 
                 <div className={styles.infoRow}>
                     <div className={styles.infoItem}>
-                        <div className={styles.infoIcon}><img src={lockerusername} alt="호스트" />
+                        <div className={styles.infoIcon}>
+                            <img src={lockerusername} alt="호스트" />
                         </div>
                         <div className={styles.infoContent}>
                             <span className={styles.infoLabel}>호스트</span>
-                            <span className={styles.infoValue}>{storage.keeperName}</span>
+                            <span className={styles.infoValue}>{keeperName || 'Unknown Host'}</span>
                         </div>
                     </div>
                 </div>
 
                 <div className={styles.infoRow}>
                     <div className={styles.infoItem}>
-                        <div className={styles.infoIcon}><img src={lockertel} alt="전화번호" />
+                        <div className={styles.infoIcon}>
+                            <img src={lockertel} alt="전화번호" />
                         </div>
                         <div className={styles.infoContent}>
                             <span className={styles.infoLabel}>전화번호</span>
                             <span className={styles.infoValue}>
-                                {formatPhoneNumber(storage.keeperPhone)}
+                                {formatPhoneNumber(keeperPhone)}
                             </span>
                         </div>
                     </div>
@@ -249,11 +284,11 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
             </div>
 
             {/* 가격 정보 */}
-            {storage.jimTypeResults && storage.jimTypeResults.length > 0 && (
+            {priceInfo && priceInfo.length > 0 && (
                 <div className={styles.priceSection}>
                     <div className={styles.priceTitle}>가격</div>
                     <div className={styles.priceItems}>
-                        {storage.jimTypeResults.map((type, index) => (
+                        {priceInfo.map((type, index) => (
                             <div key={index} className={styles.priceItemRow}>
                                 <span className={styles.priceType}>{type.typeName}</span>
                                 <span className={styles.priceAmount}>
@@ -266,29 +301,29 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
             )}
 
             {/* 반려 사유 (반려된 보관소의 경우) */}
-            {status === '반려됨' && storage.reviewComment && (
+            {(status === '반려됨' || status === 'REJECTED') && reviewComment && (
                 <div className={styles.rejectReasonSection}>
                     <div className={styles.rejectReasonTitle}>반려 사유</div>
                     <div className={styles.rejectReasonContent}>
-                        {storage.reviewComment}
+                        {reviewComment}
                     </div>
                 </div>
             )}
 
             {/* 승인/반려 버튼 (대기중인 보관소의 경우) */}
-            {status === '대기중' && (
+            {(status === '대기중' || status === 'WAITING') && (
                 <div className={styles.actionButtonsSection}>
                     <button
                         className={styles.approveButton}
                         onClick={handleApprove}
-                        disabled={loading}
+                        disabled={isLoading}
                     >
-                        {loading ? '처리 중...' : '승인'}
+                        {isLoading ? '처리중...' : '승인'}
                     </button>
                     <button
                         className={styles.rejectButton}
                         onClick={handleRejectClick}
-                        disabled={loading}
+                        disabled={isLoading}
                     >
                         반려
                     </button>
@@ -306,22 +341,22 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
                             onChange={(e) => setRejectReason(e.target.value)}
                             placeholder="반려 사유를 입력해주세요"
                             rows={4}
-                            disabled={loading}
+                            disabled={isLoading}
                         />
                         <div className={styles.rejectModalButtons}>
                             <button
                                 className={styles.rejectModalCancelButton}
                                 onClick={handleRejectCancel}
-                                disabled={loading}
+                                disabled={isLoading}
                             >
                                 취소
                             </button>
                             <button
                                 className={styles.rejectModalConfirmButton}
                                 onClick={handleRejectConfirm}
-                                disabled={!rejectReason.trim() || loading}
+                                disabled={!rejectReason.trim() || isLoading}
                             >
-                                {loading ? '처리 중...' : '확인'}
+                                {isLoading ? '처리중...' : '확인'}
                             </button>
                         </div>
                     </div>
@@ -338,12 +373,12 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
 
                         <div className={styles.modalImageContainer}>
                             <img
-                                src={storage.images[modalImageIndex]}
+                                src={storage.result.images[modalImageIndex]}
                                 alt={`보관소 이미지 ${modalImageIndex + 1}`}
                                 className={styles.modalImage}
                             />
 
-                            {storage.images.length > 1 && (
+                            {storage.result.images.length > 1 && (
                                 <>
                                     <button
                                         className={`${styles.modalSliderBtn} ${styles.modalPrevBtn}`}
@@ -361,9 +396,9 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
                             )}
                         </div>
 
-                        {storage.images.length > 1 && (
+                        {storage.result.images.length > 1 && (
                             <div className={styles.modalIndicators}>
-                                {storage.images.map((_, idx) => (
+                                {storage.result.images.map((_, idx) => (
                                     <div
                                         key={idx}
                                         className={`${styles.modalIndicator} ${
@@ -384,6 +419,8 @@ const StorageDetailModal = ({ storage, status, onRefresh }) => {
 export default StorageDetailModal;
 
 
+
+
 // import React, { useState } from 'react';
 // import styles from '../../styles/admin/pages/LockerReviewDetails.module.css';
 // import lockeraddress from "../../assets/location.svg"
@@ -397,6 +434,11 @@ export default StorageDetailModal;
 //     const [showRejectModal, setShowRejectModal] = useState(false);
 //     const [rejectReason, setRejectReason] = useState('');
 //
+//     // Debug logging - remove in production
+//     console.log('StorageDetailModal received storage:', storage);
+//     console.log('StorageDetailModal received storage:', storage.result.address);
+//     console.log('StorageDetailModal received status:', status);
+//
 //     const formatPhoneNumber = (phone) => {
 //         if (!phone) return '';
 //         const numbers = phone.replace(/\D/g, '');
@@ -406,17 +448,17 @@ export default StorageDetailModal;
 //     };
 //
 //     const nextImage = () => {
-//         if (storage?.images && storage.images.length > 1) {
+//         if (storage?.result.images && storage.result.images.length > 1) {
 //             setCurrentImageIndex((prev) =>
-//                 prev === storage.images.length - 1 ? 0 : prev + 1
+//                 prev === storage.result.images.length - 1 ? 0 : prev + 1
 //             );
 //         }
 //     };
 //
 //     const prevImage = () => {
-//         if (storage?.images && storage.images.length > 1) {
+//         if (storage?.result.images && storage.result.images.length > 1) {
 //             setCurrentImageIndex((prev) =>
-//                 prev === 0 ? storage.images.length - 1 : prev - 1
+//                 prev === 0 ? storage.result.images.length - 1 : prev - 1
 //             );
 //         }
 //     };
@@ -432,17 +474,17 @@ export default StorageDetailModal;
 //     };
 //
 //     const nextModalImage = () => {
-//         if (storage?.images && storage.images.length > 1) {
+//         if (storage?.result.images && storage.result.images.length > 1) {
 //             setModalImageIndex((prev) =>
-//                 prev === storage.images.length - 1 ? 0 : prev + 1
+//                 prev === storage.result.images.length - 1 ? 0 : prev + 1
 //             );
 //         }
 //     };
 //
 //     const prevModalImage = () => {
-//         if (storage?.images && storage.images.length > 1) {
+//         if (storage?.result.images && storage.result.images.length > 1) {
 //             setModalImageIndex((prev) =>
-//                 prev === 0 ? storage.images.length - 1 : prev - 1
+//                 prev === 0 ? storage.result.images.length - 1 : prev - 1
 //             );
 //         }
 //     };
@@ -450,13 +492,29 @@ export default StorageDetailModal;
 //     const getStatusBadgeClass = () => {
 //         switch (status) {
 //             case '대기중':
+//             case 'WAITING':
 //                 return styles.statusPending;
 //             case '승인됨':
+//             case 'APPROVED':
 //                 return styles.statusApproved;
 //             case '반려됨':
+//             case 'REJECTED':
 //                 return styles.statusRejected;
 //             default:
 //                 return styles.statusPending;
+//         }
+//     };
+//
+//     const getStatusText = () => {
+//         switch (status) {
+//             case 'WAITING':
+//                 return '대기중';
+//             case 'APPROVED':
+//                 return '승인됨';
+//             case 'REJECTED':
+//                 return '반려됨';
+//             default:
+//                 return status;
 //         }
 //     };
 //
@@ -483,21 +541,28 @@ export default StorageDetailModal;
 //         setRejectReason('');
 //     };
 //
-//     if (!storage) return null;
+//     if (!storage) {
+//         return <div className={styles.container}>보관소 정보를 불러올 수 없습니다.</div>;
+//     }
 //
+//     // 백엔드 응답에 맞는 필드명 사용
+//     const keeperName = storage.result.memberName;
+//     const keeperPhone = storage.result.memberPhone;
+//     const reviewComment = storage.result.reviewComment;
+//     const priceInfo = storage.result.jimTypeResults || storage.result.jimTypes; // 백엔드 응답에 따라 둘 다 지원
 //
 //     return (
 //         <div className={styles.container}>
 //             {/* 헤더 */}
 //             <div className={styles.header}>
-//                 <h2 className={styles.title}>{storage.lockerName}</h2>
+//                 <h2 className={styles.title}>{storage.result.lockerName || 'Unknown Locker'}</h2>
 //                 <span className={`${styles.statusBadge} ${getStatusBadgeClass()}`}>
-//                     {status}
+//                     {getStatusText()}
 //                 </span>
 //             </div>
 //
 //             {/* 이미지 슬라이더 */}
-//             {storage.images && storage.images.length > 0 && (
+//             {storage.result.images && storage.result.images.length > 0 && (
 //                 <div className={styles.imageSliderContainer}>
 //                     <div className={styles.imageSlider}>
 //                         <div
@@ -506,7 +571,7 @@ export default StorageDetailModal;
 //                                 transform: `translateX(-${currentImageIndex * 100}%)`
 //                             }}
 //                         >
-//                             {storage.images.map((img, idx) => (
+//                             {storage.result.images.map((img, idx) => (
 //                                 <div key={idx} className={styles.imageSlide}>
 //                                     <img
 //                                         src={img}
@@ -518,7 +583,7 @@ export default StorageDetailModal;
 //                             ))}
 //                         </div>
 //
-//                         {storage.images.length > 1 && (
+//                         {storage.result.images.length > 1 && (
 //                             <>
 //                                 <button
 //                                     className={`${styles.sliderBtn} ${styles.prevBtn}`}
@@ -535,9 +600,9 @@ export default StorageDetailModal;
 //                             </>
 //                         )}
 //
-//                         {storage.images.length > 1 && (
+//                         {storage.result.images.length > 1 && (
 //                             <div className={styles.sliderIndicators}>
-//                                 {storage.images.map((_, idx) => (
+//                                 {storage.result.images.map((_, idx) => (
 //                                     <div
 //                                         key={idx}
 //                                         className={`${styles.indicator} ${
@@ -556,12 +621,13 @@ export default StorageDetailModal;
 //             <div className={styles.infoSection}>
 //                 <div className={styles.infoRow}>
 //                     <div className={styles.infoItem}>
-//                         <div className={styles.infoIcon}><img src={lockeraddress} alt="주소" />
+//                         <div className={styles.infoIcon}>
+//                             <img src={lockeraddress} alt="주소" />
 //                         </div>
 //                         <div className={styles.infoContent}>
 //                             <span className={styles.infoLabel}>주소</span>
 //                             <span className={styles.infoValue}>
-//                                 {storage.address} {storage.addressDetail}
+//                                 {storage.result.address} {storage.result.addressDetail}
 //                             </span>
 //                         </div>
 //                     </div>
@@ -569,23 +635,25 @@ export default StorageDetailModal;
 //
 //                 <div className={styles.infoRow}>
 //                     <div className={styles.infoItem}>
-//                         <div className={styles.infoIcon}><img src={lockerusername} alt="호스트" />
+//                         <div className={styles.infoIcon}>
+//                             <img src={lockerusername} alt="호스트" />
 //                         </div>
 //                         <div className={styles.infoContent}>
 //                             <span className={styles.infoLabel}>호스트</span>
-//                             <span className={styles.infoValue}>{storage.keeperName}</span>
+//                             <span className={styles.infoValue}>{keeperName || 'Unknown Host'}</span>
 //                         </div>
 //                     </div>
 //                 </div>
 //
 //                 <div className={styles.infoRow}>
 //                     <div className={styles.infoItem}>
-//                         <div className={styles.infoIcon}><img src={lockertel} alt="전화번호" />
+//                         <div className={styles.infoIcon}>
+//                             <img src={lockertel} alt="전화번호" />
 //                         </div>
 //                         <div className={styles.infoContent}>
 //                             <span className={styles.infoLabel}>전화번호</span>
 //                             <span className={styles.infoValue}>
-//                                 {formatPhoneNumber(storage.keeperPhone)}
+//                                 {formatPhoneNumber(keeperPhone)}
 //                             </span>
 //                         </div>
 //                     </div>
@@ -593,11 +661,11 @@ export default StorageDetailModal;
 //             </div>
 //
 //             {/* 가격 정보 */}
-//             {storage.jimTypeResults && storage.jimTypeResults.length > 0 && (
+//             {priceInfo && priceInfo.length > 0 && (
 //                 <div className={styles.priceSection}>
 //                     <div className={styles.priceTitle}>가격</div>
 //                     <div className={styles.priceItems}>
-//                         {storage.jimTypeResults.map((type, index) => (
+//                         {priceInfo.map((type, index) => (
 //                             <div key={index} className={styles.priceItemRow}>
 //                                 <span className={styles.priceType}>{type.typeName}</span>
 //                                 <span className={styles.priceAmount}>
@@ -610,17 +678,17 @@ export default StorageDetailModal;
 //             )}
 //
 //             {/* 반려 사유 (반려된 보관소의 경우) */}
-//             {status === '반려됨' && storage.rejectReason && (
+//             {(status === '반려됨' || status === 'REJECTED') && reviewComment && (
 //                 <div className={styles.rejectReasonSection}>
 //                     <div className={styles.rejectReasonTitle}>반려 사유</div>
 //                     <div className={styles.rejectReasonContent}>
-//                         {storage.rejectReason}
+//                         {reviewComment}
 //                     </div>
 //                 </div>
 //             )}
 //
 //             {/* 승인/반려 버튼 (대기중인 보관소의 경우) */}
-//             {status === '대기중' && (
+//             {(status === '대기중' || status === 'WAITING') && (
 //                 <div className={styles.actionButtonsSection}>
 //                     <button
 //                         className={styles.approveButton}
@@ -678,12 +746,12 @@ export default StorageDetailModal;
 //
 //                         <div className={styles.modalImageContainer}>
 //                             <img
-//                                 src={storage.images[modalImageIndex]}
+//                                 src={storage.result.images[modalImageIndex]}
 //                                 alt={`보관소 이미지 ${modalImageIndex + 1}`}
 //                                 className={styles.modalImage}
 //                             />
 //
-//                             {storage.images.length > 1 && (
+//                             {storage.result.images.length > 1 && (
 //                                 <>
 //                                     <button
 //                                         className={`${styles.modalSliderBtn} ${styles.modalPrevBtn}`}
@@ -701,9 +769,9 @@ export default StorageDetailModal;
 //                             )}
 //                         </div>
 //
-//                         {storage.images.length > 1 && (
+//                         {storage.result.images.length > 1 && (
 //                             <div className={styles.modalIndicators}>
-//                                 {storage.images.map((_, idx) => (
+//                                 {storage.result.images.map((_, idx) => (
 //                                     <div
 //                                         key={idx}
 //                                         className={`${styles.modalIndicator} ${
