@@ -227,6 +227,11 @@ export default function MyPage() {
   // ---- 네비게이션 핸들러 ----
   const redirectParam = encodeURIComponent(location.pathname);
 
+  // 뒤로가기 핸들러 추가
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   const goToLogin = () => {
     showLoading();
     setTimeout(() => {
@@ -325,7 +330,7 @@ export default function MyPage() {
   const WalletPointRow = () => (
     <div
       className="wallet-card"
-      onClick={() => navigate("/page/wallet")}
+      onClick={() => navigate("/page/mypage/wallet")}
       role="button"
     >
       <div className="wallet-row">
@@ -400,7 +405,8 @@ export default function MyPage() {
             </div>
             <div className="user-details">
               <div className="user-greeting">
-                <h2 className="username">{userInfo.name}님 안녕하세요</h2>
+                <h2 className="username">{userInfo.name}님</h2>
+                <div className="user-subtitle">안녕하세요! </div>
               </div>
             </div>
           </div>
@@ -509,7 +515,12 @@ export default function MyPage() {
 
   return (
     <div className="container">
-      <header className="header" />
+      <header className="header">
+        <div className="headerLeft">
+          <button className="backButton" onClick={handleBack} />
+        </div>
+        <h1 className="header-content">마이페이지</h1>
+      </header>
       <main className="main-content">
         {!isLoggedIn || !user?.id ? (
           <>
