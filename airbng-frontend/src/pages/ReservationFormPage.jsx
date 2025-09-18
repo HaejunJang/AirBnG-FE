@@ -1,13 +1,13 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getReservationForm, postReservation } from "../api/reservationApi";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/pages/reservationForm.css";
 import Header from "../components/Header/Header";
-import { v4 as uuidv4 } from "uuid";
 import tossIcon from "../../src/assets/toss_icon.png";
 import airbngIcon from "../../src/assets/favicon.svg";
 import { useAuth } from "../context/AuthContext";
+import { getOrCreateIdemKey, clearIdemKey } from "../utils/idempotency";
 
 function useQueryParam(name) {
   const { search } = useLocation();
@@ -18,6 +18,11 @@ function useQueryParam(name) {
 }
 
 function ReservationFormPage() {
+  // 스크롤 최상단
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
   const lockerId = useQueryParam("lockerId");
   const navigate = useNavigate();
 
@@ -58,10 +63,35 @@ function ReservationFormPage() {
     { id: "toss", name: "토스페이", icon: tossIcon, method: "PG" },
   ];
 
-  const [idemKey] = useState(() => uuidv4()); // 페이지 로드 시 고유 키 생성
-
   const { user } = useAuth();
   const memberId = user?.id;
+
+  // 최근 제출 시도의 스코프/시도 여부 기억
+  const lastScopeRef = useRef(null); // TODO
+  const attemptedRef = useRef(false); // TODO
+
+  // 사용자가 결과에 영향을 주는 값들을 수정 -> 직전 스코프 키 폐기
+  useEffect(() => {
+    // 제출 시도 없으면 무시
+    if (!attemptedRef.current) return;
+    if (!lastScopeRef.current) return;
+    // 제출 시도 후, 값 변경 시 -> 멱등키 폐기
+    clearIdemKey(lastScopeRef.current);
+    // 다음 제출에서 새 키 발급되도록 제출 시도 내역 삭제
+    attemptedRef.current = false;
+    lastScopeRef.current = null;
+  }, [
+    selectedDateRange.startDate, // TODO: 금액/검증에 영향 주는 필드들
+    selectedDateRange.endDate,
+    selectedStartTime,
+    selectedEndTime,
+    jimTypeCounts, // 객체 레퍼런스가 바뀌므로 트리거됨
+    lockerId,
+    selectedPaymentMethod?.method, // 결제수단 변경도 트리거
+  ]);
+
+  // 스코프 생성
+  const buildScope = (method, lockerId) => `reservation:${method}:${lockerId}`;
 
   // 날짜 포맷팅 함수
   const formatDateTimeForServer = (date) => {
@@ -505,13 +535,16 @@ function ReservationFormPage() {
     return true;
   };
 
+  // 성공 시 키 & 플래그 초기화
+  const done = (scope) => {
+    clearIdemKey(scope);
+    attemptedRef.current = false;
+    lastScopeRef.current = null;
+  };
+
   // 폼 제출 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
 
     const startDateStr = dateArray[selectedDateRange.startDate];
     const endDateStr = dateArray[selectedDateRange.endDate];
@@ -533,10 +566,17 @@ function ReservationFormPage() {
       paymentMethod: selectedPaymentMethod.method,
     };
 
-    postReservation(requestData, idemKey)
+    const idemScope = buildScope(
+      requestData.paymentMethod,
+      requestData.lockerId
+    );
+    lastScopeRef.current = idemScope; // 최근 스코프 기억
+    attemptedRef.current = true; // 제출 시도됨
+    postReservation(requestData, getOrCreateIdemKey(idemScope))
       .then((data) => {
         if (data.code === 4000) {
           ModalUtils.showSuccess("예약이 완료되었습니다!", "", () => {
+            done(idemScope);
             const reservationId = data.result?.reservationId || 0;
             if (reservationId === 0) {
               navigate("/page/home");
@@ -550,6 +590,7 @@ function ReservationFormPage() {
             "보관소가 비활성화 되었습니다.",
             "이용 불가",
             () => {
+              done(idemScope);
               navigate(-1);
             }
           );
@@ -558,11 +599,16 @@ function ReservationFormPage() {
             "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
             "예약 실패",
             () => {
+              // TODO : 로그인 후 돌아왔을 때, 선택 내역 남겨두기
+              done(idemScope);
               navigate("/page/login");
             }
           );
         } else {
           ModalUtils.showError(data.message, "예약 실패", () => {
+            console.log(data);
+            // TODO: 실패 시 멱등키 유지 → 사용자가 다시 시도하면 같은 키로 재전송
+
             // navigate(-1);
           });
         }
@@ -570,7 +616,7 @@ function ReservationFormPage() {
       .catch((error) => {
         console.error("API 요청 실패:", error);
         ModalUtils.showError(
-          "예약 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.",
+          "네트워크 오류. 잠시 후 다시 시도해주세요.",
           "예약 실패"
         );
       });
