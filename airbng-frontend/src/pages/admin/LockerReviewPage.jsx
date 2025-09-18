@@ -33,8 +33,8 @@ const StorageReviewContent = () => {
     const getEnglishStatus = (koreanStatus) => {
         switch(koreanStatus) {
             case '대기중': return 'WAITING';
-            case '승인됨': return 'APPROVED';
-            case '반려됨': return 'REJECTED';
+            case '승인': return 'APPROVED';
+            case '반려': return 'REJECTED';
             default: return 'WAITING';
         }
     };
@@ -184,18 +184,18 @@ const StorageReviewContent = () => {
                         </div>
                         <div
                             className={`${styles.statCard} ${styles.clickableCard}`}
-                            onClick={() => handleStatusClick('승인됨')}
+                            onClick={() => handleStatusClick('승인')}
                         >
-                            <h3 className={styles.statLabel}>승인됨</h3>
+                            <h3 className={styles.statLabel}>승인</h3>
                             <p className={`${styles.statValue} ${styles.textGreen}`}>
                                 {loading ? '...' : statusInfo.approved.count}
                             </p>
                         </div>
                         <div
                             className={`${styles.statCard} ${styles.clickableCard}`}
-                            onClick={() => handleStatusClick('반려됨')}
+                            onClick={() => handleStatusClick('반려')}
                         >
-                            <h3 className={styles.statLabel}>반려됨</h3>
+                            <h3 className={styles.statLabel}>반려</h3>
                             <p className={`${styles.statValue} ${styles.textRed}`}>
                                 {loading ? '...' : statusInfo.rejected.count}
                             </p>
@@ -249,7 +249,7 @@ const StorageReviewContent = () => {
                                         <h4 className={styles.storageName}>{storage.lockerName}</h4>
                                         <span className={`${styles.statusBadge} ${
                                             selectedStatus === '대기중' ? styles.statusPending :
-                                                selectedStatus === '승인됨' ? styles.statusApproved :
+                                                selectedStatus === '승인' ? styles.statusApproved :
                                                     styles.statusRejected
                                         }`}>
                                             {selectedStatus}
@@ -304,7 +304,7 @@ const StorageReviewContent = () => {
 
             {/* 하단: 카테고리별 요약 */}
             <div className={styles.contentCard}>
-                <h3 className={styles.subTitle}>카테고리별 요약</h3>
+                <h3 className={styles.subTitle}>보관소 상태</h3>
 
                 <div className={styles.summaryGrid}>
                     {/* 대기중 */}
@@ -326,7 +326,7 @@ const StorageReviewContent = () => {
                     {/* 승인됨 */}
                     <div className={styles.summarySection}>
                         <div className={styles.summaryHeader}>
-                            <h4 className={`${styles.summaryTitle} ${styles.textGreen}`}>승인됨</h4>
+                            <h4 className={`${styles.summaryTitle} ${styles.textGreen}`}>승인</h4>
                             <span className={styles.summaryCount}>{summaryData.approved.count}개</span>
                         </div>
                         <div className={styles.summaryList}>
@@ -342,7 +342,7 @@ const StorageReviewContent = () => {
                     {/* 반려됨 */}
                     <div className={styles.summarySection}>
                         <div className={styles.summaryHeader}>
-                            <h4 className={`${styles.summaryTitle} ${styles.textRed}`}>반려됨</h4>
+                            <h4 className={`${styles.summaryTitle} ${styles.textRed}`}>반려</h4>
                             <span className={styles.summaryCount}>{summaryData.rejected.count}개</span>
                         </div>
                         <div className={styles.summaryList}>
