@@ -4,6 +4,10 @@ import { getReservationForm, postReservation } from "../api/reservationApi";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/pages/reservationForm.css";
 import Header from "../components/Header/Header";
+import { v4 as uuidv4 } from "uuid";
+import tossIcon from "../../src/assets/toss_icon.png";
+import airbngIcon from "../../src/assets/favicon.svg";
+import { useAuth } from "../context/AuthContext";
 
 function useQueryParam(name) {
   const { search } = useLocation();
@@ -30,6 +34,7 @@ function ReservationFormPage() {
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
   const [lockerData, setLockerData] = useState({
+    keeperId: 0,
     lockerName: "",
     addressKr: "",
   });
@@ -46,6 +51,17 @@ function ReservationFormPage() {
   });
   const [startTimeOptions, setStartTimeOptions] = useState([]);
   const [endTimeOptions, setEndTimeOptions] = useState([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(""); // 결제 수단 상태 추가
+
+  const paymentMethods = [
+    { id: "jimpay", name: "짐페이머니", icon: airbngIcon, method: "WALLET" },
+    { id: "toss", name: "토스페이", icon: tossIcon, method: "PG" },
+  ];
+
+  const [idemKey] = useState(() => uuidv4()); // 페이지 로드 시 고유 키 생성
+
+  const { user } = useAuth();
+  const memberId = user?.id;
 
   // 날짜 포맷팅 함수
   const formatDateTimeForServer = (date) => {
@@ -96,6 +112,7 @@ function ReservationFormPage() {
         if (data.code === 1000) {
           const result = data.result;
           setLockerData({
+            keeperId: result.keeperId,
             lockerName: result.lockerName,
             addressKr: result.addressKr,
           });
@@ -351,6 +368,12 @@ function ReservationFormPage() {
     return { totalItemPrice, serviceFee, totalPrice, items };
   };
 
+  // 결제
+  const selectPaymentMethod = (methodId) => {
+    const found = paymentMethods.find((pm) => pm.id === methodId) || null;
+    setSelectedPaymentMethod(found);
+  };
+
   // 계산 결과
   const calculation = calculateTotal();
 
@@ -372,6 +395,20 @@ function ReservationFormPage() {
 
     jimItems.forEach((item) => {
       item.classList.remove("jim-item-highlight");
+    });
+
+    // 결제수단 섹션 하이라이팅 제거
+    const paymentTitle = document.querySelector("#paymentSection h3");
+    const paymentItems = document.querySelectorAll(
+      "#paymentMethods .payment-method"
+    );
+
+    if (paymentTitle) {
+      paymentTitle.classList.remove("title-highlight");
+    }
+
+    paymentItems.forEach((item) => {
+      item.classList.remove("payment-item-highlight");
     });
   };
 
@@ -405,6 +442,26 @@ function ReservationFormPage() {
       if (jimSection) {
         jimSection.scrollIntoView({ behavior: "smooth", block: "center" });
       }
+    } else if (sectionType === "payment") {
+      const paymentTitle = document.querySelector("#paymentSection h3");
+      const paymentItems = document.querySelectorAll(
+        "#paymentMethods .payment-method"
+      );
+
+      if (paymentTitle) {
+        paymentTitle.classList.add("title-highlight");
+      }
+
+      paymentItems.forEach((item, index) => {
+        setTimeout(() => {
+          item.classList.add("payment-item-highlight");
+        }, index * 150);
+      });
+
+      const paymentSection = document.querySelector("#paymentSection");
+      if (paymentSection) {
+        paymentSection.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     }
 
     // 3초 후 하이라이팅 제거
@@ -422,15 +479,28 @@ function ReservationFormPage() {
       return false;
     }
 
+    console.log("날짜 선택 통과");
+
     // 짐 종류 선택 확인
     const hasSelectedItems = Object.values(jimTypeCounts).some(
       (count) => count > 0
     );
+
     if (!hasSelectedItems) {
       //   ModalUtils.showWarning("보관할 짐을 선택해주세요.", "짐 종류 미선택");
       highlightSection("jim");
       return false;
     }
+
+    console.log("짐 종류 선택 통과");
+
+    // 결제 수단 선택 확인
+    if (!selectedPaymentMethod) {
+      highlightSection("payment");
+      return false;
+    }
+
+    console.log("결제 수단 선택 통과");
 
     return true;
   };
@@ -447,8 +517,8 @@ function ReservationFormPage() {
     const endDateStr = dateArray[selectedDateRange.endDate];
 
     const requestData = {
-      dropperId: 2,
-      keeperId: 3,
+      dropperId: memberId,
+      keeperId: lockerData.keeperId,
       lockerId: parseInt(lockerId),
       startTime: `${startDateStr} ${selectedStartTime}:00`,
       endTime: `${endDateStr} ${selectedEndTime}:00`,
@@ -458,11 +528,12 @@ function ReservationFormPage() {
           jimTypeId: parseInt(jimTypeId),
           count: parseInt(count),
         })),
+      amount: calculation.totalPrice - calculation.serviceFee,
+      fee: calculation.serviceFee,
+      paymentMethod: selectedPaymentMethod.method,
     };
 
-    console.log("Request Data:", requestData);
-
-    postReservation(requestData)
+    postReservation(requestData, idemKey)
       .then((data) => {
         if (data.code === 4000) {
           ModalUtils.showSuccess("예약이 완료되었습니다!", "", () => {
@@ -492,7 +563,7 @@ function ReservationFormPage() {
           );
         } else {
           ModalUtils.showError(data.message, "예약 실패", () => {
-            navigate(-1);
+            // navigate(-1);
           });
         }
       })
@@ -765,6 +836,38 @@ function ReservationFormPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* 결제 수단 */}
+        <div id="paymentSection" className="payment-section">
+          <h3 className="section-title">결제 수단</h3>
+          <div id="paymentMethods" className="payment-methods">
+            {paymentMethods.map((method) => (
+              <div
+                key={method.id}
+                className={`payment-method ${
+                  selectedPaymentMethod.id === method.id ? "selected" : ""
+                }`}
+                onClick={() => selectPaymentMethod(method.id)}
+              >
+                <div className="payment-method-content">
+                  <img className="payment-method-icon" src={method.icon} />
+                  <div className="payment-method-name">{method.name}</div>
+                  <div className="payment-method-radio">
+                    <div
+                      className={`radio-circle ${
+                        selectedPaymentMethod.id === method.id ? "selected" : ""
+                      }`}
+                    >
+                      {selectedPaymentMethod.id === method.id && (
+                        <div className="radio-inner"></div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

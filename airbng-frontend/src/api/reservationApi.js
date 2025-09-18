@@ -47,9 +47,9 @@ export const deleteReservationApi = (reservationId) => {
 };
 
 // 예약 post
-export const postReservation = async (req) => {
+export const postReservation = async (req, idemkey) => {
   const response = await httpAuth.post("/reservations", req, {
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Idempotency-Key": idemkey },
   });
   return response.data;
 };
