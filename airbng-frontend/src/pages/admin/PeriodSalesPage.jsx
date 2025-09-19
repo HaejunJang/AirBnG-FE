@@ -1,4 +1,4 @@
-import SalesPeriod from "../../components/admin/SalesPeriod";
+import SalesPeriod from "../../components/admin/PeriodSales";
 import React from "react";
 
 function PeriodSalesPage() {
