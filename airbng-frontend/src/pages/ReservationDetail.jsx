@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import "../styles/pages/ReservationDetail.css";
+import styles from "../styles/pages/ReservationDetail.module.css";
 import { getReservationDetail } from "../api/reservationApi";
 
 import { useAuth } from "../context/AuthContext";
@@ -70,12 +70,9 @@ const ReservationDetail = () => {
   // 필수 매개변수가 없는 경우 처리
   if (!reservationId || !memberId) {
     return (
-      <div className="reservation-detail">
-        <div className="reservation-detail__header">
-          <button
-            className="reservation-detail__back-btn"
-            onClick={() => navigate(-1)}
-          >
+      <div className={styles.reservationDetail}>
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={() => navigate(-1)}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
                 d="M19 12H5M12 19L5 12L12 5"
@@ -86,9 +83,9 @@ const ReservationDetail = () => {
               />
             </svg>
           </button>
-          <h1 className="reservation-detail__title">예약 상세</h1>
+          <h1 className={styles.title}>예약 상세</h1>
         </div>
-        <div className="reservation-detail__content">
+        <div className={styles.content}>
           <div className="error-message">
             잘못된 접근입니다. 필요한 정보가 없습니다.
           </div>
@@ -100,12 +97,9 @@ const ReservationDetail = () => {
   // 로딩 중이거나 에러가 있을 때 처리
   if (loading) {
     return (
-      <div className="reservation-detail">
-        <div className="reservation-detail__header">
-          <button
-            className="reservation-detail__back-btn"
-            onClick={() => navigate(-1)}
-          >
+      <div className={styles.reservationDetail}>
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={() => navigate(-1)}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
                 d="M15 18L9 12L15 6"
@@ -116,9 +110,9 @@ const ReservationDetail = () => {
               />
             </svg>
           </button>
-          <h1 className="reservation-detail__title">예약 상세</h1>
+          <h1 className={styles.title}>예약 상세</h1>
         </div>
-        <div className="reservation-detail__content">
+        <div className={styles.content}>
           <div style={{ textAlign: "center", padding: "50px 0" }}>
             로딩 중...
           </div>
@@ -129,12 +123,9 @@ const ReservationDetail = () => {
 
   if (error) {
     return (
-      <div className="reservation-detail">
-        <div className="reservation-detail__header">
-          <button
-            className="reservation-detail__back-btn"
-            onClick={() => navigate(-1)}
-          >
+      <div className={styles.reservationDetail}>
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={() => navigate(-1)}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
                 d="M15 18L9 12L15 6"
@@ -145,9 +136,9 @@ const ReservationDetail = () => {
               />
             </svg>
           </button>
-          <h1 className="reservation-detail__title">예약 상세</h1>
+          <h1 className={styles.title}>예약 상세</h1>
         </div>
-        <div className="reservation-detail__content">
+        <div className={styles.content}>
           <div
             style={{ textAlign: "center", padding: "50px 0", color: "#ff4444" }}
           >
@@ -170,12 +161,9 @@ const ReservationDetail = () => {
 
   if (!data) {
     return (
-      <div className="reservation-detail">
-        <div className="reservation-detail__header">
-          <button
-            className="reservation-detail__back-btn"
-            onClick={() => navigate(-1)}
-          >
+      <div className={styles.reservationDetail}>
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={() => navigate(-1)}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
                 d="M15 18L9 12L15 6"
@@ -186,9 +174,9 @@ const ReservationDetail = () => {
               />
             </svg>
           </button>
-          <h1 className="reservation-detail__title">예약 상세</h1>
+          <h1 className={styles.title}>예약 상세</h1>
         </div>
-        <div className="reservation-detail__content">
+        <div className={styles.content}>
           <div style={{ textAlign: "center", padding: "50px 0" }}>
             데이터가 없습니다.
           </div>
@@ -298,12 +286,9 @@ const ReservationDetail = () => {
   };
 
   return (
-    <div className="reservation-detail">
-      <div className="reservation-detail__header">
-        <button
-          className="reservation-detail__back-btn"
-          onClick={handleBackClick}
-        >
+    <div className={styles.reservationDetail}>
+      <div className={styles.header}>
+        <button className={styles.backBtn} onClick={handleBackClick}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path
               d="M15 18L9 12L15 6"
@@ -314,47 +299,66 @@ const ReservationDetail = () => {
             />
           </svg>
         </button>
-        <h1 className="reservation-detail__title">예약 상세</h1>
+        <h1 className={styles.title}>예약 상세</h1>
       </div>
 
-      <div className="reservation-detail__content">
+      <div className={styles.content}>
         {/* 예약 완료 메시지 (예약 직후에만 표시) */}
         {isFromReservation && (
-          <div className="reservation-success">
-            <div className="success-icon">
-              <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="45" fill="#ffffff" stroke="#4561db" stroke-width="6"/>
-                <path d="M30 50l12 12 25-25" stroke="#4561db" stroke-width="6" stroke-linecap="round"
-                      stroke-linejoin="round" fill="none"/>
+          <div className={styles.reservationSuccess}>
+            <div className={styles.successIcon}>
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="#ffffff"
+                  stroke="#4561db"
+                  stroke-width="6"
+                />
+                <path
+                  d="M30 50l12 12 25-25"
+                  stroke="#4561db"
+                  stroke-width="6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  fill="none"
+                />
               </svg>
             </div>
-            <h2 className="success-title">예약이 완료되었습니다!</h2>
+            <h2 className={styles.successTitle}>예약이 완료되었습니다!</h2>
           </div>
         )}
 
-        <div className="locker-info">
+        <div className={styles.lockerInfo}>
           <img
-              src={
-                data.images && data.images.length > 0
-                    ? data.images[0]
-                    : "/api/placeholder/60/60"
-              }
-              alt="보관소 이미지"
-            className="locker-info__image"
+            src={
+              data.images && data.images.length > 0
+                ? data.images[0]
+                : "/api/placeholder/60/60"
+            }
+            alt="보관소 이미지"
+            className={styles.lockerImage}
           />
-          <div className="locker-info__details">
-            <h2 className="locker-info__name">{data.lockerName || "보관소"}</h2>
-            <p className="locker-info__address">서울 강남구 강남대로 396</p>
+          <div className={styles.lockerDetails}>
+            <h2 className={styles.lockerName}>{data.lockerName || "보관소"}</h2>
+            <p className={styles.lockerAddress}>서울 강남구 강남대로 396</p>
           </div>
         </div>
 
-        <div className="reservation-section">
-          <h3 className="section-title">보관 날짜</h3>
-          <div className="section-content">
+        <div className={styles.reservationSection}>
+          <h3 className={styles.sectionTitle}>보관 날짜</h3>
+          <div className={styles.sectionContent}>
             <img
               src={CalendarIcon}
               alt="달력 아이콘"
-              className="section-icon"
+              className={styles.sectionIcon}
               width="20"
               height="20"
             />
@@ -364,13 +368,13 @@ const ReservationDetail = () => {
           </div>
         </div>
 
-        <div className="reservation-section">
-          <h3 className="section-title">보관 시간</h3>
-          <div className="section-content">
+        <div className={styles.reservationSection}>
+          <h3 className={styles.sectionTitle}>보관 시간</h3>
+          <div className={styles.sectionContent}>
             <img
               src={ClockIcon}
               alt="시계 아이콘"
-              className="section-icon"
+              className={styles.sectionIcon}
               width="20"
               height="20"
             />
@@ -380,16 +384,16 @@ const ReservationDetail = () => {
           </div>
         </div>
 
-        <div className="reservation-section">
-          <h3 className="section-title">짐 종류</h3>
-          <div className="jim-types">
+        <div className={styles.reservationSection}>
+          <h3 className={styles.sectionTitle}>짐 종류</h3>
+          <div className={styles.jimTypes}>
             {data.reservationJimTypes &&
               data.reservationJimTypes.map((item, index) => (
-                <div key={index} className="jim-type-item">
+                <div key={index} className={styles.jimTypeItem}>
                   <img
                     src={BoxIcon}
                     alt="박스 아이콘"
-                    className="section-icon"
+                    className={styles.sectionIcon}
                     width="20"
                     height="20"
                   />
@@ -401,13 +405,13 @@ const ReservationDetail = () => {
           </div>
         </div>
 
-        <div className="reservation-section">
-          <h3 className="section-title">픽업 방식</h3>
-          <div className="section-content">
+        <div className={styles.reservationSection}>
+          <h3 className={styles.sectionTitle}>픽업 방식</h3>
+          <div className={styles.sectionContent}>
             <img
               src={RotateIcon}
               alt="회전 아이콘"
-              className="section-icon"
+              className={styles.sectionIcon}
               width="20"
               height="20"
             />
@@ -415,35 +419,35 @@ const ReservationDetail = () => {
           </div>
         </div>
 
-        <div className="price-calculation">
+        <div className={styles.priceCalculation}>
           {pricing.items.map((item, index) => (
-            <div key={index} className="price-item">
+            <div key={index} className={styles.priceItem}>
               <span>
                 {item.name} × {item.count}개 × {formatHours(item.hours)}
               </span>
               <span>{item.price.toLocaleString()}원</span>
             </div>
           ))}
-          <div className="price-item">
+          <div className={styles.priceItem}>
             <span>서비스 수수료 (5%)</span>
             <span>{pricing.serviceFee.toLocaleString()}원</span>
           </div>
-          <hr className="price-divider" />
-          <div className="price-total">
+          <hr className={styles.priceDivider} />
+          <div className={styles.priceTotal}>
             <span>총 결제 금액</span>
             <span>{pricing.total.toLocaleString()}원</span>
           </div>
         </div>
 
-        <div className="notice">
+        <div className={styles.notice}>
           <p>* 30분안에 승인하지 않으면 자동거절됩니다.</p>
         </div>
 
-        <div className="action-buttons">
-          <button className="btn-cancel" onClick={handleCancel}>
+        <div className={styles.actionButtons}>
+          <button className={styles.btnCancel} onClick={handleCancel}>
             {userRole === "keeper" ? "거절" : "취소"}
           </button>
-          <button className="btn-confirm" onClick={handleConfirm}>
+          <button className={styles.btnConfirm} onClick={handleConfirm}>
             {userRole === "keeper" ? "승인" : "확인"}
           </button>
         </div>
