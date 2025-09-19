@@ -1,4 +1,3 @@
-
 .container {
     width: 412px;
     min-height: 100vh;
@@ -38,7 +37,7 @@
 }
 
 /* 메인 컨텐츠 */
-.main-content {
+.mypage-main-content {
     padding: 20px;
     margin: 0 !important;
 }
@@ -410,8 +409,8 @@
     color: #dc3545;
 }
 
-/* 모달 스타일 */
-.modal-overlay {
+/* Confirm 모달만을 위한 커스텀 스타일 */
+.modal-overlay-custom {
     position: fixed;
     top: 0;
     left: 0;
@@ -422,63 +421,51 @@
     align-items: center;
     justify-content: center;
     z-index: 2000;
+    padding: 20px;
 }
 
-.modal-content {
+.modal-content-custom {
     background: white;
-    border-radius: 16px;
-    padding: 0;
-    max-width: 360px;
-    width: 90%;
-    max-height: 80vh;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    animation: modalSlideIn 0.3s ease-out;
+    animation: fadeIn 0.3s ease;
 }
 
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.modal-header {
+.modal-header-custom {
     padding: 20px 20px 0 20px;
     text-align: center;
 }
 
-.modal-header h3 {
+.modal-header-custom h3 {
     font-size: 18px;
     font-weight: 700;
     color: #333;
     margin: 0;
 }
 
-.modal-body {
+.modal-body-custom {
     padding: 15px 20px;
     text-align: center;
 }
 
-.modal-body p {
+.modal-body-custom p {
     font-size: 16px;
     color: #666;
     line-height: 1.5;
     margin: 0;
 }
 
-.modal-footer {
+.modal-footer-custom {
     padding: 0 20px 20px 20px;
     display: flex;
     gap: 10px;
     justify-content: center;
 }
 
-.modal-footer .btn {
+.modal-footer-custom .btn {
     flex: 1;
     max-width: 120px;
 }
@@ -528,24 +515,24 @@
         width: 100%;
         box-shadow: none;
     }
-    
+
     .header {
         width: 100%;
     }
-    
+
     .main-content {
         padding: 15px;
     }
-    
+
     .user-info-section {
         padding: 20px;
     }
-    
+
     .welcome-buttons {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .btn {
         width: 200px;
     }
@@ -562,6 +549,17 @@
 }
 
 @keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
     to {
         opacity: 1;
         transform: translateY(0);
