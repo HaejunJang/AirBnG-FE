@@ -528,8 +528,42 @@ export default function MyPage() {
         )}
       </main>
 
-      {/* 모달 & 로딩 */}
-      <Modal />
+      {/* 정보 모달 (성공) */}
+      <Modal
+        isOpen={showInfoModal}
+        onClose={closeModal}
+        onConfirm={confirmModal}
+        title={modalData.title}
+        message={modalData.message}
+        type="success"
+        buttonText="확인"
+      />
+
+      {/* 질문 모달 (확인/취소) */}
+      <Modal
+        isOpen={showQuestionModal}
+        onClose={closeModal}
+        onConfirm={confirmModal}
+        title={modalData.title}
+        message={modalData.message}
+        type="question"
+        buttonText="확인"
+        cancelButtonText="취소"
+        showCancelButton={true}
+      />
+
+      {/* 에러 모달 */}
+      <Modal
+        isOpen={showErrorModal}
+        onClose={closeModal}
+        onConfirm={confirmModal}
+        title={modalData.title}
+        message={modalData.message}
+        type="error"
+        buttonText="확인"
+      />
+
+      {/* 로딩 */}
       <Loading />
     </div>
   );
