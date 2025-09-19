@@ -1,9 +1,13 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getReservationForm, postReservation } from "../api/reservationApi";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/pages/reservationForm.css";
 import Header from "../components/Header/Header";
+import tossIcon from "../../src/assets/toss_icon.png";
+import airbngIcon from "../../src/assets/favicon.svg";
+import { useAuth } from "../context/AuthContext";
+import { getOrCreateIdemKey, clearIdemKey } from "../utils/idempotency";
 
 function useQueryParam(name) {
   const { search } = useLocation();
@@ -14,6 +18,11 @@ function useQueryParam(name) {
 }
 
 function ReservationFormPage() {
+  // 스크롤 최상단
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
   const lockerId = useQueryParam("lockerId");
   const navigate = useNavigate();
 
@@ -30,6 +39,7 @@ function ReservationFormPage() {
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
   const [lockerData, setLockerData] = useState({
+    keeperId: 0,
     lockerName: "",
     addressKr: "",
   });
@@ -46,6 +56,43 @@ function ReservationFormPage() {
   });
   const [startTimeOptions, setStartTimeOptions] = useState([]);
   const [endTimeOptions, setEndTimeOptions] = useState([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(""); // 결제 수단 상태 추가
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
+
+  const paymentMethods = [
+    { id: "jimpay", name: "짐페이머니", icon: airbngIcon, method: "WALLET" },
+    { id: "toss", name: "토스페이", icon: tossIcon, method: "PG" },
+  ];
+
+  const { user } = useAuth();
+  const memberId = user?.id;
+
+  // 최근 제출 시도의 스코프/시도 여부 기억
+  const lastScopeRef = useRef(null); // TODO
+  const attemptedRef = useRef(false); // TODO
+
+  // 사용자가 결과에 영향을 주는 값들을 수정 -> 직전 스코프 키 폐기
+  useEffect(() => {
+    // 제출 시도 없으면 무시
+    if (!attemptedRef.current) return;
+    if (!lastScopeRef.current) return;
+    // 제출 시도 후, 값 변경 시 -> 멱등키 폐기
+    clearIdemKey(lastScopeRef.current);
+    // 다음 제출에서 새 키 발급되도록 제출 시도 내역 삭제
+    attemptedRef.current = false;
+    lastScopeRef.current = null;
+  }, [
+    selectedDateRange.startDate, // TODO: 금액/검증에 영향 주는 필드들
+    selectedDateRange.endDate,
+    selectedStartTime,
+    selectedEndTime,
+    jimTypeCounts, // 객체 레퍼런스가 바뀌므로 트리거됨
+    lockerId,
+    selectedPaymentMethod?.method, // 결제수단 변경도 트리거
+  ]);
+
+  // 스코프 생성
+  const buildScope = (method, lockerId) => `reservation:${method}:${lockerId}`;
 
   // 날짜 포맷팅 함수
   const formatDateTimeForServer = (date) => {
@@ -75,6 +122,18 @@ function ReservationFormPage() {
     showWarning: (message, title = "", callback = null) => {
       setModal({ show: true, type: "warning", title, message, callback });
     },
+    showLoading: (message = "처리 중...", title = "") => {
+      setModal({ show: true, type: "loading", title, message, callback: null });
+    },
+    hideModal: () => {
+      setModal({
+        show: false,
+        type: "",
+        title: "",
+        message: "",
+        callback: null,
+      });
+    },
   };
 
   // 초기 데이터 로드
@@ -96,6 +155,7 @@ function ReservationFormPage() {
         if (data.code === 1000) {
           const result = data.result;
           setLockerData({
+            keeperId: result.keeperId,
             lockerName: result.lockerName,
             addressKr: result.addressKr,
           });
@@ -351,6 +411,12 @@ function ReservationFormPage() {
     return { totalItemPrice, serviceFee, totalPrice, items };
   };
 
+  // 결제
+  const selectPaymentMethod = (methodId) => {
+    const found = paymentMethods.find((pm) => pm.id === methodId) || null;
+    setSelectedPaymentMethod(found);
+  };
+
   // 계산 결과
   const calculation = calculateTotal();
 
@@ -372,6 +438,20 @@ function ReservationFormPage() {
 
     jimItems.forEach((item) => {
       item.classList.remove("jim-item-highlight");
+    });
+
+    // 결제수단 섹션 하이라이팅 제거
+    const paymentTitle = document.querySelector("#paymentSection h3");
+    const paymentItems = document.querySelectorAll(
+      "#paymentMethods .payment-method"
+    );
+
+    if (paymentTitle) {
+      paymentTitle.classList.remove("title-highlight");
+    }
+
+    paymentItems.forEach((item) => {
+      item.classList.remove("payment-item-highlight");
     });
   };
 
@@ -405,6 +485,26 @@ function ReservationFormPage() {
       if (jimSection) {
         jimSection.scrollIntoView({ behavior: "smooth", block: "center" });
       }
+    } else if (sectionType === "payment") {
+      const paymentTitle = document.querySelector("#paymentSection h3");
+      const paymentItems = document.querySelectorAll(
+        "#paymentMethods .payment-method"
+      );
+
+      if (paymentTitle) {
+        paymentTitle.classList.add("title-highlight");
+      }
+
+      paymentItems.forEach((item, index) => {
+        setTimeout(() => {
+          item.classList.add("payment-item-highlight");
+        }, index * 150);
+      });
+
+      const paymentSection = document.querySelector("#paymentSection");
+      if (paymentSection) {
+        paymentSection.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     }
 
     // 3초 후 하이라이팅 제거
@@ -422,33 +522,52 @@ function ReservationFormPage() {
       return false;
     }
 
+    console.log("날짜 선택 통과");
+
     // 짐 종류 선택 확인
     const hasSelectedItems = Object.values(jimTypeCounts).some(
       (count) => count > 0
     );
+
     if (!hasSelectedItems) {
       //   ModalUtils.showWarning("보관할 짐을 선택해주세요.", "짐 종류 미선택");
       highlightSection("jim");
       return false;
     }
 
+    console.log("짐 종류 선택 통과");
+
+    // 결제 수단 선택 확인
+    if (!selectedPaymentMethod) {
+      highlightSection("payment");
+      return false;
+    }
+
+    console.log("결제 수단 선택 통과");
+
     return true;
+  };
+
+  // 성공 시 키 & 플래그 초기화
+  const done = (scope) => {
+    clearIdemKey(scope);
+    attemptedRef.current = false;
+    lastScopeRef.current = null;
   };
 
   // 폼 제출 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
+
+    // 로딩 모달 표시
+    ModalUtils.showLoading("결제 처리 중입니다...", "잠시만 기다려주세요");
 
     const startDateStr = dateArray[selectedDateRange.startDate];
     const endDateStr = dateArray[selectedDateRange.endDate];
 
     const requestData = {
-      dropperId: 2,
-      keeperId: 3,
       lockerId: parseInt(lockerId),
       startTime: `${startDateStr} ${selectedStartTime}:00`,
       endTime: `${endDateStr} ${selectedEndTime}:00`,
@@ -458,51 +577,70 @@ function ReservationFormPage() {
           jimTypeId: parseInt(jimTypeId),
           count: parseInt(count),
         })),
+      amount: calculation.totalPrice - calculation.serviceFee,
+      fee: calculation.serviceFee,
+      paymentMethod: selectedPaymentMethod.method,
     };
 
-    console.log("Request Data:", requestData);
+    const idemScope = buildScope(
+      requestData.paymentMethod,
+      requestData.lockerId
+    );
+    lastScopeRef.current = idemScope; // 최근 스코프 기억
+    attemptedRef.current = true; // 제출 시도됨
 
-    postReservation(requestData)
-      .then((data) => {
-        if (data.code === 4000) {
-          ModalUtils.showSuccess("예약이 완료되었습니다!", "", () => {
-            const reservationId = data.result?.reservationId || 0;
-            if (reservationId === 0) {
-              navigate("/page/home");
-            } else {
-              sessionStorage.setItem("lockerId", lockerId);
-              navigate("/page/reservation?reservationId=" + reservationId);
-            }
-          });
-        } else if (data.code === 3005) {
-          ModalUtils.showWarning(
-            "보관소가 비활성화 되었습니다.",
-            "이용 불가",
-            () => {
-              navigate(-1);
-            }
-          );
-        } else if (data.code === 9002) {
+    // 1초 대기 후 API 호출
+    setTimeout(() => {
+      postReservation(requestData, getOrCreateIdemKey(idemScope))
+        .then((data) => {
+          if (data.code === 4000) {
+            // 로딩 모달 숨기고 바로 성공 모달 표시
+            ModalUtils.showSuccess("예약이 완료되었습니다!", "", () => {
+              done(idemScope);
+              const reservationId = data.result?.reservationId || 0;
+              if (reservationId === 0) {
+                navigate("/page/home");
+              } else {
+                sessionStorage.setItem("lockerId", lockerId);
+                navigate("/page/reservation?reservationId=" + reservationId);
+              }
+            });
+          } else if (data.code === 3005) {
+            ModalUtils.showWarning(
+              "보관소가 비활성화 되었습니다.",
+              "이용 불가",
+              () => {
+                done(idemScope);
+                navigate(-1);
+              }
+            );
+          } else if (data.code === 9002) {
+            ModalUtils.showError(
+              "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
+              "예약 실패",
+              () => {
+                // TODO : 로그인 후 돌아왔을 때, 선택 내역 남겨두기
+                done(idemScope);
+                navigate("/page/login");
+              }
+            );
+          } else {
+            ModalUtils.showError(data.message, "예약 실패", () => {
+              console.log(data);
+              // TODO: 실패 시 멱등키 유지 → 사용자가 다시 시도하면 같은 키로 재전송
+
+              // navigate(-1);
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("API 요청 실패:", error);
           ModalUtils.showError(
-            "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
-            "예약 실패",
-            () => {
-              navigate("/page/login");
-            }
+            "네트워크 오류. 잠시 후 다시 시도해주세요.",
+            "예약 실패"
           );
-        } else {
-          ModalUtils.showError(data.message, "예약 실패", () => {
-            navigate(-1);
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("API 요청 실패:", error);
-        ModalUtils.showError(
-          "예약 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.",
-          "예약 실패"
-        );
-      });
+        });
+    }, 500); // 500ms 대기
   };
 
   // 날짜 렌더링
@@ -768,6 +906,38 @@ function ReservationFormPage() {
           </div>
         </div>
 
+        {/* 결제 수단 */}
+        <div id="paymentSection" className="payment-section">
+          <h3 className="section-title">결제 수단</h3>
+          <div id="paymentMethods" className="payment-methods">
+            {paymentMethods.map((method) => (
+              <div
+                key={method.id}
+                className={`payment-method ${
+                  selectedPaymentMethod.id === method.id ? "selected" : ""
+                }`}
+                onClick={() => selectPaymentMethod(method.id)}
+              >
+                <div className="payment-method-content">
+                  <img className="payment-method-icon" src={method.icon} />
+                  <div className="payment-method-name">{method.name}</div>
+                  <div className="payment-method-radio">
+                    <div
+                      className={`radio-circle ${
+                        selectedPaymentMethod.id === method.id ? "selected" : ""
+                      }`}
+                    >
+                      {selectedPaymentMethod.id === method.id && (
+                        <div className="radio-inner"></div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* 가격 계산 */}
         <div className="price-calculation">
           {calculation.items.map((item, index) => (
@@ -795,10 +965,14 @@ function ReservationFormPage() {
         <button
           type="submit"
           form="reservationForm"
-          className="submit-button"
+          className={`submit-button ${
+            calculation.totalPrice === 0 ? "reserve-only" : ""
+          }`}
           onClick={handleSubmit}
         >
-          예약하기
+          {calculation.totalPrice > 0
+            ? `${calculation.totalPrice.toLocaleString()}원 결제하기`
+            : "빠진 정보 확인하기"}
         </button>
       </div>
 
@@ -806,23 +980,33 @@ function ReservationFormPage() {
       {modal.show && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3 className="modal-title">{modal.title}</h3>
-            <p className="modal-message">{modal.message}</p>
-            <button
-              className={`modal-button ${modal.type}`}
-              onClick={() => {
-                setModal({
-                  show: false,
-                  type: "",
-                  title: "",
-                  message: "",
-                  callback: null,
-                });
-                if (modal.callback) modal.callback();
-              }}
-            >
-              확인
-            </button>
+            {modal.type === "loading" ? (
+              <>
+                <div className="loading-spinner"></div>
+                <h3 className="modal-title">{modal.title}</h3>
+                <p className="modal-message">{modal.message}</p>
+              </>
+            ) : (
+              <>
+                <h3 className="modal-title">{modal.title}</h3>
+                <p className="modal-message">{modal.message}</p>
+                <button
+                  className={`modal-button ${modal.type}`}
+                  onClick={() => {
+                    setModal({
+                      show: false,
+                      type: "",
+                      title: "",
+                      message: "",
+                      callback: null,
+                    });
+                    if (modal.callback) modal.callback();
+                  }}
+                >
+                  확인
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

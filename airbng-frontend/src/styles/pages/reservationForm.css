@@ -452,6 +452,14 @@ body {
   background-color: rgba(47, 70, 183);
 }
 
+.submit-button.reserve-only {
+  background: rgb(102, 122, 223);
+}
+
+.submit-button.reserve-only:hover {
+  background-color: rgba(69, 97, 219);
+}
+
 /* 모달 */
 .modal-overlay {
   position: fixed;
@@ -523,6 +531,22 @@ body {
 
 .modal-button.success:hover {
   background-color: #15803d;
+}
+
+/* 로딩 스피너 */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #4561db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* 반응형 디자인 */
@@ -679,5 +703,119 @@ body {
   }
   50% {
     transform: scale(1.02);
+  }
+}
+
+/* 결제 수단 */
+.payment-section {
+  margin-top: 0.5rem;
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.payment-method {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: white;
+}
+
+.payment-method:hover {
+  border-color: #d1d5db;
+  background-color: #f9fafb;
+}
+
+.payment-method.selected {
+  border-color: #4561db;
+  background-color: rgba(69, 97, 219, 0.05);
+}
+
+.payment-method-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.payment-method-icon {
+  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.payment-method-name {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.payment-method-radio {
+  flex-shrink: 0;
+}
+
+.radio-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.radio-circle.selected {
+  border-color: #4561db;
+  background-color: white;
+}
+
+.radio-inner {
+  width: 10px;
+  height: 10px;
+  background-color: #4561db;
+  border-radius: 50%;
+  animation: radioScale 0.2s ease-out;
+}
+
+@keyframes radioScale {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 결제 수단 하이라이팅 */
+.payment-item-highlight {
+  border: 2px solid #ff6b6b !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2) !important;
+  background-color: rgba(220, 53, 69, 0.05) !important;
+  animation: strongShake 0.5s ease-out,
+    fadeOutPayment 1s ease-in-out 2s forwards;
+  transform-origin: center;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeOutPayment {
+  0% {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+    background-color: rgba(220, 53, 69, 0.05);
+  }
+  100% {
+    border-color: #e5e7eb;
+    box-shadow: 0 0 0 3px transparent;
+    background-color: white;
   }
 }
