@@ -578,7 +578,7 @@ function ReservationFormPage() {
                 navigate("/page/home");
               } else {
                 sessionStorage.setItem("lockerId", lockerId);
-                navigate("/page/reservation?reservationId=" + reservationId);
+                navigate("/page/reservations/detail/" + reservationId);
               }
             });
           } else if (data.code === 3005) {
