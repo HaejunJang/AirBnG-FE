@@ -9,8 +9,6 @@ import SalesOverviewPage from "./components/admin/SalesOverviewPage";
 import StorageReviewPage from "./pages/admin/StorageReviewPage";
 import PeriodSalesPage from "./pages/admin/PeriodSalesPage";
 import StorageSalesPage from "./pages/admin/StorageSalesPage";
-import PaymentSalesPage from "./pages/admin/PaymentSalesPage";
-import NetSalesPage from "./pages/admin/NetSalesPage";
 
 function AdminApp() {
     return (
@@ -45,19 +43,7 @@ function AdminApp() {
                     </AdminRoute>
                 }/>
 
-                <Route path="/admin/sales/payment" element={
-                    <AdminRoute>
-                        <PaymentSalesPage/>
-                    </AdminRoute>
-                }/>
-
-                <Route path="/admin/sales/net" element={
-                    <AdminRoute>
-                        <NetSalesPage/>
-                    </AdminRoute>
-                }/>
-
-                <Route path="/admin" element={<Navigate to="/admin/home" replace/>}/>
+                <Route path="/admin" element={<Navigate to="/admin/login" replace/>}/>
 
                 <Route path="/admin/*" element={
                     <AdminRoute>
