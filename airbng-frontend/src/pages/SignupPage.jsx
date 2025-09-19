@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { signupApi } from "../api/signupApi";
-import Modal from "../components/modal/Modal";
-import "../styles/pages/signUp.css";
+import { Modal, useModal } from "../components/common/ModalUtil";
+import signup from "../styles/pages/signUp.module.css";
 
 function SignUpPage() {
   const navigate = useNavigate();
@@ -37,31 +37,7 @@ function SignUpPage() {
     signup: { loading: false },
   });
 
-    // 새로운 모달 상태들
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [showErrorModal, setShowErrorModal] = useState(false);
-    const [modalData, setModalData] = useState({
-        title: "",
-        message: "",
-        onConfirm: null,
-    });
-
-    const showModal = (type, title, message, onConfirm = null) => {
-        setModalData({ title, message, onConfirm });
-        if (type === "success") {
-            setShowSuccessModal(true);
-        } else {
-            setShowErrorModal(true);
-        }
-    };
-
-    const hideModal = () => {
-        setShowSuccessModal(false);
-        setShowErrorModal(false);
-        if (modalData.onConfirm) {
-            modalData.onConfirm();
-        }
-    };
+  const { modalState, showSuccess, showError, hideModal } = useModal();
 
   const goBack = () => {
     navigate(-1);
@@ -307,28 +283,28 @@ function SignUpPage() {
       !password ||
       !passwordConfirm
     ) {
-      showModal("error", "오류", "모든 필드를 입력해주세요.");
+      showError("모든 필드를 입력해주세요.", "오류");
       return;
     }
 
     if (!validationStates.email.checked) {
-      showModal("error", "오류", "이메일 중복 확인을 해주세요.");
+      showError("이메일 중복 확인을 해주세요.", "오류");
       return;
     }
 
     if (!validationStates.nickname.checked) {
-      showModal("error", "오류", "닉네임 중복 확인을 해주세요.");
+      showError("닉네임 중복 확인을 해주세요.", "오류");
       return;
     }
 
     if (password !== passwordConfirm) {
-      showModal("error", "오류", "비밀번호가 일치하지 않습니다.");
+      showError("비밀번호가 일치하지 않습니다.", "오류");
       return;
     }
 
     const passwordError = validatePassword(password);
     if (passwordError) {
-      showModal("error", "오류", passwordError);
+      showError(passwordError, "오류");
       return;
     }
 
@@ -349,35 +325,33 @@ function SignUpPage() {
 
       const result = await signupApi.signup(memberData, profileImage);
 
-            if (result.code === 1000) {
-                showModal("success", "회원가입 완료!", "AirBnG에 오신 것을 환영합니다!", () => {
-                    navigate("/page/login");
-                });
-            } else {
-                showModal(
-                    "error",
-                    "회원가입 실패",
-                    result.message || "회원가입에 실패했습니다."
-                );
-            }
-        } catch (error) {
-            console.error("회원가입 오류:", error);
-            showModal(
-                "error",
-                "회원가입 실패",
-                error.message || "서버 오류로 회원가입에 실패했습니다."
-            );
-        } finally {
-            setButtonStates((prev) => ({
-                ...prev,
-                signup: { loading: false },
-            }));
-        }
-    };
+      if (result.code === 1000) {
+        showSuccess("AirBnG에 오신 것을 환영합니다!", "회원가입 완료!", () => {
+          navigate("/page/login");
+        });
+      } else {
+        showError(
+          result.message || "회원가입에 실패했습니다.",
+          "회원가입 실패"
+        );
+      }
+    } catch (error) {
+      console.error("회원가입 오류:", error);
+      showError(
+        error.message || "서버 오류로 회원가입에 실패했습니다.",
+        "회원가입 실패"
+      );
+    } finally {
+      setButtonStates((prev) => ({
+        ...prev,
+        signup: { loading: false },
+      }));
+    }
+  };
 
   return (
-    <div className="signup-page-container">
-      <button className="signup-back-button" onClick={goBack}>
+    <div className={signup.signupPageContainer}>
+      <button className={signup.signupBackButton} onClick={goBack}>
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
@@ -388,31 +362,37 @@ function SignUpPage() {
         </svg>
       </button>
 
-      <div className="signup-container">
-        <div className="signup-header">
-          <h1 className="signup-title">회원가입</h1>
-          <p className="signup-subtitle">AirBnG에 오신 것을 환영합니다</p>
+      <div className={signup.signupContainer}>
+        <div className={signup.signupHeader}>
+          <h1 className={signup.signupTitle}>회원가입</h1>
+          <p className={signup.signupSubtitle}>AirBnG에 오신 것을 환영합니다</p>
         </div>
 
-        <div className="profile-section">
-          <div className="profile-image-container">
+        <div className={signup.profileSection}>
+          <div className={signup.profileImageContainer}>
             <img
               id="profile-preview"
               src={profilePreview}
-              alt="기본 프로필 이미지"
-              className="profile-image"
+              alt="프로필 이미지"
+              className={signup.profileImage}
               onClick={() => document.getElementById("profile-input").click()}
             />
             <div
-              className="profile-upload-btn"
+              className={signup.profileUploadBtn}
               onClick={() => document.getElementById("profile-input").click()}
+              title="프로필 사진 변경"
             >
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M12 4v16m8-8H4"
-                ></path>
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                />
               </svg>
             </div>
           </div>
@@ -423,16 +403,24 @@ function SignUpPage() {
             onChange={handleProfileImageChange}
             style={{ display: "none" }}
           />
-          <p className="profile-text">프로필 사진을 설정해주세요 (선택사항)</p>
+          <p className={signup.profileText}>
+            프로필 사진을 설정해주세요 (선택사항)
+          </p>
         </div>
 
-        <form className="signup-form" onSubmit={handleSignup}>
-          <div className="input-group">
-            <label className="input-label">이메일</label>
-            <div className="input-row">
+        <form className={signup.signupForm} onSubmit={handleSignup}>
+          <div className={signup.inputGroup}>
+            <label className={signup.inputLabel}>이메일</label>
+            <div className={signup.inputRow}>
               <input
                 type="email"
-                className={`form-input ${validationStates.email.type}`}
+                className={`${signup.formInput} ${
+                  validationStates.email.type === "success"
+                    ? signup.success
+                    : validationStates.email.type === "error"
+                    ? signup.error
+                    : ""
+                }`}
                 placeholder="이메일을 입력하세요"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
@@ -440,7 +428,7 @@ function SignUpPage() {
               />
               <button
                 type="button"
-                className={`check-button ${
+                className={`${signup.checkButton} ${
                   buttonStates.emailCheck.success ? "success" : ""
                 }`}
                 onClick={checkEmailDuplicate}
@@ -455,19 +443,25 @@ function SignUpPage() {
             </div>
             {validationStates.email.message && (
               <div
-                className={`validation-message ${validationStates.email.type}`}
+                className={`${signup.validationMessage} ${
+                  validationStates.email.type === "success"
+                    ? signup.success
+                    : validationStates.email.type === "error"
+                    ? signup.error
+                    : ""
+                }`}
               >
                 {validationStates.email.message}
               </div>
             )}
           </div>
 
-          <div className="input-group">
-            <label className="input-label">이름</label>
-            <div className="input-row">
+          <div className={signup.inputGroup}>
+            <label className={signup.inputLabel}>이름</label>
+            <div className={signup.inputRow}>
               <input
                 type="text"
-                className="form-input"
+                className={signup.formInput}
                 placeholder="이름을 입력하세요"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
@@ -476,12 +470,12 @@ function SignUpPage() {
             </div>
           </div>
 
-          <div className="input-group">
-            <label className="input-label">전화번호</label>
-            <div className="input-row">
+          <div className={signup.inputGroup}>
+            <label className={signup.inputLabel}>전화번호</label>
+            <div className={signup.inputRow}>
               <input
                 type="tel"
-                className="form-input"
+                className={signup.formInput}
                 placeholder="휴대폰 번호 입력('-'제외 11자리 입력)"
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
@@ -490,12 +484,18 @@ function SignUpPage() {
             </div>
           </div>
 
-          <div className="input-group">
-            <label className="input-label">닉네임</label>
-            <div className="input-row">
+          <div className={signup.inputGroup}>
+            <label className={signup.inputLabel}>닉네임</label>
+            <div className={signup.inputRow}>
               <input
                 type="text"
-                className={`form-input ${validationStates.nickname.type}`}
+                className={`${signup.formInput} ${
+                  validationStates.nickname.type === "success"
+                    ? signup.success
+                    : validationStates.nickname.type === "error"
+                    ? signup.error
+                    : ""
+                }`}
                 placeholder="닉네임을 입력하세요"
                 value={formData.nickname}
                 onChange={(e) => handleInputChange("nickname", e.target.value)}
@@ -503,7 +503,7 @@ function SignUpPage() {
               />
               <button
                 type="button"
-                className={`check-button ${
+                className={`${signup.checkButton} ${
                   buttonStates.nicknameCheck.success ? "success" : ""
                 }`}
                 onClick={checkNicknameDuplicate}
@@ -518,19 +518,31 @@ function SignUpPage() {
             </div>
             {validationStates.nickname.message && (
               <div
-                className={`validation-message ${validationStates.nickname.type}`}
+                className={`${signup.validationMessage} ${
+                  validationStates.nickname.type === "success"
+                    ? signup.success
+                    : validationStates.nickname.type === "error"
+                    ? signup.error
+                    : ""
+                }`}
               >
                 {validationStates.nickname.message}
               </div>
             )}
           </div>
 
-          <div className="input-group">
-            <label className="input-label">비밀번호</label>
-            <div className="input-row">
+          <div className={signup.inputGroup}>
+            <label className={signup.inputLabel}>비밀번호</label>
+            <div className={signup.inputRow}>
               <input
                 type="password"
-                className={`form-input ${validationStates.password.type}`}
+                className={`${signup.formInput} ${
+                  validationStates.password.type === "success"
+                    ? signup.success
+                    : validationStates.password.type === "error"
+                    ? signup.error
+                    : ""
+                }`}
                 placeholder="대/소문자/숫자 하나 이상을 포함하여 8자 이상"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
@@ -539,19 +551,31 @@ function SignUpPage() {
             </div>
             {validationStates.password.message && (
               <div
-                className={`validation-message ${validationStates.password.type}`}
+                className={`${signup.validationMessage} ${
+                  validationStates.password.type === "success"
+                    ? signup.success
+                    : validationStates.password.type === "error"
+                    ? signup.error
+                    : ""
+                }`}
               >
                 {validationStates.password.message}
               </div>
             )}
           </div>
 
-          <div className="input-group">
-            <label className="input-label">비밀번호 확인</label>
-            <div className="input-row">
+          <div className={signup.inputGroup}>
+            <label className={signup.inputLabel}>비밀번호 확인</label>
+            <div className={signup.inputRow}>
               <input
                 type="password"
-                className={`form-input ${validationStates.passwordConfirm.type}`}
+                className={`${signup.formInput} ${
+                  validationStates.passwordConfirm.type === "success"
+                    ? signup.success
+                    : validationStates.passwordConfirm.type === "error"
+                    ? signup.error
+                    : ""
+                }`}
                 placeholder="비밀번호를 다시 입력하세요"
                 value={formData.passwordConfirm}
                 onChange={(e) =>
@@ -562,7 +586,13 @@ function SignUpPage() {
             </div>
             {validationStates.passwordConfirm.message && (
               <div
-                className={`validation-message ${validationStates.passwordConfirm.type}`}
+                className={`${signup.validationMessage} ${
+                  validationStates.passwordConfirm.type === "success"
+                    ? signup.success
+                    : validationStates.passwordConfirm.type === "error"
+                    ? signup.error
+                    : ""
+                }`}
               >
                 {validationStates.passwordConfirm.message}
               </div>
@@ -571,42 +601,40 @@ function SignUpPage() {
 
           <button
             type="submit"
-            className="signup-button"
+            className={signup.signupButton}
             disabled={buttonStates.signup.loading}
           >
             {buttonStates.signup.loading ? "가입 중..." : "회원가입"}
           </button>
         </form>
 
-        <div className="login-section">
-          <span className="login-text">이미 계정이 있으신가요? </span>
-          <button type="button" className="login-link" onClick={goToLogin}>
+        <div className={signup.loginSection}>
+          <span className={signup.loginText}>이미 계정이 있으신가요? </span>
+          <button
+            type="button"
+            className={signup.loginLink}
+            onClick={goToLogin}
+          >
             로그인
           </button>
         </div>
       </div>
 
-            {/* 성공 모달 */}
-            <Modal
-                isOpen={showSuccessModal}
-                onClose={hideModal}
-                title={modalData.title}
-                message={modalData.message}
-                type="success"
-                buttonText="확인"
-            />
-
-            {/* 에러 모달 */}
-            <Modal
-                isOpen={showErrorModal}
-                onClose={hideModal}
-                title={modalData.title}
-                message={modalData.message}
-                type="error"
-                buttonText="확인"
-            />
-        </div>
-    );
+      {/* ModalUtil Modal */}
+      <Modal
+        show={modalState.show}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+        onClose={hideModal}
+      />
+    </div>
+  );
 }
 
 export default SignUpPage;

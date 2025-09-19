@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getLockerById } from "../api/lockerApi";
 import { getReservationForm } from "../api/reservationApi";
 import { checkZzimExists, toggleZzim as toggleZzimApi } from "../api/lockerApi";
@@ -8,11 +8,9 @@ import styles from "../styles/pages/lockerDetails.module.css";
 import lockeraddress from "../assets/location.svg";
 import lockerusername from "../assets/lockeruser.svg";
 import lockertel from "../assets/call.svg";
-import { useNavigate } from "react-router-dom";
-import useModal from "../hooks/useModal";
-import Modals from "../components/reservation/Modals";
 import favicon from "../assets/favicon.svg";
 import Header from "../components/Header/Header";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 const LockerDetails = () => {
   console.log("LockerDetailsPage 렌더링");
@@ -30,14 +28,10 @@ const LockerDetails = () => {
   const [isMyLocker, setIsMyLocker] = useState(false);
   const [userLoading, setUserLoading] = useState(true);
 
-  const navigate = useNavigate();
-
+  const { modalState, showError, showLogin, hideModal } = useModal();
   const { user } = useAuth();
   const memberId = user?.id;
 
-  // 모달 훅 사용
-  const { loginModal, showLoginModal, hideLoginModal } = useModal();
-  const originScroll = window.scrollY;
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -68,18 +62,13 @@ const LockerDetails = () => {
     };
   }, []);
 
-  // 로그인 확인 핸들러
-  const handleLoginConfirm = () => {
-    navigate("/page/login");
-  };
-
   const checkIfMyLocker = (keeperId, currentUserId) => {
     console.log("내 보관소 체크:", { keeperId, currentUserId });
     return keeperId && currentUserId && keeperId === currentUserId;
   };
 
   // 찜 상태 확인 API 호출
-  const checkZzimStatus = async () => {
+  const checkZzimStatus = useCallback(async () => {
     if (!lockerId || !memberId || isMyLocker) return;
 
     try {
@@ -93,17 +82,12 @@ const LockerDetails = () => {
     } catch (error) {
       console.error("찜 상태 확인 에러:", error);
     }
-  };
+  }, [lockerId, memberId, isMyLocker]);
 
   // 찜 토글
   const toggleZzim = async () => {
-    if (!lockerId || !memberId) {
-      showLoginModal("zzim");
-      return;
-    }
-
-    if (!user) {
-      showLoginModal("zzim");
+    if (!lockerId || !memberId || !user) {
+      showLogin();
       return;
     }
 
@@ -120,7 +104,7 @@ const LockerDetails = () => {
       }
     } catch (error) {
       console.error("찜 토글 에러:", error);
-      alert("찜 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+      showError("찜 처리 중 오류가 발생했습니다. 다시 시도해주세요.", "오류");
     } finally {
       setIsZzimLoading(false);
     }
@@ -128,8 +112,8 @@ const LockerDetails = () => {
 
   // 예약 버튼 클릭
   const handleReserveClick = async () => {
-    if (!lockerId || !memberId) {
-      showLoginModal("reserve");
+    if (!lockerId || !memberId || !user) {
+      showLogin();
       return;
     }
 
@@ -530,11 +514,6 @@ const LockerDetails = () => {
     );
   };
 
-  // const handleBack = (originScroll) => {
-  //   window.scrollTo(originScroll);
-  //   navigate(-1);
-  // };
-
   const Loader = ({ message, isError }) => (
     <div className={styles.container}>
       <Header
@@ -608,10 +587,18 @@ const LockerDetails = () => {
 
       {renderImageModal()}
 
-      <Modals
-        loginModal={loginModal}
-        hideLoginModal={hideLoginModal}
-        onLoginConfirm={handleLoginConfirm}
+      {/* ModalUtil Modal */}
+      <Modal
+        show={modalState.show}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+        onClose={hideModal}
       />
     </div>
   );

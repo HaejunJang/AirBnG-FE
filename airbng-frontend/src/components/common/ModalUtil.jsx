@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/common/modalUtil.css";
 
 /**
@@ -155,6 +156,9 @@ const Modal = ({
  * 모달 훅 - 모달 상태 관리
  */
 const useModal = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [modalState, setModalState] = React.useState({
     show: false,
     type: "info",
@@ -288,6 +292,34 @@ const useModal = () => {
     [showModal]
   );
 
+  const showLogin = useCallback(
+    (
+      title = "로그인 필요",
+      message = "로그인이 필요한 서비스입니다.",
+      onConfirm = null,
+      onCancel = null
+    ) => {
+      showModal({
+        type: "confirm",
+        title,
+        message,
+        confirmText: "로그인하기",
+        onConfirm:
+          onConfirm ||
+          (() => {
+            // 현재 페이지를 redirect 파라미터로 전달
+            const currentPath = location.pathname + location.search;
+            const redirectParam = encodeURIComponent(currentPath);
+            navigate(`/page/login?redirect=${redirectParam}`);
+          }),
+        showCancel: true,
+        cancelText: "취소",
+        onCancel,
+      });
+    },
+    [showModal, navigate, location]
+  );
+
   return {
     modalState,
     showModal,
@@ -298,6 +330,7 @@ const useModal = () => {
     showInfo,
     showConfirm,
     showLoading,
+    showLogin,
   };
 };
 
@@ -344,6 +377,12 @@ class ModalUtils {
   static showLoading(message, title) {
     if (this.modalRef) {
       this.modalRef.showLoading(message, title);
+    }
+  }
+
+  static showLogin(message, title, onConfirm) {
+    if (this.modalRef) {
+      this.modalRef.showLogin(message, title, onConfirm);
     }
   }
 

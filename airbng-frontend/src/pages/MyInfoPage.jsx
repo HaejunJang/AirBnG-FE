@@ -1,17 +1,18 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMyInfo } from "../hooks/useMyInfo";
 import ProfileImageUpload from "../components/info/ProfileImageUpload";
 import LoadingSpinner from "../components/info/LoadingSpinner";
-import ErrorMessage from "../components/info/ErrorMessage"
-import Modal from "../components/modal/Modal";
+import ErrorMessage from "../components/info/ErrorMessage";
 import info from "../styles/pages/myInfo.module.css";
-import { getCurrentUserIdFromToken, useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header/Header";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 const MyInfoPage = () => {
   const navigate = useNavigate();
   const { user, isLoggedIn } = useAuth();
+  const { modalState, showSuccess, showError, hideModal } = useModal();
   // const urlMemberId = searchParams.get('memberId');
 
   const {
@@ -20,7 +21,6 @@ const MyInfoPage = () => {
     isLoading,
     error,
     nicknameValidation,
-    showSuccessModal,
     isNicknameChanged,
     loadUserInfo,
     handleProfileImageChange,
@@ -30,7 +30,6 @@ const MyInfoPage = () => {
     updateUserField,
     updatePhoneField,
     setError,
-    setShowSuccessModal,
   } = useMyInfo();
 
   // 원래 닉네임 저장 → 닉네임이 바뀌었는지 비교
@@ -53,14 +52,15 @@ const MyInfoPage = () => {
     console.log("사용자 정보:", user);
 
     if (!isLoggedIn || !user?.id) {
-      alert("로그인이 필요합니다.");
-      navigate("/page/home");
+      showError("로그인이 필요합니다.", "로그인 필요", () => {
+        navigate("/page/home");
+      });
       return;
     }
 
     // 사용자 정보 로드
     loadUserInfo(user.id);
-  }, [isLoggedIn, user, navigate]);
+  }, [isLoggedIn, user, navigate, loadUserInfo, showError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,13 +74,10 @@ const MyInfoPage = () => {
 
     const success = await updateUserInfo();
     if (success) {
-      setShowSuccessModal(true);
+      showSuccess("정보가 성공적으로 수정되었습니다.", "수정 완료!", () => {
+        navigate("/page/mypage");
+      });
     }
-  };
-
-  const handleSuccessModalClose = () => {
-    setShowSuccessModal(false);
-    navigate("/page/mypage");
   };
 
   const getNicknameButtonText = () => {
@@ -217,11 +214,18 @@ const MyInfoPage = () => {
         </form>
       </div>
 
+      {/* ModalUtil Modal */}
       <Modal
-        isOpen={showSuccessModal}
-        onClose={handleSuccessModalClose}
-        title="수정 완료!"
-        message="정보가 성공적으로 수정되었습니다."
+        show={modalState.show}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+        onClose={hideModal}
       />
     </div>
   );

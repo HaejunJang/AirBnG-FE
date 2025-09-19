@@ -1,16 +1,14 @@
 // ReservationList.jsx
-import React, { useContext } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
-import AuthContext from "../api/reservationApi"; // 로그인 회원 정보 context
 import useReservationList from "../hooks/useReservationList";
-import useModal from "../hooks/useModal";
 import useDropdown from "../hooks/useDropdown";
 import Header from "../components/Header/Header";
 import ReservationTabs from "../components/reservation/ReservationTabs";
 import ReservationCard from "../components/reservation/ReservationCard";
-import Modals from "../components/reservation/Modals";
 import EmptyAndLoading from "../components/reservation/EmptyAndLoading";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 import { PERIOD_OPTIONS } from "../utils/reservation/reservationUtils";
 
@@ -38,17 +36,8 @@ const ReservationList = () => {
     deleteReservation,
   } = useReservationList(memberId); //memberId 넣기
 
-  const {
-    confirmModal,
-    successModal,
-    errorModal,
-    showConfirmModal,
-    hideConfirmModal,
-    showSuccessModal,
-    hideSuccessModal,
-    showErrorModal,
-    hideErrorModal,
-  } = useModal();
+  const { modalState, showConfirm, showSuccess, showError, hideModal } =
+    useModal();
 
   const {
     dropdownOpen,
@@ -56,7 +45,6 @@ const ReservationList = () => {
     toggleDropdown,
     closeDropdown,
     toggleMoreMenu,
-    setDropdownOpen,
   } = useDropdown();
 
   if (!1) return <div>로그인 후 확인 가능합니다.</div>;
@@ -65,10 +53,28 @@ const ReservationList = () => {
   const handleDeleteReservation = async (reservationId) => {
     const result = await deleteReservation(reservationId);
     if (result.success) {
-      showSuccessModal(result.refundAmount);
+      showSuccess(
+        `예약이 취소되었습니다.${
+          result.refundAmount ? ` 환불 금액: ${result.refundAmount}원` : ""
+        }`,
+        "취소 완료"
+      );
     } else {
-      showErrorModal();
+      showError(
+        "예약 취소 중 오류가 발생했습니다. 다시 시도해주세요.",
+        "취소 실패"
+      );
     }
+  };
+
+  // 예약 삭제 확인 모달 표시
+  const handleShowConfirmModal = (reservationId) => {
+    showConfirm(
+      "예약 취소",
+      "정말로 예약을 취소하시겠습니까?",
+      () => handleDeleteReservation(reservationId),
+      null
+    );
   };
 
   // Filter 표시 여부
@@ -205,7 +211,7 @@ const ReservationList = () => {
               memberId={memberId}
               activeMoreMenu={activeMoreMenu}
               toggleMoreMenu={toggleMoreMenu}
-              onShowConfirmModal={showConfirmModal}
+              onShowConfirmModal={handleShowConfirmModal}
               navigate={navigate}
             />
           ))}
@@ -218,15 +224,19 @@ const ReservationList = () => {
         loading={loading}
         message={showEmpty ? backendMessage : ""}
       />
-      {/* 모달들 */}
-      <Modals
-        confirmModal={confirmModal}
-        successModal={successModal}
-        errorModal={errorModal}
-        hideConfirmModal={hideConfirmModal}
-        hideSuccessModal={hideSuccessModal}
-        hideErrorModal={hideErrorModal}
-        onDeleteConfirm={handleDeleteReservation}
+
+      {/* ModalUtil Modal */}
+      <Modal
+        show={modalState.show}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+        onClose={hideModal}
       />
     </div>
   );
