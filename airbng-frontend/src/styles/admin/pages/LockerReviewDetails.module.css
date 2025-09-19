@@ -29,17 +29,17 @@
 }
 
 .statusPending {
-    background-color: #fff3cd;
+    background-color: hsla(231, 55%, 56%, 0.1);
     color: #856404;
 }
 
 .statusApproved {
-    background-color: #d4edda;
+    background-color: hsla(231, 55%, 56%, 0.1);
     color: #155724;
 }
 
 .statusRejected {
-    background-color: #f8d7da;
+    background-color: hsla(231, 55%, 56%, 0.1);
     color: #721c24;
 }
 

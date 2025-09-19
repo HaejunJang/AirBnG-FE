@@ -14,15 +14,15 @@
 }
 
 .textOrange {
-    color: #fd7e14;
+    color: hsl(231, 55%, 56%); /* 따뜻한 주황색 - 대기 */
 }
 
 .textGreen {
-    color: #28a745;
+    color: hsl(231, 55%, 56%); /* 메인 서비스 색 - 승인 */
 }
 
 .textRed {
-    color: #dc3545;
+    color: hsl(231, 55%, 56%); /* 부드러운 빨간색 - 반려 */
 }
 
 .summaryGrid {
@@ -80,32 +80,32 @@
 }
 
 .clickableItem:hover {
-    transform: translateX(4px);
+    transform: translateX(0px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .summaryPending {
-    background-color: #fff3cd;
-    border-left: 3px solid #fd7e14;
+    background-color: hsla(231, 55%, 56%, 0.4);
+    /*border-left: 3px solid hsl(45, 85%, 55%);*/
 }
 
 .summaryApproved {
-    background-color: #d4edda;
-    border-left: 3px solid #28a745;
+    background-color: hsla(231, 55%, 56%, 0.4);
+    /*border-left: 3px solid hsl(231, 55%, 56%);*/
 }
 
 .summaryRejected {
-    background-color: #f8d7da;
-    border-left: 3px solid #dc3545;
+    background-color: hsla(231, 55%, 56%, 0.4);
+    /*border-left: 3px solid hsl(350, 70%, 60%);*/
 }
 
 .summaryStorageName {
     font-weight: 500;
-    color: #495057;
+    color: #343a40;
 }
 
 .summaryOwnerName {
-    color: #6c757d;
+    color: #495057;
 }
 
 .emptyMessage {
