@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import '../styles/pages/MyPage.css';
-import {useMyInfo} from "../hooks/useMyInfo";
-import {infoApi} from "../api/infoApi";
+import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header/Header";
+import "../styles/pages/MyPage.css";
+import { useMyInfo } from "../hooks/useMyInfo";
+import { infoApi } from "../api/infoApi";
 import { getUserProfile } from "../utils/jwtUtil";
 
 export default function MyPage() {
