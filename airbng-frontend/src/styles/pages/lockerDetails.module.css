@@ -358,6 +358,18 @@ body {
   animation: heartBeat 0.6s ease-in-out;
 }
 
+.zzimBtn.disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  border: 2px solid #ddd;
+}
+
+.zzimBtn.disabled .heartIcon {
+  stroke: #ccc !important;
+  fill: none !important;
+}
+
 /* 찜 버튼 로딩 애니메이션 */
 .zzimLoader {
   width: 20px;
