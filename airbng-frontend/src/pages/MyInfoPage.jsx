@@ -4,7 +4,7 @@ import { useMyInfo } from '../hooks/useMyInfo';
 import ProfileImageUpload from '../components/info/ProfileImageUpload';
 import LoadingSpinner from '../components/info/LoadingSpinner';
 import ErrorMessage from '../components/info/ErrorMessage';
-import SuccessModal from '../components/info/SuccessModal';
+import Modal from '../components/modal/Modal';
 import info from '../styles/pages/myInfo.module.css';
 import {getCurrentUserIdFromToken, useAuth} from '../context/AuthContext';
 
@@ -224,7 +224,7 @@ const MyInfoPage = () => {
                 </form>
             </div>
 
-            <SuccessModal
+            <Modal
                 isOpen={showSuccessModal}
                 onClose={handleSuccessModalClose}
                 title="수정 완료!"
