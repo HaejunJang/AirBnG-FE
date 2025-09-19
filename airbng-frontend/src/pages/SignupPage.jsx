@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { signupApi } from "../api/signupApi";
+import Modal from "../components/modal/Modal";
 import "../styles/pages/signUp.css";
 
 function SignUpPage() {
@@ -36,27 +37,31 @@ function SignUpPage() {
     signup: { loading: false },
   });
 
-  const [modal, setModal] = useState({
-    show: false,
-    type: "",
-    title: "",
-    message: "",
-    onConfirm: null,
-  });
-
-  const showModal = (type, title, message, onConfirm = null) => {
-    setModal({ show: true, type, title, message, onConfirm });
-  };
-
-  const hideModal = () => {
-    setModal({
-      show: false,
-      type: "",
-      title: "",
-      message: "",
-      onConfirm: null,
+    // 새로운 모달 상태들
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [modalData, setModalData] = useState({
+        title: "",
+        message: "",
+        onConfirm: null,
     });
-  };
+
+    const showModal = (type, title, message, onConfirm = null) => {
+        setModalData({ title, message, onConfirm });
+        if (type === "success") {
+            setShowSuccessModal(true);
+        } else {
+            setShowErrorModal(true);
+        }
+    };
+
+    const hideModal = () => {
+        setShowSuccessModal(false);
+        setShowErrorModal(false);
+        if (modalData.onConfirm) {
+            modalData.onConfirm();
+        }
+    };
 
   const goBack = () => {
     navigate(-1);
@@ -344,32 +349,31 @@ function SignUpPage() {
 
       const result = await signupApi.signup(memberData, profileImage);
 
-      if (result.code === 1000) {
-        showModal("success", "회원가입 완료!", "", () => {
-          // navigate(`/page/login?redirect=${redirectUrl}`, { replace: true });
-          navigate("/page/login");
-        });
-      } else {
-        showModal(
-          "error",
-          "오류",
-          result.message || "회원가입에 실패했습니다."
-        );
-      }
-    } catch (error) {
-      console.error("회원가입 오류:", error);
-      showModal(
-        "error",
-        "오류",
-        error.message || "서버 오류로 회원가입에 실패했습니다."
-      );
-    } finally {
-      setButtonStates((prev) => ({
-        ...prev,
-        signup: { loading: false },
-      }));
-    }
-  };
+            if (result.code === 1000) {
+                showModal("success", "회원가입 완료!", "AirBnG에 오신 것을 환영합니다!", () => {
+                    navigate("/page/login");
+                });
+            } else {
+                showModal(
+                    "error",
+                    "회원가입 실패",
+                    result.message || "회원가입에 실패했습니다."
+                );
+            }
+        } catch (error) {
+            console.error("회원가입 오류:", error);
+            showModal(
+                "error",
+                "회원가입 실패",
+                error.message || "서버 오류로 회원가입에 실패했습니다."
+            );
+        } finally {
+            setButtonStates((prev) => ({
+                ...prev,
+                signup: { loading: false },
+            }));
+        }
+    };
 
   return (
     <div className="signup-page-container">
@@ -582,55 +586,27 @@ function SignUpPage() {
         </div>
       </div>
 
-      {modal.show && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div
-              className="modal-content"
-              role="dialog"
-              aria-live="assertive"
-              aria-labelledby="modal-title"
-              aria-describedby="modal-desc"
-            >
-              <div
-                className={`modal-icon ${
-                  modal.type === "success"
-                    ? "success-rotate"
-                    : modal.type === "error"
-                    ? "error-shake"
-                    : ""
-                }`}
-              >
-                {modal.type === "success" ? "✓" : "!"}
-              </div>
+            {/* 성공 모달 */}
+            <Modal
+                isOpen={showSuccessModal}
+                onClose={hideModal}
+                title={modalData.title}
+                message={modalData.message}
+                type="success"
+                buttonText="확인"
+            />
 
-              <div id="modal-title" className="modal-title">
-                {modal.title || (modal.type === "error" ? "오류" : "알림")}
-              </div>
-
-              {(modal.message || modal.type === "error") && (
-                <div id="modal-desc" className="modal-text">
-                  {modal.message || "처리 중 오류가 발생했습니다."}
-                </div>
-              )}
-            </div>
-
-            <div className="modal-buttons">
-              <button
-                className={`modal-btn ${modal.onConfirm ? "" : "single"}`}
-                onClick={() => {
-                  hideModal();
-                  if (modal.onConfirm) modal.onConfirm();
-                }}
-              >
-                확인
-              </button>
-            </div>
-          </div>
+            {/* 에러 모달 */}
+            <Modal
+                isOpen={showErrorModal}
+                onClose={hideModal}
+                title={modalData.title}
+                message={modalData.message}
+                type="error"
+                buttonText="확인"
+            />
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default SignUpPage;
