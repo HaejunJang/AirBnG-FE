@@ -90,6 +90,13 @@ export const sendTextByRest = async (convId, { text, msgId }) => {
   return unwrap(res); // Message
 };
 
+export const decideReservation = (convId, reservationId, approve, reason) => {
+  return httpAuth.post(
+    `/chat/conversations/${convId}/messages/reservation/${reservationId}/decision`,
+    { approve, reason }
+  );
+};
+
 /* ===== Attachments ===== */
 export const uploadAttachment = async (convId, file, { kind = 'image', msgId }) => {
   const fd = new FormData();

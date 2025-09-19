@@ -298,6 +298,8 @@ export default function ChatRoom({ convId, meId }) {
               peerLastReadSeq={peerLastReadSeq}
               peerInRoom={peerInRoom}
               presenceSettled={presenceSettled}
+              convId={convId}
+              meId={meId}
             />
           );
         })}

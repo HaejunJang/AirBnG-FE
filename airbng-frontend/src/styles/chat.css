@@ -296,7 +296,7 @@
 }
 
 /* 날짜 칩 (헤더 아래 라벨) */
-.date-chip{ display:flex; justify-content:center; margin:14px 0 10px; }
+.date-chip{ display:flex; justify-content:center; margin:14px 0 12px; }
 .date-chip > span{
   display: inline-flex; align-items:center; justify-content: center;
   background: rgba(0, 0, 0, 0.08);
@@ -314,7 +314,7 @@
 }
 
 /* Message Rows */
-.msg-row { --bubble-max: 72%; margin: 5px 0; }
+.msg-row { --bubble-max: 72%; margin: 8px 0; }
 .msg-row--me { display: flex; justify-content: flex-end; }
 .msg-row--you { display: grid; grid-template-columns: 36px 1fr; grid-auto-rows: auto; gap: 8px; align-items: center; }
 
@@ -327,13 +327,14 @@
   display: flex;
   flex-direction: column;
   justify-content: center;           /* ← 전체(이름+버블)를 가운데로 */
-  padding-top: 14px;                  /* 버블이 살짝 내려오도록 여유 */
+  padding-top: 0px;                  /* 버블이 살짝 내려오도록 여유 */
 }
 
 .msg-row--you .msg-name{
   margin: 0 0 4px 6px;
   line-height: 1;
-  transform: translateY(10px);
+  transform: none;
+  margin: 0 0 4px 6px;
   color: var(--text-muted);
   font-weight: 700;
 }
@@ -351,12 +352,12 @@
 .msg-col { min-width: 0; }
 .msg-name { font-size: var(--fs-12); color: var(--text-muted); margin: 2px 0 4px 6px; }
 
-.bubble-row { display: flex; align-items: flex-end; gap: 6px; transform: translateZ(0); }
+.bubble-row { display: flex; flex-wrap: nowrap; align-items: flex-end; gap: 6px; transform: translateZ(0); }
 .msg-row--me .bubble-row { justify-content: flex-end; }
-.msg-row--you .bubble-row { margin-top: 6px; transform: translateY(8px); justify-content: flex-start; }
+.msg-row--you .bubble-row { margin-top: 6px; transform: none; justify-content: flex-start; margin-top: 2px; }
 .msg-row--me .bubble-time { order: 1; }
-.msg-row--me .bubble { max-width: calc(var(--bubble-max) + var(--time-gutter)); order: 2; }
-.msg-row--you .bubble { max-width: calc(var(--bubble-max) + 44px); }
+.msg-row--me .bubble { max-width: var(--bubble-max); order: 2; }
+.msg-row--you .bubble { max-width: var(--bubble-max);  }
 
 .bubble {
   max-width: var(--bubble-max); min-width: 56px;
@@ -368,7 +369,7 @@
   box-shadow: 0 1px 0 rgba(30,41,59,.04);
   line-height:1.3;
   min-height: 34px;
-  word-break:break-word; white-space: pre-wrap;
+  word-break:break-word; white-space: pre-wrap; flex: 0 1 auto; 
 }
 /* 이미지/파일도 버블 안에서 중앙에 놓이도록(여백 균등 유지) */
 .bubble :is(.msg-image-wrap, .msg-file){
@@ -381,11 +382,10 @@
 .bubble--me{
   background:#DAE1FF !important;
   color:#111 !important;            /* 연한 보라 위 가독성 */
-  border:0 !important;
-  border-bottom-right-radius:8px;   /* 꼬리 쪽 살짝 플랫 */
+  border:1px solid #F0F2F7 !important; border-top-right-radius: 6px;
 }
 
-.bubble-meta { display: flex; align-items: flex-end; gap: 6px; }
+.bubble-meta { display: flex; align-items: flex-end; gap: 6px; flex: 0 0 auto; white-space: nowrap; }
 .bubble-time { font-size: 11px; line-height: 1; color:#8A8FA3 !important; opacity: .85; transform: translateY(1px); }
 .msg-unread {
   min-width: 18px; height: 18px; padding: 0 6px; border-radius: 999px;
@@ -396,6 +396,72 @@
   transform: translateY(1px);
 }
 .msg-row--me .bubble-time { text-align: right; }
+
+/* 버블을 카드에 맞게 조금 더 크게 + 안쪽 여백 제거 */
+.bubble:has(.reservation-card--compact){
+  padding: 0 !important;
+  text-align: left !important;
+  place-items: normal !important;
+  max-width: clamp(260px, 68vw, 312px); /* ← 카드가 커보이게 */
+}
+
+/* 카드: 버블 꽉 채우기 */
+.bubble .reservation-card--compact{
+  width: 100% !important;
+  max-width: none !important;
+  background: transparent;
+  border: 0; border-radius: 0; box-shadow: none;
+}
+
+.reservation-card {
+  padding: 12px;
+}
+
+/* 상단 영역(조금 키움) */
+.rc__media   { padding: 12px 14px 8px; display:grid; grid-template-columns: 48px 1fr; gap:10px; align-items:center; }
+.rc__thumb--sm{ width:48px; height:48px; border-radius:8px; object-fit:cover; display:block; }
+.rc__meta{ min-width:0; }
+.rc__title{ font-weight:800; font-size:14px; line-height:1.25; margin:0 0 2px; color:var(--text-strong);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rc__addr { font-size:12.5px; line-height:1.45; color:var(--text); white-space:normal; word-break:break-word; }
+
+/* 상세(점선 박스) */
+.rc__details{ margin: 0 14px 10px; padding:10px; border:1px dashed #DCE2EE; border-radius:8px; background:#fff; }
+.rc__row{
+  display:grid; grid-template-columns: 52px 1fr; /* 라벨폭 ↑ */
+  gap:8px; align-items:start; font-size:13px; line-height:1.5; color:var(--text);
+}
+.rc__row + .rc__row{ margin-top:6px; }
+.rc__label{ color:#6C7283; font-weight:800; white-space:nowrap; }
+.rc__val{ color:var(--text-strong); white-space:normal; word-break:break-word; }
+
+/* 액션: 반드시 한 줄, 좌우 균등 */
+.reservation-card--compact .rc__actions{
+  display:flex; flex-wrap:nowrap; gap:10px;
+  padding: 8px 14px 12px;
+}
+.reservation-card--compact .rc__actions .btn{
+  flex:1 1 0; min-width:0;   /* 줄바꿈 방지 */
+  height: 34px;              /* 살짝 키움 */
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+}
+.reservation-card--compact .btn--outline{ background:#fff; color:var(--text-strong); border:1px solid #E0E6F2; }
+.reservation-card--compact .btn--primary{ background:var(--primary); color:#fff; border:1px solid color-mix(in oklab, var(--primary) 18%, #2b3a67); }
+
+/* 중복 클릭 방지 시 비활성 스타일 */
+.reservation-card--compact .rc__actions .btn[disabled]{
+  opacity:.6; cursor:not-allowed; transform:none !important;
+  box-shadow:none !important;
+}
+
+/* 7) 아주 좁은 화면에서도 내용 안 짤리도록 보조 */
+@media (max-width: 420px){
+  .rc__media{ grid-template-columns: 40px 1fr auto; }
+  .rc__thumb--sm{ width:40px; height:40px; }
+  .rc__row{ grid-template-columns: 40px 1fr; }
+}
 
 /* =============================================================
    Chat Input

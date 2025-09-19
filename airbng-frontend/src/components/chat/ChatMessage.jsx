@@ -1,4 +1,6 @@
 import React, { useMemo, memo } from 'react';
+import ReservationMessage from './ReservationMessage';
+import { decideReservation } from '../../api/chatApi';
 
 function AttachmentView({ a, pending, failed }) {
   const isImage = a?.kind === 'image' || /^image\//.test(a?.mime || '');
@@ -30,6 +32,7 @@ function AttachmentView({ a, pending, failed }) {
 function ChatMessage({
   me, msg, name, showName, avatarUrl,
   peerLastReadSeq, peerInRoom, presenceSettled,
+  convId, meId,
 }) {
   const seoulTimeFmt = useMemo(
     () => new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' }),
@@ -74,12 +77,29 @@ function ChatMessage({
   const initial = (name || '상').slice(0, 1);
   const text = msg?.text ?? '';
 
-  const body = msg?.attachments?.length
-    ? msg.attachments.map((a) => (
-        <AttachmentView key={a.attachmentId || a.fileName || a.__localUrl || Math.random()}
-                        a={a} pending={!!msg._pending} failed={!!msg.failed} />
-      ))
-    : text;
+  let body;
+  if (msg?.type === 'reservation' && msg?.reservation) {
+    const card = msg.reservation;
+    const onApprove = () => decideReservation(convId, card.reservationId, true).catch(console.error);
+    const onReject  = () => decideReservation(convId, card.reservationId, false).catch(console.error);
+    // 드로퍼가 카드 메시지를 보냄 → 내가 드로퍼가 아니고(canApprove=true)면 키퍼로 판단
+    const canAct = !!card?.canApprove && Number(meId) !== Number(msg?.senderId);
+    body = (
+      <ReservationMessage
+        me={me}
+        card={card}
+        canAct={canAct}       
+        onApprove={onApprove}
+        onReject={onReject}
+      />
+    );
+  } else if (msg?.attachments?.length) {
+    body = msg.attachments.map((a, idx) => (
+      <AttachmentView key={a.fileName || a.imageUrl || idx} a={a} pending={!!msg._pending} failed={!!msg.failed}/>
+    ));
+  } else {
+    body = text;
+  }
 
   if (me) {
     return (

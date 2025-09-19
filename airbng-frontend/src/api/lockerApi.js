@@ -4,13 +4,13 @@ import { httpAuth, httpPublic } from "./http";
 export const getPopularTop5 = () => httpPublic.get("/lockers/popular");
 
 // 특정 보관소 조회
-export const getLockerById = (lockerId) => httpPublic.get("/lockers/${lockerId}");
+export const getLockerById = (lockerId) => httpPublic.get(`/lockers/${lockerId}`);
 
 // 보관소 활성화/비활성화 토글
-export const toggleLockerActivation = (lockerId) => httpAuth.patch("/lockers/${lockerId}");
+export const toggleLockerActivation = (lockerId) => httpAuth.patch(`/lockers/${lockerId}`);
 
 // 특정 보관소 삭제
-export const deleteLocker = (lockerId) => httpAuth.delete("/lockers/${lockerId}");
+export const deleteLocker = (lockerId) => httpAuth.delete(`/lockers/${lockerId}`);
 
 // 보관소 등록
 export const registerLocker = ({ locker, images = [] }) => {
@@ -25,7 +25,7 @@ export const updateLocker = ({ lockerId, locker, images = [] }) => {
     const fd = new FormData();
     fd.append("locker", new Blob([JSON.stringify(locker)], { type: "application/json" }));
     images.forEach((f) => fd.append("images", f));
-    return httpAuth.post("/lockers/update/${lockerId}", fd);
+    return httpAuth.post(`/lockers/update/${lockerId}`, fd);
 };
 // 내가 보유한 보관소 존재 여부
 export const hasMyLocker = () => httpAuth.get("/lockers/me/exist");
@@ -43,7 +43,7 @@ export const searchLockers = ({ address, lockerName, jimTypeId }) => {
 };
 
 // 수정할 특정 보관소 정보 조회
-export const getLockerForUpdate = (lockerId) => httpAuth.get("/lockers/update/${lockerId}");
+export const getLockerForUpdate = (lockerId) => httpAuth.get(`/lockers/update/${lockerId}`);
 
 
 // 상세
