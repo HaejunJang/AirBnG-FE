@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import "../styles/pages/ReservationDetail.css";
 import { getReservationDetail } from "../api/reservationApi";
 
@@ -13,13 +13,24 @@ import ClockIcon from "../assets/clock copy.svg";
 const ReservationDetail = () => {
   const navigate = useNavigate();
   const { reservationId } = useParams();
+  const { search } = useLocation();
+  const urlParams = new URLSearchParams(search);
+  const isFromReservation = urlParams.get("from") === "reservation"; // 예약 완료 직후인지 확인
+
   console.log("reservationId:", typeof reservationId);
+  console.log("isFromReservation:", isFromReservation);
+
   const { user } = useAuth(); // AuthContext에서 사용자 정보 가져오기
   const memberId = user?.id; // memberId 파싱
 
   const [reservationData, setReservationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // 스크롤 최상단으로 이동
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
 
   // API 호출 함수
   const fetchReservationDetail = async (reservationId, memberId) => {
@@ -288,6 +299,25 @@ const ReservationDetail = () => {
       </div>
 
       <div className="reservation-detail__content">
+        {/* 예약 완료 메시지 (예약 직후에만 표시) */}
+        {isFromReservation && (
+          <div className="reservation-success">
+            <div className="success-icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="24" fill="#4561db" />
+                <path
+                  d="M15 24l6 6 12-12"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <h2 className="success-title">예약이 완료되었습니다!</h2>
+          </div>
+        )}
+
         <div className="locker-info">
           <img
             src={
