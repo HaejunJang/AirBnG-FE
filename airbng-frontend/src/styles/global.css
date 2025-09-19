@@ -26,6 +26,7 @@ button { border: 0; background: none; cursor: pointer; }
   --app-max-width: 412px;
   --header-height: 60px;          /* used in header.css */
   --bottom-nav-height: 80px;      /* used in navigation.css */
+  --header-icon-size: 40px; /* used in header.css */
 
   /* Brand & palette */
   --primary: #4561DB;
