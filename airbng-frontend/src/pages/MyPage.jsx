@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import '../styles/pages/MyPage.css';
 import {useMyInfo} from "../hooks/useMyInfo";
 import {infoApi} from "../api/infoApi";
+import Header from "../components/Header/Header";
+import { getUserProfile } from "../utils/jwtUtil";
 
 export default function MyPage() {
     const {user, ready, isLoggedIn, logout, setUser} = useAuth();
@@ -290,7 +292,7 @@ export default function MyPage() {
 
   return (
     <div className="container">
-      <header className="header" />
+      <Header headerTitle="마이페이지" />
       <main className="main-content">
         {!isLoggedIn || !user?.id ? (
           <>

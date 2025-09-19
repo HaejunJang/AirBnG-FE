@@ -1,35 +1,14 @@
 
 .container {
-    width: 412px;
-    min-height: 100vh;
-    height: 100%;
-    background: white;
-    overflow-y: auto;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    position: relative;
-    padding-bottom: 80px; /* 네비바 공간 확보 */
-    padding-top: var(--header-height, 60px); /* 헤더 높이 */
-}
-
-/* 헤더 스타일 */
-.header {
-    position: fixed;
-    top: 0;
-    width: 412px;
-    background: white;
-    border-bottom: 1px solid #f0f0f0;
-    z-index: 1000;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-}
-
-.header-content h1 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #333;
-    margin: 0;
+  width: 412px;
+  min-height: 100vh;
+  height: 100%;
+  background: white;
+  overflow-y: auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  padding-bottom: 80px; /* 네비바 공간 확보 */
+  padding-top: var(--header-height, 60px); /* 헤더 높이 */
 }
 
 .logo-icon {
@@ -39,8 +18,9 @@
 
 /* 메인 컨텐츠 */
 .main-content {
-    padding: 20px;
-    margin: 0 !important;
+  padding: 20px;
+  margin: 0 !important;
+  box-shadow: none !important;
 }
 
 .menu-section {
