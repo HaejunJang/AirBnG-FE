@@ -16,7 +16,7 @@ import LoginPage from "./pages/LoginPage";
 import LockerDetailsPage from "./pages/LockerDetailsPage";
 import Notification from "./pages/notification";
 import { SSEProvider } from "./context/SseContext";
-import { getUserProfile } from './utils/jwtUtil';
+import { getUserProfile } from "./utils/jwtUtil";
 import MyInfoPage from "./pages/MyInfoPage";
 
 function App() {
@@ -52,8 +52,14 @@ function App() {
           <Route path="/page/lockerSearch" element={<SearchFilterPage />} />
           <Route path="/page/lockers" element={<LockerRootPage />} />
           <Route path="/page/lockers/manage" element={<LockerManagePage />} />
-          <Route path="/page/lockers/register" element={<LockerRegisterPage />} />
-          <Route path="/page/lockerDetails" element={<LockerDetailsPage />} />
+          <Route
+            path="/page/lockers/register"
+            element={<LockerRegisterPage />}
+          />
+          <Route
+            path="/page/lockers/:lockerId"
+            element={<LockerDetailsPage />}
+          />
           <Route path="/page/reservations/list" element={<ReservationList />} />
           <Route
             path="/page/reservations/detail/:id"
@@ -68,7 +74,7 @@ function App() {
           <Route path="/page/login" element={<LoginPage />} />
           <Route path="/page/notification" element={<Notification />} />
 
-            <Route path="/page/mypage/update" element={<MyInfoPage />} />
+          <Route path="/page/mypage/update" element={<MyInfoPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
@@ -78,11 +84,11 @@ function App() {
   const profile = getUserProfile();
 
   return (
-      <BrowserRouter>
-          <SSEProvider memberId={profile?.id || null}>
-            <MainContent />
-          </SSEProvider>
-      </BrowserRouter>
+    <BrowserRouter>
+      <SSEProvider memberId={profile?.id || null}>
+        <MainContent />
+      </SSEProvider>
+    </BrowserRouter>
   );
 }
 
