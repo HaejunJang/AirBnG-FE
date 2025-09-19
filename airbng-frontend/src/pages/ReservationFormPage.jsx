@@ -57,6 +57,7 @@ function ReservationFormPage() {
   const [startTimeOptions, setStartTimeOptions] = useState([]);
   const [endTimeOptions, setEndTimeOptions] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(""); // 결제 수단 상태 추가
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
 
   const paymentMethods = [
     { id: "jimpay", name: "짐페이머니", icon: airbngIcon, method: "WALLET" },
@@ -120,6 +121,18 @@ function ReservationFormPage() {
     },
     showWarning: (message, title = "", callback = null) => {
       setModal({ show: true, type: "warning", title, message, callback });
+    },
+    showLoading: (message = "처리 중...", title = "") => {
+      setModal({ show: true, type: "loading", title, message, callback: null });
+    },
+    hideModal: () => {
+      setModal({
+        show: false,
+        type: "",
+        title: "",
+        message: "",
+        callback: null,
+      });
     },
   };
 
@@ -546,12 +559,15 @@ function ReservationFormPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validateForm()) return;
+
+    // 로딩 모달 표시
+    ModalUtils.showLoading("결제 처리 중입니다...", "잠시만 기다려주세요");
+
     const startDateStr = dateArray[selectedDateRange.startDate];
     const endDateStr = dateArray[selectedDateRange.endDate];
 
     const requestData = {
-      dropperId: memberId,
-      keeperId: lockerData.keeperId,
       lockerId: parseInt(lockerId),
       startTime: `${startDateStr} ${selectedStartTime}:00`,
       endTime: `${endDateStr} ${selectedEndTime}:00`,
@@ -572,54 +588,59 @@ function ReservationFormPage() {
     );
     lastScopeRef.current = idemScope; // 최근 스코프 기억
     attemptedRef.current = true; // 제출 시도됨
-    postReservation(requestData, getOrCreateIdemKey(idemScope))
-      .then((data) => {
-        if (data.code === 4000) {
-          ModalUtils.showSuccess("예약이 완료되었습니다!", "", () => {
-            done(idemScope);
-            const reservationId = data.result?.reservationId || 0;
-            if (reservationId === 0) {
-              navigate("/page/home");
-            } else {
-              sessionStorage.setItem("lockerId", lockerId);
-              navigate("/page/reservation?reservationId=" + reservationId);
-            }
-          });
-        } else if (data.code === 3005) {
-          ModalUtils.showWarning(
-            "보관소가 비활성화 되었습니다.",
-            "이용 불가",
-            () => {
-              done(idemScope);
-              navigate(-1);
-            }
-          );
-        } else if (data.code === 9002) {
-          ModalUtils.showError(
-            "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
-            "예약 실패",
-            () => {
-              // TODO : 로그인 후 돌아왔을 때, 선택 내역 남겨두기
-              done(idemScope);
-              navigate("/page/login");
-            }
-          );
-        } else {
-          ModalUtils.showError(data.message, "예약 실패", () => {
-            console.log(data);
-            // TODO: 실패 시 멱등키 유지 → 사용자가 다시 시도하면 같은 키로 재전송
 
-            // navigate(-1);
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("API 요청 실패:", error);
-        ModalUtils.showError(
-          "네트워크 오류. 잠시 후 다시 시도해주세요.",
-          "예약 실패"
-        );
-      });
+    // 1초 대기 후 API 호출
+    setTimeout(() => {
+      postReservation(requestData, getOrCreateIdemKey(idemScope))
+        .then((data) => {
+          if (data.code === 4000) {
+            // 로딩 모달 숨기고 바로 성공 모달 표시
+            ModalUtils.showSuccess("예약이 완료되었습니다!", "", () => {
+              done(idemScope);
+              const reservationId = data.result?.reservationId || 0;
+              if (reservationId === 0) {
+                navigate("/page/home");
+              } else {
+                sessionStorage.setItem("lockerId", lockerId);
+                navigate("/page/reservation?reservationId=" + reservationId);
+              }
+            });
+          } else if (data.code === 3005) {
+            ModalUtils.showWarning(
+              "보관소가 비활성화 되었습니다.",
+              "이용 불가",
+              () => {
+                done(idemScope);
+                navigate(-1);
+              }
+            );
+          } else if (data.code === 9002) {
+            ModalUtils.showError(
+              "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
+              "예약 실패",
+              () => {
+                // TODO : 로그인 후 돌아왔을 때, 선택 내역 남겨두기
+                done(idemScope);
+                navigate("/page/login");
+              }
+            );
+          } else {
+            ModalUtils.showError(data.message, "예약 실패", () => {
+              console.log(data);
+              // TODO: 실패 시 멱등키 유지 → 사용자가 다시 시도하면 같은 키로 재전송
+
+              // navigate(-1);
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("API 요청 실패:", error);
+          ModalUtils.showError(
+            "네트워크 오류. 잠시 후 다시 시도해주세요.",
+            "예약 실패"
+          );
+        });
+    }, 500); // 500ms 대기
   };
 
   // 날짜 렌더링
@@ -944,10 +965,14 @@ function ReservationFormPage() {
         <button
           type="submit"
           form="reservationForm"
-          className="submit-button"
+          className={`submit-button ${
+            calculation.totalPrice === 0 ? "reserve-only" : ""
+          }`}
           onClick={handleSubmit}
         >
-          예약하기
+          {calculation.totalPrice > 0
+            ? `${calculation.totalPrice.toLocaleString()}원 결제하기`
+            : "빠진 정보 확인하기"}
         </button>
       </div>
 
@@ -955,23 +980,33 @@ function ReservationFormPage() {
       {modal.show && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3 className="modal-title">{modal.title}</h3>
-            <p className="modal-message">{modal.message}</p>
-            <button
-              className={`modal-button ${modal.type}`}
-              onClick={() => {
-                setModal({
-                  show: false,
-                  type: "",
-                  title: "",
-                  message: "",
-                  callback: null,
-                });
-                if (modal.callback) modal.callback();
-              }}
-            >
-              확인
-            </button>
+            {modal.type === "loading" ? (
+              <>
+                <div className="loading-spinner"></div>
+                <h3 className="modal-title">{modal.title}</h3>
+                <p className="modal-message">{modal.message}</p>
+              </>
+            ) : (
+              <>
+                <h3 className="modal-title">{modal.title}</h3>
+                <p className="modal-message">{modal.message}</p>
+                <button
+                  className={`modal-button ${modal.type}`}
+                  onClick={() => {
+                    setModal({
+                      show: false,
+                      type: "",
+                      title: "",
+                      message: "",
+                      callback: null,
+                    });
+                    if (modal.callback) modal.callback();
+                  }}
+                >
+                  확인
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
