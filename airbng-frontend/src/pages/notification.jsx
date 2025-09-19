@@ -45,21 +45,29 @@ const NotificationItem = ({ notification, onRemove }) => {
         REMINDER: '리마인더',
         STATE_CHANGE: '상태 변경',
         CANCEL_NOTICE: '취소 알림',
+        LOCKER_APPROVED: '보관소 승인',
+        LOCKER_REJECTED: '보관소 반려'
     };
+
     const classMap = {
         EXPIRED: 'expired',
         REMINDER: 'reminder',
         STATE_CHANGE: 'state-change',
         CANCEL_NOTICE: 'cancel-notice',
+        LOCKER_APPROVED: 'locker-approved',
+        LOCKER_REJECTED: 'locker-rejected'
     };
+
+    // 보관소 승인/거절 알림에서는 예약번호 숨김
+    const showReservationId = !['LOCKER_APPROVED', 'LOCKER_REJECTED'].includes(notification.type);
 
     return (
         <div className="notification-item">
             <div className="notification-content">
                 <div className="notification-header">
-                    <span className={`notification-type ${classMap[notification.type] || ''}`}>
-                        {typeMap[notification.type] || notification.type}
-                    </span>
+          <span className={`notification-type ${classMap[notification.type] || ''}`}>
+            {typeMap[notification.type] || notification.type}
+          </span>
                     <div className="notification-actions">
                         <span className="notification-time">{notification.receivedAt}</span>
                         <button
@@ -72,7 +80,8 @@ const NotificationItem = ({ notification, onRemove }) => {
                 </div>
                 <div className="notification-message">{notification.message}</div>
                 <div className="notification-details">
-                    예약번호: {notification.reservationId} | 사용자: {notification.nickName}
+                    {showReservationId && <>예약번호: {notification.reservationId} | </>}
+                    사용자: {notification.nickName}
                 </div>
             </div>
         </div>
@@ -81,14 +90,40 @@ const NotificationItem = ({ notification, onRemove }) => {
 
 const NotificationList = ({ notifications, deletedNotificationIds, onRemove, onClearAll }) => {
     // 고유 키 생성 함수 (여러 필드 조합으로 생성)
-    const getAlarmKey = (alarm) => {
-        // id가 있으면 사용하고, 없으면 다른 필드들로 조합해서 고유키 생성
+// 고유 키 생성 함수 (여러 필드 조합으로 생성)
+    const getAlarmKey = useCallback((alarm) => {
+        if (!alarm) {
+            return null;
+        }
+
+        // id가 있으면 사용 (가장 확실한 고유키)
         if (alarm.id) {
             return `${alarm.id}`;
         }
-        // id가 없는 경우 다른 필드들로 고유 키 생성
-        return `${alarm.reservationId}-${alarm.receiverId}-${alarm.type}-${alarm.receivedAt}`;
-    };
+
+        // eventId가 있으면 사용 (보관소 알림에서 사용할 수 있음)
+        if (alarm.eventId) {
+            return `${alarm.eventId}`;
+        }
+
+        // 예약 관련 알림: reservationId + receiverId + type + receivedAt
+        if (alarm.reservationId && alarm.receiverId && alarm.type && alarm.receivedAt) {
+            return `${alarm.reservationId}-${alarm.receiverId}-${alarm.type}-${alarm.receivedAt}`;
+        }
+
+        // 보관소 알림 등: type + receivedAt + receiverId로 고유키 생성
+        if (alarm.type && alarm.receivedAt && alarm.receiverId) {
+            return `${alarm.type}-${alarm.receivedAt}-${alarm.receiverId}`;
+        }
+
+        // 최후의 수단: type + receivedAt
+        if (alarm.type && alarm.receivedAt) {
+            return `${alarm.type}-${alarm.receivedAt}`;
+        }
+
+        // 그래도 안되면 전체 객체를 JSON으로
+        return JSON.stringify(alarm);
+    }, []);
 
     const TWENTY_THREE_HOURS = 23 * 60 * 60 * 1000;
 
@@ -156,17 +191,33 @@ const NotificationApp = () => {
             return null;
         }
 
-        // id가 있으면 사용하고, 없으면 다른 필드들로 조합해서 고유키 생성
+        // id가 있으면 사용 (가장 확실한 고유키)
         if (alarm.id) {
             return `${alarm.id}`;
         }
 
-        // id가 없는 경우 다른 필드들로 고유 키 생성
+        // eventId가 있으면 사용 (보관소 알림에서 사용할 수 있음)
+        if (alarm.eventId) {
+            return `${alarm.eventId}`;
+        }
+
+        // 예약 관련 알림: reservationId + receiverId + type + receivedAt
         if (alarm.reservationId && alarm.receiverId && alarm.type && alarm.receivedAt) {
             return `${alarm.reservationId}-${alarm.receiverId}-${alarm.type}-${alarm.receivedAt}`;
         }
 
-        return null;
+        // 보관소 알림 등: type + receivedAt + receiverId로 고유키 생성
+        if (alarm.type && alarm.receivedAt && alarm.receiverId) {
+            return `${alarm.type}-${alarm.receivedAt}-${alarm.receiverId}`;
+        }
+
+        // 최후의 수단: type + receivedAt
+        if (alarm.type && alarm.receivedAt) {
+            return `${alarm.type}-${alarm.receivedAt}`;
+        }
+
+        // 그래도 안되면 전체 객체를 JSON으로
+        return JSON.stringify(alarm);
     }, []);
 
     // 컴포넌트 마운트 시 브라우저 알림 권한 확인

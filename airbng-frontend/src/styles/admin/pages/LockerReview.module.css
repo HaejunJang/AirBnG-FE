@@ -2,8 +2,7 @@
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    margin-bottom: 20px;
+    padding: 20px;
 }
 
 .contentTitle {
@@ -69,7 +68,7 @@
 }
 
 .backButtonContainer {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 .backButton {
@@ -312,4 +311,30 @@
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
+}
+
+.squareButton {
+    width: 80px;
+    height: 50px;
+    background-color: hsl(231, 55%, 56%);
+    color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;   /* 가로 중앙 정렬 */
+    align-items: center;       /* 세로 중앙 정렬 */
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+
+
+    transition: all 0.2s;
+    position: relative;       /* 위치 조정 가능 */
+    top: 15px;                 /* 살짝 아래로 이동 */
+    left: 10px;                /* 살짝 오른쪽으로 이동 */
+}
+
+.squareButton:hover {
+    background-color: hsla(231, 55%, 56%, 0.7);
+    /*transform: translateY(-2px);*/
 }
