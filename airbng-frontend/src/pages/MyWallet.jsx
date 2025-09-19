@@ -385,7 +385,6 @@ export default function MyWallet() {
             </div>
           ) : (
             <div className={styles.noAccount}>
-              <div className={styles.noAccountIcon}>🏦</div>
               <h3 className={styles.noAccountTitle}>연동된 계좌가 없습니다</h3>
               <p className={styles.noAccountDesc}>
                 계좌를 등록하면 쉽게 충전하고
