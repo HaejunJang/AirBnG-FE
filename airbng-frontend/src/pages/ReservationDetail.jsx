@@ -215,24 +215,43 @@ const ReservationDetail = () => {
     return `${hours}:${minutes}`;
   };
 
-  // Calculate total price
+  // 시간 포맷팅 함수 (FormPage와 동일)
+  const formatHours = (hours) => {
+    if (hours === 1) return "1시간";
+    if (hours < 1) return `${Math.round(hours * 60)}분`;
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return m > 0 ? `${h}시간 ${m}분` : `${h}시간`;
+  };
+
+  // Calculate total price (FormPage 로직과 동일하게 수정)
   const calculateTotal = () => {
-    const hours = Math.ceil((endDate - startDate) / (1000 * 60 * 60));
-    let total = 0;
+    const diffMs = endDate - startDate;
+    const totalHours = diffMs / (1000 * 60 * 60);
+    let totalItemPrice = 0;
+    const items = [];
 
     if (data.reservationJimTypes && data.reservationJimTypes.length > 0) {
       data.reservationJimTypes.forEach((item) => {
-        total += item.count * item.pricePerHour * hours;
+        const itemPrice = item.count * item.pricePerHour * totalHours;
+        totalItemPrice += itemPrice;
+        items.push({
+          name: item.typeName,
+          count: item.count,
+          hours: totalHours,
+          price: itemPrice,
+        });
       });
     }
 
-    const serviceTime = hours * 2; // 2시간씩 서비스 수수료
-    const serviceFee = serviceTime * 200; // 시간당 200원
+    const serviceFee = Math.floor(totalItemPrice * 0.05); // 5% 수수료
+    const total = Math.floor(totalItemPrice + serviceFee);
 
     return {
-      itemTotal: total,
+      itemTotal: totalItemPrice,
       serviceFee: serviceFee,
-      total: total + serviceFee,
+      total: total,
+      items: items,
     };
   };
 
@@ -303,15 +322,10 @@ const ReservationDetail = () => {
         {isFromReservation && (
           <div className="reservation-success">
             <div className="success-icon">
-              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                <circle cx="24" cy="24" r="24" fill="#4561db" />
-                <path
-                  d="M15 24l6 6 12-12"
-                  stroke="white"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="#ffffff" stroke="#4561db" stroke-width="6"/>
+                <path d="M30 50l12 12 25-25" stroke="#4561db" stroke-width="6" stroke-linecap="round"
+                      stroke-linejoin="round" fill="none"/>
               </svg>
             </div>
             <h2 className="success-title">예약이 완료되었습니다!</h2>
@@ -320,12 +334,12 @@ const ReservationDetail = () => {
 
         <div className="locker-info">
           <img
-            src={
-              data.images && data.images.length > 0
-                ? data.images[0]
-                : "/api/placeholder/60/60"
-            }
-            alt="보관소 이미지"
+              src={
+                data.images && data.images.length > 0
+                    ? data.images[0]
+                    : "/api/placeholder/60/60"
+              }
+              alt="보관소 이미지"
             className="locker-info__image"
           />
           <div className="locker-info__details">
@@ -401,28 +415,23 @@ const ReservationDetail = () => {
           </div>
         </div>
 
-        <div className="pricing-section">
-          {data.reservationJimTypes &&
-            data.reservationJimTypes.map((item, index) => (
-              <div key={index} className="pricing-item">
-                <span className="pricing-label">{item.typeName} + 2시간</span>
-                <span className="pricing-value">
-                  {(item.count * item.pricePerHour * 2).toLocaleString()}원
-                </span>
-              </div>
-            ))}
-          <div className="pricing-item">
-            <span className="pricing-label">서비스 수수료</span>
-            <span className="pricing-value">
-              {pricing.serviceFee.toLocaleString()}원
-            </span>
+        <div className="price-calculation">
+          {pricing.items.map((item, index) => (
+            <div key={index} className="price-item">
+              <span>
+                {item.name} × {item.count}개 × {formatHours(item.hours)}
+              </span>
+              <span>{item.price.toLocaleString()}원</span>
+            </div>
+          ))}
+          <div className="price-item">
+            <span>서비스 수수료 (5%)</span>
+            <span>{pricing.serviceFee.toLocaleString()}원</span>
           </div>
-
-          <div className="pricing-total">
-            <span className="pricing-total-label">총 결제 금액</span>
-            <span className="pricing-total-value">
-              {pricing.total.toLocaleString()}원
-            </span>
+          <hr className="price-divider" />
+          <div className="price-total">
+            <span>총 결제 금액</span>
+            <span>{pricing.total.toLocaleString()}원</span>
           </div>
         </div>
 
