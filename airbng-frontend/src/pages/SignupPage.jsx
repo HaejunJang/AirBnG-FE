@@ -298,13 +298,13 @@ function SignUpPage() {
     }
 
     if (password !== passwordConfirm) {
-      showError("오류", "비밀번호가 일치하지 않습니다.");
+      showError("비밀번호가 일치하지 않습니다.", "오류");
       return;
     }
 
     const passwordError = validatePassword(password);
     if (passwordError) {
-      showError("오류", passwordError);
+      showError(passwordError, "오류");
       return;
     }
 
