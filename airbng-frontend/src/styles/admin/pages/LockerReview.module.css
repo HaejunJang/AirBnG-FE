@@ -217,77 +217,7 @@
     cursor: not-allowed;
 }
 
-.summaryGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
-    margin-top: 20px;
-}
-
-.summarySection {
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    padding: 16px;
-    background-color: #fafafa;
-}
-
-.summaryHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.summaryTitle {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-.summaryCount {
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-
-.summaryList {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.summaryItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-}
-
-.summaryPending {
-    background-color: #fff3cd;
-}
-
-.summaryApproved {
-    background-color: #d4edda;
-}
-
-.summaryRejected {
-    background-color: #f8d7da;
-}
-
-.summaryStorageName {
-    font-weight: 500;
-    color: #495057;
-}
-
-.summaryOwnerName {
-    color: #6c757d;
-}
-
-/* Loading 스타일 - LockerReview.module.css에 추가 */
+/* Loading 스타일 */
 .loadingContainer {
     display: flex;
     justify-content: center;
@@ -326,8 +256,6 @@
     cursor: pointer;
     font-weight: 600;
     font-size: 1rem;
-
-
     transition: all 0.2s;
     position: relative;       /* 위치 조정 가능 */
     top: 15px;                 /* 살짝 아래로 이동 */
@@ -336,5 +264,346 @@
 
 .squareButton:hover {
     background-color: hsla(231, 55%, 56%, 0.7);
-    /*transform: translateY(-2px);*/
 }
+
+
+/*.contentCard {*/
+/*    background: white;*/
+/*    border-radius: 12px;*/
+/*    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);*/
+/*    padding: 20px;*/
+/*}*/
+
+/*.contentTitle {*/
+/*    font-size: 1.8rem;*/
+/*    font-weight: 600;*/
+/*    color: #2c3e50;*/
+/*    margin-bottom: 20px;*/
+/*}*/
+
+/*.textGray {*/
+/*    color: #6c757d;*/
+/*}*/
+
+/*.statsGrid {*/
+/*    display: grid;*/
+/*    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));*/
+/*    gap: 20px;*/
+/*    margin-top: 25px;*/
+/*}*/
+
+/*.statCard {*/
+/*    background: #f8f9fa;*/
+/*    border: 1px solid #e9ecef;*/
+/*    border-radius: 8px;*/
+/*    padding: 20px;*/
+/*    text-align: center;*/
+/*    transition: all 0.2s ease;*/
+/*}*/
+
+/*.clickableCard {*/
+/*    cursor: pointer;*/
+/*}*/
+
+/*.clickableCard:hover {*/
+/*    background-color: #e9ecef;*/
+/*    transform: translateY(-2px);*/
+/*    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
+/*}*/
+
+/*.statLabel {*/
+/*    font-size: 0.9rem;*/
+/*    color: #6c757d;*/
+/*    margin-bottom: 8px;*/
+/*    font-weight: 500;*/
+/*}*/
+
+/*.statValue {*/
+/*    font-size: 2rem;*/
+/*    font-weight: bold;*/
+/*    margin: 0;*/
+/*}*/
+
+/*.textOrange {*/
+/*    color: #fd7e14;*/
+/*}*/
+
+/*.textGreen {*/
+/*    color: #28a745;*/
+/*}*/
+
+/*.textRed {*/
+/*    color: #dc3545;*/
+/*}*/
+
+/*.backButtonContainer {*/
+/*    margin-bottom: 30px;*/
+/*}*/
+
+/*.backButton {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    gap: 8px;*/
+/*    padding: 8px 16px;*/
+/*    background: none;*/
+/*    border: none;*/
+/*    color: #6c757d;*/
+/*    cursor: pointer;*/
+/*    border-radius: 6px;*/
+/*    transition: all 0.2s;*/
+/*}*/
+
+/*.backButton:hover {*/
+/*    background-color: #f5f5f5;*/
+/*    color: #495057;*/
+/*}*/
+
+/*.cardHeader {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    align-items: center;*/
+/*    margin-bottom: 24px;*/
+/*}*/
+
+/*.subTitle {*/
+/*    font-size: 1.3rem;*/
+/*    font-weight: 600;*/
+/*    color: #495057;*/
+/*    margin-bottom: 0;*/
+/*}*/
+
+/*.countBadge {*/
+/*    font-size: 0.9rem;*/
+/*    color: #6c757d;*/
+/*    background-color: #f8f9fa;*/
+/*    padding: 4px 12px;*/
+/*    border-radius: 12px;*/
+/*    border: 1px solid #e9ecef;*/
+/*}*/
+
+/*.storageDetailList {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    gap: 16px;*/
+/*    margin-bottom: 24px;*/
+/*}*/
+
+/*.storageDetailItem {*/
+/*    border: 1px solid #e9ecef;*/
+/*    border-radius: 8px;*/
+/*    padding: 16px;*/
+/*    transition: background-color 0.2s;*/
+/*    cursor: pointer;*/
+/*}*/
+
+/*.storageDetailItem:hover {*/
+/*    background-color: #f8f9fa;*/
+/*}*/
+
+/*.storageDetailHeader {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    align-items: flex-start;*/
+/*    margin-bottom: 12px;*/
+/*}*/
+
+/*.storageName {*/
+/*    margin: 0;*/
+/*    color: #495057;*/
+/*    font-weight: 600;*/
+/*}*/
+
+/*.statusBadge {*/
+/*    padding: 4px 8px;*/
+/*    border-radius: 12px;*/
+/*    font-size: 0.8rem;*/
+/*    font-weight: 600;*/
+/*}*/
+
+/*.statusPending {*/
+/*    background-color: #fff3cd;*/
+/*    color: #856404;*/
+/*}*/
+
+/*.statusApproved {*/
+/*    background-color: #d4edda;*/
+/*    color: #155724;*/
+/*}*/
+
+/*.statusRejected {*/
+/*    background-color: #f8d7da;*/
+/*    color: #721c24;*/
+/*}*/
+
+/*.storageDetailInfo {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    gap: 4px;*/
+/*}*/
+
+/*.storageDetailInfo p {*/
+/*    margin: 0;*/
+/*    font-size: 0.9rem;*/
+/*    color: #6c757d;*/
+/*}*/
+
+/*.dateText {*/
+/*    font-size: 0.8rem;*/
+/*    color: #adb5bd;*/
+/*}*/
+
+/*.pagination {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    gap: 8px;*/
+/*    margin-top: 24px;*/
+/*}*/
+
+/*.pageButton {*/
+/*    padding: 8px 12px;*/
+/*    border: 1px solid #dee2e6;*/
+/*    border-radius: 4px;*/
+/*    background: white;*/
+/*    color: #495057;*/
+/*    font-size: 0.9rem;*/
+/*    cursor: pointer;*/
+/*    transition: all 0.2s;*/
+/*}*/
+
+/*.pageButton:hover:not(.disabled) {*/
+/*    background-color: #e9ecef;*/
+/*}*/
+
+/*.pageButtonActive {*/
+/*    background: #007bff !important;*/
+/*    color: white !important;*/
+/*    border-color: #007bff !important;*/
+/*}*/
+
+/*.disabled {*/
+/*    opacity: 0.5;*/
+/*    cursor: not-allowed;*/
+/*}*/
+
+/*.summaryGrid {*/
+/*    display: grid;*/
+/*    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));*/
+/*    gap: 24px;*/
+/*    margin-top: 20px;*/
+/*}*/
+
+/*.summarySection {*/
+/*    border: 1px solid #e9ecef;*/
+/*    border-radius: 8px;*/
+/*    padding: 16px;*/
+/*    background-color: #fafafa;*/
+/*}*/
+
+/*.summaryHeader {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    align-items: center;*/
+/*    margin-bottom: 12px;*/
+/*}*/
+
+/*.summaryTitle {*/
+/*    font-size: 1rem;*/
+/*    font-weight: 600;*/
+/*    margin: 0;*/
+/*}*/
+
+/*.summaryCount {*/
+/*    font-size: 0.9rem;*/
+/*    color: #6c757d;*/
+/*}*/
+
+/*.summaryList {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    gap: 8px;*/
+/*    max-height: 300px;*/
+/*    overflow-y: auto;*/
+/*}*/
+
+/*.summaryItem {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    align-items: center;*/
+/*    padding: 8px 12px;*/
+/*    border-radius: 6px;*/
+/*    font-size: 0.9rem;*/
+/*}*/
+
+/*.summaryPending {*/
+/*    background-color: #fff3cd;*/
+/*}*/
+
+/*.summaryApproved {*/
+/*    background-color: #d4edda;*/
+/*}*/
+
+/*.summaryRejected {*/
+/*    background-color: #f8d7da;*/
+/*}*/
+
+/*.summaryStorageName {*/
+/*    font-weight: 500;*/
+/*    color: #495057;*/
+/*}*/
+
+/*.summaryOwnerName {*/
+/*    color: #6c757d;*/
+/*}*/
+
+/*!* Loading 스타일 - LockerReview.module.css에 추가 *!*/
+/*.loadingContainer {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    padding: 2rem;*/
+/*    color: #666;*/
+/*    font-size: 1rem;*/
+/*}*/
+
+/*!* 버튼 비활성화 스타일 개선 *!*/
+/*.approveButton:disabled,*/
+/*.rejectButton:disabled,*/
+/*.rejectModalConfirmButton:disabled,*/
+/*.rejectModalCancelButton:disabled {*/
+/*    opacity: 0.6;*/
+/*    cursor: not-allowed;*/
+/*}*/
+
+/*!* 페이지네이션 로딩 상태 *!*/
+/*.pagination .disabled {*/
+/*    opacity: 0.5;*/
+/*    cursor: not-allowed;*/
+/*    pointer-events: none;*/
+/*}*/
+
+/*.squareButton {*/
+/*    width: 80px;*/
+/*    height: 50px;*/
+/*    background-color: hsl(231, 55%, 56%);*/
+/*    color: #ffffff;*/
+/*    border: 1px solid #dee2e6;*/
+/*    border-radius: 8px;*/
+/*    display: flex;*/
+/*    justify-content: center;   !* 가로 중앙 정렬 *!*/
+/*    align-items: center;       !* 세로 중앙 정렬 *!*/
+/*    cursor: pointer;*/
+/*    font-weight: 600;*/
+/*    font-size: 1rem;*/
+
+
+/*    transition: all 0.2s;*/
+/*    position: relative;       !* 위치 조정 가능 *!*/
+/*    top: 15px;                 !* 살짝 아래로 이동 *!*/
+/*    left: 10px;                !* 살짝 오른쪽으로 이동 *!*/
+/*}*/
+
+/*.squareButton:hover {*/
+/*    background-color: hsla(231, 55%, 56%, 0.7);*/
+/*    !*transform: translateY(-2px);*!*/
+/*}*/

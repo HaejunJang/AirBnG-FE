@@ -1,0 +1,117 @@
+.contentCard {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.subTitle {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 20px;
+}
+
+.textOrange {
+    color: #fd7e14;
+}
+
+.textGreen {
+    color: #28a745;
+}
+
+.textRed {
+    color: #dc3545;
+}
+
+.summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.summarySection {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #fafafa;
+}
+
+.summaryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.summaryTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.summaryCount {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.summaryList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.summaryItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.clickableItem {
+    cursor: pointer;
+}
+
+.clickableItem:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.summaryPending {
+    background-color: #fff3cd;
+    border-left: 3px solid #fd7e14;
+}
+
+.summaryApproved {
+    background-color: #d4edda;
+    border-left: 3px solid #28a745;
+}
+
+.summaryRejected {
+    background-color: #f8d7da;
+    border-left: 3px solid #dc3545;
+}
+
+.summaryStorageName {
+    font-weight: 500;
+    color: #495057;
+}
+
+.summaryOwnerName {
+    color: #6c757d;
+}
+
+.emptyMessage {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 16px;
+    font-size: 0.9rem;
+}
