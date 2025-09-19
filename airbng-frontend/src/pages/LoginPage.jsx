@@ -77,7 +77,7 @@ export default function LoginPage() {
       if (submitting || cooldownUntil) return;
 
       if (!email.trim() || !password.trim()) {
-        showError("이메일/비밀번호를 확인해주세요.", "로그인 실패");
+        showError("로그인 실패", "이메일/비밀번호를 확인해주세요.");
         return;
       }
 
@@ -88,7 +88,7 @@ export default function LoginPage() {
 
         if (r?.ok) {
           resetFailCount();
-          showSuccess("정상적으로 로그인되었습니다.", "로그인 성공", () => {
+          showSuccess("로그인 성공", "정상적으로 로그인되었습니다.", () => {
             navigate(redirect, { replace: true });
           });
           return;
@@ -97,7 +97,7 @@ export default function LoginPage() {
         if (r?.status === 429 || r?.code === 8003) {
           const sec = Number(r?.retryAfter || DEFAULT_COOLDOWN);
           startCooldown(sec);
-          showWarning(`${sec}초 후 다시 시도해주세요.`, "요청이 너무 많습니다");
+          showWarning("요청이 너무 많습니다", `${sec}초 후 다시 시도해주세요.`);
           return;
         }
 
@@ -107,21 +107,21 @@ export default function LoginPage() {
           startCooldown(DEFAULT_COOLDOWN);
           setFailCount(0);
           showWarning(
-            `${DEFAULT_COOLDOWN}초 후 재시도 가능해요.`,
-            "로그인 제한"
+            "로그인 제한",
+            `${DEFAULT_COOLDOWN}초 후 재시도 가능해요.`
           );
         } else {
           console.log("Login failed:", r);
           showError(
-            `이메일/비밀번호를 확인해주세요. (${next}/${MAX_ATTEMPTS})`,
-            "로그인 실패"
+            "로그인 실패",
+            `이메일/비밀번호를 확인해주세요. (${next}/${MAX_ATTEMPTS})`
           );
         }
       } catch {
         console.log("Login failed:");
         showError(
-          "로그인 처리 중 문제가 발생했습니다. 다시 시도해주세요.",
-          "오류"
+          "오류",
+          "로그인 처리 중 문제가 발생했습니다. 다시 시도해주세요."
         );
       } finally {
         setSubmitting(false);

@@ -104,7 +104,7 @@ const LockerDetails = () => {
       }
     } catch (error) {
       console.error("찜 토글 에러:", error);
-      showError("찜 처리 중 오류가 발생했습니다. 다시 시도해주세요.", "오류");
+      showError("오류", "찜 처리 중 오류가 발생했습니다. \n다시 시도해주세요.");
     } finally {
       setIsZzimLoading(false);
     }

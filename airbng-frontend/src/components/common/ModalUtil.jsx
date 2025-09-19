@@ -199,8 +199,8 @@ const useModal = () => {
   // 편의 메서드들
   const showSuccess = useCallback(
     (
-      message = "작업이 성공적으로 완료되었습니다.",
       title = "성공",
+      message = "작업이 성공적으로 완료되었습니다.",
       callback = null
     ) => {
       showModal({
@@ -216,8 +216,8 @@ const useModal = () => {
 
   const showError = useCallback(
     (
-      message = "처리 중 오류가 발생했습니다.",
       title = "오류",
+      message = "처리 중 오류가 발생했습니다.",
       callback = null
     ) => {
       showModal({
@@ -232,7 +232,7 @@ const useModal = () => {
   );
 
   const showWarning = useCallback(
-    (message = "주의가 필요합니다.", title = "경고", callback = null) => {
+    (title = "경고", message = "주의가 필요합니다.", callback = null) => {
       showModal({
         type: "warning",
         title,
@@ -246,8 +246,8 @@ const useModal = () => {
 
   const showInfo = useCallback(
     (
-      message = "안내 메시지가 표시됩니다.",
       title = "알림",
+      message = "안내 메시지가 표시됩니다.",
       callback = null
     ) => {
       showModal({
@@ -281,7 +281,7 @@ const useModal = () => {
   );
 
   const showLoading = useCallback(
-    (message = "처리 중...", title = "잠시만 기다려주세요") => {
+    (title = "잠시만 기다려주세요", message = "처리 중...") => {
       showModal({
         type: "loading",
         title,
@@ -344,27 +344,27 @@ class ModalUtils {
     this.modalRef = ref;
   }
 
-  static showSuccess(message, title, callback) {
+  static showSuccess(title, message, callback) {
     if (this.modalRef) {
-      this.modalRef.showSuccess(message, title, callback);
+      this.modalRef.showSuccess(title, message, callback);
     }
   }
 
-  static showError(message, title, callback) {
+  static showError(title, message, callback) {
     if (this.modalRef) {
-      this.modalRef.showError(message, title, callback);
+      this.modalRef.showError(title, message, callback);
     }
   }
 
-  static showWarning(message, title, callback) {
+  static showWarning(title, message, callback) {
     if (this.modalRef) {
-      this.modalRef.showWarning(message, title, callback);
+      this.modalRef.showWarning(title, message, callback);
     }
   }
 
-  static showInfo(message, title, callback) {
+  static showInfo(title, message, callback) {
     if (this.modalRef) {
-      this.modalRef.showInfo(message, title, callback);
+      this.modalRef.showInfo(title, message, callback);
     }
   }
 
@@ -374,15 +374,15 @@ class ModalUtils {
     }
   }
 
-  static showLoading(message, title) {
+  static showLoading(title, message) {
     if (this.modalRef) {
-      this.modalRef.showLoading(message, title);
+      this.modalRef.showLoading(title, message);
     }
   }
 
-  static showLogin(message, title, onConfirm) {
+  static showLogin(title, message, onConfirm) {
     if (this.modalRef) {
-      this.modalRef.showLogin(message, title, onConfirm);
+      this.modalRef.showLogin(title, message, onConfirm);
     }
   }
 

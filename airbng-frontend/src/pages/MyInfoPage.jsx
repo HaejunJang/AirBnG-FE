@@ -12,7 +12,8 @@ import { Modal, useModal } from "../components/common/ModalUtil";
 const MyInfoPage = () => {
   const navigate = useNavigate();
   const { user, isLoggedIn } = useAuth();
-  const { modalState, showSuccess, showError, hideModal } = useModal();
+  const { modalState, showSuccess, showError, hideModal, showLogin } =
+    useModal();
   // const urlMemberId = searchParams.get('memberId');
 
   const {
@@ -52,9 +53,7 @@ const MyInfoPage = () => {
     console.log("사용자 정보:", user);
 
     if (!isLoggedIn || !user?.id) {
-      showError("로그인이 필요합니다.", "로그인 필요", () => {
-        navigate("/page/home");
-      });
+      showLogin();
       return;
     }
 
@@ -74,7 +73,7 @@ const MyInfoPage = () => {
 
     const success = await updateUserInfo();
     if (success) {
-      showSuccess("정보가 성공적으로 수정되었습니다.", "수정 완료!", () => {
+      showSuccess("수정 완료!", "정보가 성공적으로 수정되었습니다.", () => {
         navigate("/page/mypage");
       });
     }

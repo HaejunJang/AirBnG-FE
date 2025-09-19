@@ -54,15 +54,15 @@ const ReservationList = () => {
     const result = await deleteReservation(reservationId);
     if (result.success) {
       showSuccess(
+        "취소 완료",
         `예약이 취소되었습니다.${
           result.refundAmount ? ` 환불 금액: ${result.refundAmount}원` : ""
-        }`,
-        "취소 완료"
+        }`
       );
     } else {
       showError(
-        "예약 취소 중 오류가 발생했습니다. 다시 시도해주세요.",
-        "취소 실패"
+        "취소 실패",
+        "예약 취소 중 오류가 발생했습니다. 다시 시도해주세요."
       );
     }
   };

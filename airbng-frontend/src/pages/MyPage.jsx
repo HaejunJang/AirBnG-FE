@@ -75,7 +75,7 @@ export default function MyPage() {
 
   // ---- 로딩 & 모달 상태 ----
   const [loading, setLoading] = useState(false);
-  const { modalState, hideModal, showError, showInfo, showConfirm } =
+  const { modalState, hideModal, showError, showLogin, showConfirm } =
     useModal();
 
   //  짐페이 잔액 상태
@@ -199,11 +199,6 @@ export default function MyPage() {
   // ---- 네비게이션 핸들러 ----
   const redirectParam = encodeURIComponent(location.pathname);
 
-  // 뒤로가기 핸들러 추가
-  const handleBack = () => {
-    navigate(-1);
-  };
-
   const goToLogin = () => {
     showLoading();
     setTimeout(() => {
@@ -220,9 +215,7 @@ export default function MyPage() {
 
   const requireLoginThen = (task) => {
     if (!isLoggedIn) {
-      showInfo("로그인이 필요한 서비스입니다.", "로그인 필요", () => {
-        goToLogin();
-      });
+      showLogin();
       return false;
     }
     return true;
@@ -252,8 +245,8 @@ export default function MyPage() {
         await logout(); // AuthContext가 서버 요청 + 클라이언트 정리
       } catch (e) {
         showError(
-          "서버와 통신 중 문제가 있었지만 로그아웃을 완료했습니다.",
-          "알림"
+          "알림",
+          "서버와 통신 중 문제가 있었지만 로그아웃을 완료했습니다."
         );
       } finally {
         setTimeout(hideLoading, 400);

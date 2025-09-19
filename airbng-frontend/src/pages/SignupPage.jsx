@@ -283,28 +283,28 @@ function SignUpPage() {
       !password ||
       !passwordConfirm
     ) {
-      showError("모든 필드를 입력해주세요.", "오류");
+      showError("오류", "모든 필드를 입력해주세요.");
       return;
     }
 
     if (!validationStates.email.checked) {
-      showError("이메일 중복 확인을 해주세요.", "오류");
+      showError("오류", "이메일 중복 확인을 해주세요.");
       return;
     }
 
     if (!validationStates.nickname.checked) {
-      showError("닉네임 중복 확인을 해주세요.", "오류");
+      showError("오류", "닉네임 중복 확인을 해주세요.");
       return;
     }
 
     if (password !== passwordConfirm) {
-      showError("비밀번호가 일치하지 않습니다.", "오류");
+      showError("오류", "비밀번호가 일치하지 않습니다.");
       return;
     }
 
     const passwordError = validatePassword(password);
     if (passwordError) {
-      showError(passwordError, "오류");
+      showError("오류", passwordError);
       return;
     }
 
@@ -326,20 +326,20 @@ function SignUpPage() {
       const result = await signupApi.signup(memberData, profileImage);
 
       if (result.code === 1000) {
-        showSuccess("AirBnG에 오신 것을 환영합니다!", "회원가입 완료!", () => {
+        showSuccess("회원가입 완료!", "AirBnG에 오신 것을 환영합니다!", () => {
           navigate("/page/login");
         });
       } else {
         showError(
-          result.message || "회원가입에 실패했습니다.",
-          "회원가입 실패"
+          "회원가입 실패",
+          result.message || "회원가입에 실패했습니다."
         );
       }
     } catch (error) {
       console.error("회원가입 오류:", error);
       showError(
-        error.message || "서버 오류로 회원가입에 실패했습니다.",
-        "회원가입 실패"
+        "회원가입 실패",
+        error.message || "서버 오류로 회원가입에 실패했습니다."
       );
     } finally {
       setButtonStates((prev) => ({
