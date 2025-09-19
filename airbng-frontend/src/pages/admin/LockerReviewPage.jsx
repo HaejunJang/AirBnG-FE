@@ -1,84 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { SlArrowLeft } from "react-icons/sl";
+import { FiMoreVertical } from 'react-icons/fi';
 import StorageDetailModal from './LockerReviewDetailsPage';
-import {
-    getLockerReviewsByStatus,
-    getLockerReviewDetail,
-} from '../../api/admin/adminApi';
-
+import { getLockerReviewsByStatus, getLockerReviewDetail } from '../../api/admin/adminApi';
+import { useSummaryData } from '../../hooks/useSummaryData';
 import styles from '../../styles/admin/pages/LockerReview.module.css';
 
 const StorageReviewContent = () => {
-    const [selectedStatus, setSelectedStatus] = useState('대기중');
+    const [selectedStatus, setSelectedStatus] = useState('대기');
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5);
     const [showDetailView, setShowDetailView] = useState(false);
     const [showStorageDetail, setShowStorageDetail] = useState(false);
     const [selectedStorage, setSelectedStorage] = useState(null);
 
-    // API 데이터 상태
+    const { summaryData, loading: summaryLoading, reloadSummary } = useSummaryData();
     const [lockerData, setLockerData] = useState({
         waiting: { content: [], totalElements: 0, totalPages: 0 },
         approved: { content: [], totalElements: 0, totalPages: 0 },
-        rejected: { content: [], totalElements: 0, totalPages: 0 }
-    });
-    const [summaryData, setSummaryData] = useState({
-        waiting: { count: 0, content: [] },
-        approved: { count: 0, content: [] },
-        rejected: { count: 0, content: [] }
+        rejected: { content: [], totalElements: 0, totalPages: 0 },
     });
     const [loading, setLoading] = useState(false);
 
-    // 한글 상태를 영문 상태로 변환
     const getEnglishStatus = (koreanStatus) => {
-        switch(koreanStatus) {
-            case '대기중': return 'WAITING';
+        switch (koreanStatus) {
+            case '대기': return 'WAITING';
             case '승인': return 'APPROVED';
             case '반려': return 'REJECTED';
             default: return 'WAITING';
         }
     };
 
-    // 초기 요약 데이터 로드
-    useEffect(() => {
-        const loadSummaryData = async () => {
-            try {
-                setLoading(true);
-                const [waitingRes, approvedRes, rejectedRes] = await Promise.all([
-                    getLockerReviewsByStatus('WAITING', 1),
-                    getLockerReviewsByStatus('APPROVED', 1),
-                    getLockerReviewsByStatus('REJECTED', 1)
-                ]);
-
-                setSummaryData({
-                    waiting: {
-                        count: waitingRes.data.totalElements,
-                        content: waitingRes.data.content
-                    },
-                    approved: {
-                        count: approvedRes.data.totalElements,
-                        content: approvedRes.data.content
-                    },
-                    rejected: {
-                        count: rejectedRes.data.totalElements,
-                        content: rejectedRes.data.content
-                    }
-                });
-            } catch (error) {
-                console.error('요약 데이터 로드 실패:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadSummaryData();
-    }, []);
-
     // 상태별 데이터 로드
     useEffect(() => {
-        if (showDetailView) {
-            loadStatusData();
-        }
+        if (showDetailView) loadStatusData();
     }, [selectedStatus, currentPage, showDetailView]);
 
     const loadStatusData = async () => {
@@ -125,21 +78,14 @@ const StorageReviewContent = () => {
         return lockerData[status] || { content: [], totalElements: 0, totalPages: 0 };
     };
 
-    const getCurrentPageData = () => {
-        return getCurrentData().content || [];
-    };
+    const getCurrentPageData = () => getCurrentData().content || [];
+    const getTotalPages = () => getCurrentData().totalPages || 0;
 
-    const getTotalPages = () => {
-        return getCurrentData().totalPages || 0;
-    };
-
-    const getStatusInfo = () => {
-        return {
-            waiting: { count: summaryData.waiting.count, color: 'textOrange' },
-            approved: { count: summaryData.approved.count, color: 'textGreen' },
-            rejected: { count: summaryData.rejected.count, color: 'textRed' }
-        };
-    };
+    const getStatusInfo = () => ({
+        '대기': { count: summaryData.waiting.count, color: styles.textOrange },
+        '승인': { count: summaryData.approved.count, color: styles.textGreen },
+        '반려': { count: summaryData.rejected.count, color: styles.textRed }
+    });
 
     // 보관소 상세 화면
     if (showStorageDetail && selectedStorage) {
@@ -147,17 +93,30 @@ const StorageReviewContent = () => {
             <div>
                 <div className={styles.backButtonContainer}>
                     <button
-                        onClick={() => setShowStorageDetail(false)}
-                        className={styles.backButton}
+                        onClick={async () => {
+                            setShowStorageDetail(false);
+                            setShowDetailView(true);
+                            setCurrentPage(1);
+                            await loadStatusData();
+                            await reloadSummary();
+                        }}
+                        className={styles.squareButton}
                     >
-                        <SlArrowLeft size={20} />
-                        뒤로가기
+                        <FiMoreVertical />
+                        목록
                     </button>
                 </div>
+
                 <StorageDetailModal
                     storage={selectedStorage}
                     status={selectedStatus}
                     onRefresh={loadStatusData}
+                    onClose={async () => {
+                        setShowStorageDetail(false);
+                        setShowDetailView(true);
+                        await loadStatusData();
+                        await reloadSummary();
+                    }}
                 />
             </div>
         );
@@ -173,132 +132,113 @@ const StorageReviewContent = () => {
                     <p>보관소 승인 및 심사 관리 페이지입니다.</p>
                     <p>메뉴를 클릭하면 해당 페이지로 이동합니다.</p>
                     <div className={styles.statsGrid}>
-                        <div
-                            className={`${styles.statCard} ${styles.clickableCard}`}
-                            onClick={() => handleStatusClick('대기중')}
-                        >
-                            <h3 className={styles.statLabel}>대기중</h3>
-                            <p className={`${styles.statValue} ${styles.textOrange}`}>
-                                {loading ? '...' : statusInfo.waiting.count}
-                            </p>
-                        </div>
-                        <div
-                            className={`${styles.statCard} ${styles.clickableCard}`}
-                            onClick={() => handleStatusClick('승인')}
-                        >
-                            <h3 className={styles.statLabel}>승인</h3>
-                            <p className={`${styles.statValue} ${styles.textGreen}`}>
-                                {loading ? '...' : statusInfo.approved.count}
-                            </p>
-                        </div>
-                        <div
-                            className={`${styles.statCard} ${styles.clickableCard}`}
-                            onClick={() => handleStatusClick('반려')}
-                        >
-                            <h3 className={styles.statLabel}>반려</h3>
-                            <p className={`${styles.statValue} ${styles.textRed}`}>
-                                {loading ? '...' : statusInfo.rejected.count}
-                            </p>
-                        </div>
+                        {['대기', '승인', '반려'].map(status => (
+                            <div
+                                key={status}
+                                className={`${styles.statCard} ${styles.clickableCard}`}
+                                onClick={() => handleStatusClick(status)}
+                            >
+                                <h3 className={styles.statLabel}>{status}</h3>
+                                <p className={`${styles.statValue} ${statusInfo[status].color}`}>
+                                    {summaryLoading ? '...' : statusInfo[status].count}
+                                </p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
         );
     }
 
-    // 상세 화면 (숫자 클릭 후)
+    // 상세 리스트 화면 (숫자 클릭 후)
     return (
         <div>
             <div className={styles.backButtonContainer}>
                 <button
-                    onClick={() => setShowDetailView(false)}
-                    className={styles.backButton}
+                    onClick={async () => {
+                        setShowDetailView(false);
+                        setShowStorageDetail(false);
+                        setCurrentPage(1);
+                        await reloadSummary();
+                        await loadStatusData();
+                    }}
+                    className={styles.squareButton}
                 >
-                    <SlArrowLeft size={20} />
-                    뒤로가기
+                    <FiMoreVertical />
+                    목록
                 </button>
             </div>
 
             {/* 상단: 상세 리스트 */}
             <div className={styles.contentCard}>
                 <div className={styles.cardHeader}>
-                    <h3 className={styles.subTitle}>
-                        {selectedStatus} 보관소 목록
-                    </h3>
+                    <h3 className={styles.subTitle}>{selectedStatus} 보관소 목록</h3>
                     <span className={styles.countBadge}>
                         총 {getCurrentData().totalElements}개
                     </span>
                 </div>
 
-                {/* 로딩 표시 */}
                 {loading ? (
                     <div className={styles.loadingContainer}>
                         <p>데이터를 불러오는 중...</p>
                     </div>
                 ) : (
-                    <>
-                        {/* 리스트 */}
-                        <div className={styles.storageDetailList}>
-                            {getCurrentPageData().map((storage) => (
-                                <div
-                                    key={storage.lockerReviewId}
-                                    className={styles.storageDetailItem}
-                                    onClick={() => handleStorageClick(storage)}
-                                >
-                                    <div className={styles.storageDetailHeader}>
-                                        <h4 className={styles.storageName}>{storage.lockerName}</h4>
-                                        <span className={`${styles.statusBadge} ${
-                                            selectedStatus === '대기중' ? styles.statusPending :
-                                                selectedStatus === '승인' ? styles.statusApproved :
-                                                    styles.statusRejected
-                                        }`}>
-                                            {selectedStatus}
-                                        </span>
-                                    </div>
-                                    <div className={styles.storageDetailInfo}>
-                                        <p>소유자: {storage.memberName}</p>
-                                        <p>위치: {storage.address}</p>
-                                        <p className={styles.dateText}>
-                                            신청일: {new Date(storage.createdAt).toLocaleDateString()}
-                                        </p>
-                                    </div>
+                    <div className={styles.storageDetailList}>
+                        {getCurrentPageData().map(storage => (
+                            <div
+                                key={storage.lockerReviewId}
+                                className={styles.storageDetailItem}
+                                onClick={() => handleStorageClick(storage)}
+                            >
+                                <div className={styles.storageDetailHeader}>
+                                    <h4 className={styles.storageName}>{storage.lockerName}</h4>
+                                    <span className={`${styles.statusBadge} ${
+                                        selectedStatus === '대기' ? styles.statusPending :
+                                            selectedStatus === '승인' ? styles.statusApproved :
+                                                styles.statusRejected
+                                    }`}>{selectedStatus}</span>
                                 </div>
-                            ))}
-                        </div>
-
-                        {/* 페이지네이션 */}
-                        {getTotalPages() > 1 && (
-                            <div className={styles.pagination}>
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                    disabled={currentPage === 1}
-                                    className={`${styles.pageButton} ${currentPage === 1 ? styles.disabled : ''}`}
-                                >
-                                    이전
-                                </button>
-
-                                {[...Array(getTotalPages())].map((_, i) => (
-                                    <button
-                                        key={i + 1}
-                                        onClick={() => setCurrentPage(i + 1)}
-                                        className={`${styles.pageButton} ${
-                                            currentPage === i + 1 ? styles.pageButtonActive : ''
-                                        }`}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                ))}
-
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
-                                    disabled={currentPage === getTotalPages()}
-                                    className={`${styles.pageButton} ${currentPage === getTotalPages() ? styles.disabled : ''}`}
-                                >
-                                    다음
-                                </button>
+                                <div className={styles.storageDetailInfo}>
+                                    <p>소유자: {storage.memberName}</p>
+                                    <p>위치: {storage.address}</p>
+                                    <p className={styles.dateText}>
+                                        신청일: {new Date(storage.createdAt).toLocaleDateString()}
+                                    </p>
+                                </div>
                             </div>
-                        )}
-                    </>
+                        ))}
+                    </div>
+                )}
+
+                {/* 페이지네이션 */}
+                {getTotalPages() > 1 && (
+                    <div className={styles.pagination}>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className={`${styles.pageButton} ${currentPage === 1 ? styles.disabled : ''}`}
+                        >
+                            이전
+                        </button>
+
+                        {[...Array(getTotalPages())].map((_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => setCurrentPage(i + 1)}
+                                className={`${styles.pageButton} ${currentPage === i + 1 ? styles.pageButtonActive : ''}`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
+                            disabled={currentPage === getTotalPages()}
+                            className={`${styles.pageButton} ${currentPage === getTotalPages() ? styles.disabled : ''}`}
+                        >
+                            다음
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -310,7 +250,7 @@ const StorageReviewContent = () => {
                     {/* 대기중 */}
                     <div className={styles.summarySection}>
                         <div className={styles.summaryHeader}>
-                            <h4 className={`${styles.summaryTitle} ${styles.textOrange}`}>대기중</h4>
+                            <h4 className={`${styles.summaryTitle} ${styles.textOrange}`}>대기</h4>
                             <span className={styles.summaryCount}>{summaryData.waiting.count}개</span>
                         </div>
                         <div className={styles.summaryList}>
