@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import { useAuth } from '../context/AuthContext';
+import Modal from '../components/modal/Modal';
 import '../styles/pages/login.css';
 
 const COOLDOWN_KEY = 'loginCooldownUntil';
@@ -28,18 +29,54 @@ export default function LoginPage() {
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [countdown, setCountdown] = useState(0);
 
-  const [modal, setModal] = useState({
-    open: false,
-    type: 'info',
-    title: '',
-    message: '',
-    onConfirm: null,
-  });
+    // 새로운 모달 상태들
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [showWarningModal, setShowWarningModal] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
+    const [modalData, setModalData] = useState({
+        title: '',
+        message: '',
+        onConfirm: null,
+    });
 
-  const showModal = (type, title, message, onConfirm = null) =>
-    setModal({ open: true, type, title, message, onConfirm });
-  const closeModal = () =>
-    setModal({ open: false, type: 'info', title: '', message: '', onConfirm: null });
+    const showModal = (type, title, message, onConfirm = null) => {
+        setModalData({ title, message, onConfirm });
+
+        // 모든 모달을 먼저 닫고
+        setShowSuccessModal(false);
+        setShowErrorModal(false);
+        setShowWarningModal(false);
+        setShowInfoModal(false);
+
+        // 해당 타입의 모달만 열기
+        switch(type) {
+            case 'success':
+                setShowSuccessModal(true);
+                break;
+            case 'error':
+                setShowErrorModal(true);
+                break;
+            case 'warning':
+                setShowWarningModal(true);
+                break;
+            case 'info':
+            default:
+                setShowInfoModal(true);
+                break;
+        }
+    };
+
+    const closeModal = () => {
+        setShowSuccessModal(false);
+        setShowErrorModal(false);
+        setShowWarningModal(false);
+        setShowInfoModal(false);
+
+        if (modalData.onConfirm) {
+            modalData.onConfirm();
+        }
+    };
 
   useEffect(() => {
     const saved = Number(sessionStorage.getItem(cdKeyFor(email)) || 0);
@@ -85,14 +122,13 @@ export default function LoginPage() {
       // remember 값을 함께 전달
       const r = await login({ email, password, remember });
 
-      if (r?.ok) {
-        resetFailCount();
-        showModal('info', '로그인 성공', '정상적으로 로그인되었습니다.', () => {
-          closeModal();
-          navigate(redirect, { replace: true });
-        });
-        return;
-      }
+            if (r?.ok) {
+                resetFailCount();
+                showModal('success', '로그인 성공', '정상적으로 로그인되었습니다.', () => {
+                    navigate(redirect, { replace: true });
+                });
+                return;
+            }
 
       if (r?.status === 429 || r?.code === 8003) {
         const sec = Number(r?.retryAfter || DEFAULT_COOLDOWN);
@@ -202,30 +238,47 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* 모달 */}
-      {modal.open && (
-        <div className="login-modal-overlay" onClick={closeModal}>
-          <div className="login-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="login-modal-header">
-              <h3>{modal.title}</h3>
-            </div>
-            <div className={`login-modal-body ${modal.type}`}>
-              <p>{modal.message}</p>
-            </div>
-            <div className="login-modal-footer">
-              <button
-                className="login-modal-button"
-                onClick={() => {
-                  if (modal.onConfirm) modal.onConfirm();
-                  else closeModal();
-                }}
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </main>
-  );
+            {/* 성공 모달 */}
+            <Modal
+                isOpen={showSuccessModal}
+                onClose={closeModal}
+                title={modalData.title}
+                message={modalData.message}
+                type="success"
+                buttonText="확인"
+            />
+
+            {/* 에러 모달 */}
+            <Modal
+                isOpen={showErrorModal}
+                onClose={closeModal}
+                title={modalData.title}
+                message={modalData.message}
+                type="error"
+                buttonText="확인"
+            />
+
+            {/* 경고 모달 (warning도 error 스타일 사용) */}
+            <Modal
+                isOpen={showWarningModal}
+                onClose={closeModal}
+                title={modalData.title}
+                message={modalData.message}
+                type="error"
+                icon="⚠️"
+                buttonText="확인"
+            />
+
+            {/* 정보 모달 (info도 success 스타일 사용) */}
+            <Modal
+                isOpen={showInfoModal}
+                onClose={closeModal}
+                title={modalData.title}
+                message={modalData.message}
+                type="success"
+                icon="ℹ️"
+                buttonText="확인"
+            />
+        </main>
+    );
 }
