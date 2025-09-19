@@ -164,7 +164,7 @@
 }
 
 .headerCell {
-    padding: 20px 15px;
+    padding: 0px 8px;
     text-align: center;
     border-right: 1px solid rgba(255,255,255,0.2);
 }
@@ -235,6 +235,77 @@
 .btnInfo:hover {
     background-color: #2980b9;
     transform: translateY(-1px);
+}
+
+.actionButtons {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}
+
+.btnDetail {
+    padding: 4px 8px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btnDetail:hover {
+    background-color: #2980b9;
+}
+
+.btnReport {
+    padding: 4px 8px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btnReport:hover {
+    background-color: #218838;
+}
+
+.tableContainer {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tableHeader {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 120px;
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+    color: #333;
+}
+
+.tableRow {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 120px;
+    padding: 12px;
+    border-bottom: 1px solid #f1f3f4;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.tableRow:hover {
+    background-color: #f8f9fa;
+}
+
+.cell {
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
 }
 
 /* 페이지네이션 */

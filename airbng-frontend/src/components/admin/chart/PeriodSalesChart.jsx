@@ -10,9 +10,9 @@ import {
     Legend,
     ResponsiveContainer,
 } from "recharts";
-import styles from '../../../styles/admin/layout/SalesChart.module.css';
+import styles from '../../../styles/admin/chart/PeriodSalesChart.module.css';
 
-const SalesChart = ({ data, activeTab }) => {
+const PeriodSalesChart = ({ data, activeTab }) => {
     // 차트용 데이터 변환
     const convertDataForChart = (rawData, tab) => {
         if (!rawData || rawData.length === 0) return [];
@@ -45,7 +45,7 @@ const SalesChart = ({ data, activeTab }) => {
     const chartData = data ? convertDataForChart(data, activeTab) : defaultData;
 
     const getTitle = () => {
-        if (activeTab === 'daily') return '일간 매출 추이';
+        if (activeTab === 'daily') return '주간 매출 추이';
         if (activeTab === 'monthly') return '월간 매출 추이';
         return '연간 매출 추이';
     };
@@ -135,4 +135,4 @@ const SalesChart = ({ data, activeTab }) => {
     );
 };
 
-export default SalesChart;
+export default PeriodSalesChart;
