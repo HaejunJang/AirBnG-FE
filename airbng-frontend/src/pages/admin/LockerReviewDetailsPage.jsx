@@ -14,6 +14,11 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject, onStatusChan
     const [rejectReason, setRejectReason] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    // 결과 모달 상태 추가
+    const [showResultModal, setShowResultModal] = useState(false);
+    const [resultMessage, setResultMessage] = useState('');
+    const [resultType, setResultType] = useState(''); // 'approve' or 'reject'
+
     const getImages = () => {
         if (storage?.result.images && storage.result.images.length > 0) {
             return storage.result.images;
@@ -57,6 +62,21 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject, onStatusChan
         }
     };
 
+    // 결과 모달 표시 함수
+    const showResult = (message, type) => {
+        setResultMessage(message);
+        setResultType(type);
+        setShowResultModal(true);
+    };
+
+    // 결과 모달 닫기 및 메인 모달 닫기
+    const handleResultModalClose = async () => {
+        setShowResultModal(false);
+        setResultMessage('');
+        setResultType('');
+        onClose && await onClose(); // 메인 모달 닫고 목록 화면으로
+    };
+
     const handleApprove = async () => {
         if (isLoading) return;
         try {
@@ -64,11 +84,10 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject, onStatusChan
             await approveLockerReview(storage.result.lockerId, storage.result.memberId);
             onApprove && onApprove(storage);
             onStatusChange && onStatusChange(storage.result.lockerId, 'APPROVED');
-            alert('보관소가 승인되었습니다.');
-            onClose && await onClose(); // 모달 닫고 목록 화면으로
+            showResult('보관소가 승인되었습니다.', 'approve');
         } catch (error) {
             console.error('보관소 승인 실패:', error);
-            alert('보관소 승인에 실패했습니다. 다시 시도해주세요.');
+            showResult('보관소 승인에 실패했습니다. 다시 시도해주세요.', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -85,11 +104,10 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject, onStatusChan
             onStatusChange && onStatusChange(storage.result.lockerId, 'REJECTED', rejectReason);
             setShowRejectModal(false);
             setRejectReason('');
-            alert('보관소가 반려되었습니다.');
-            onClose && await onClose(); // 모달 닫고 목록 화면으로
+            showResult('보관소가 반려되었습니다.', 'reject');
         } catch (error) {
             console.error('보관소 반려 실패:', error);
-            alert('보관소 반려에 실패했습니다. 다시 시도해주세요.');
+            showResult('보관소 반려에 실패했습니다. 다시 시도해주세요.', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -225,6 +243,28 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject, onStatusChan
                                 {isLoading ? '처리중...' : '확인'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 결과 모달 */}
+            {showResultModal && (
+                <div className={styles.resultModalOverlay} onClick={handleResultModalClose}>
+                    <div className={styles.resultModalContent} onClick={e => e.stopPropagation()}>
+                        <div className={`${styles.resultModalIcon} ${
+                            resultType === 'approve' ? styles.successIcon :
+                                resultType === 'reject' ? styles.rejectIcon : styles.errorIcon
+                        }`}>
+                            {resultType === 'approve' ? '✓' : resultType === 'reject' ? '✓' : '!'}
+                        </div>
+                        <h3 className={styles.resultModalTitle}>
+                            {resultType === 'approve' ? '승인 완료' :
+                                resultType === 'reject' ? '반려 완료' : '오류'}
+                        </h3>
+                        <p className={styles.resultModalMessage}>{resultMessage}</p>
+                        <button className={styles.resultModalButton} onClick={handleResultModalClose}>
+                            확인
+                        </button>
                     </div>
                 </div>
             )}

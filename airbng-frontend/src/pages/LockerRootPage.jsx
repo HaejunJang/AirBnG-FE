@@ -24,7 +24,7 @@ export default function LockerRootPage() {
   const [lockerStatus, setLockerStatus] = useState("REGISTER");
   const [canRegister, setCanRegister] = useState(false);
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const load = useCallback(async () => {
     try {
@@ -48,9 +48,8 @@ export default function LockerRootPage() {
                   status?.reviewStatus === "REGISTER" || status?.reviewStatus === "REJECTED"
               );
           } catch (err) {
-
               console.error("Locker status fetch failed", err);
-              setCanRegister(true);
+              setCanRegister(false);
           }
 
 
