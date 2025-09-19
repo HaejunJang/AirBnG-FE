@@ -1,0 +1,124 @@
+/* StorageSalesChart.module.css */
+
+.chartSection {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.chartContainer {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chartTitle {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #333;
+    text-align: center;
+}
+
+.chartWrapper {
+    width: 100%;
+    height: 400px;
+}
+
+/* 파이차트 관련 스타일 */
+.pieChartWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.pieChart {
+    width: 100%;
+    height: 300px;
+}
+
+.pieLegend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+}
+
+.legendColor {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.legendText {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* 커스텀 툴팁 */
+.customTooltip {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+}
+
+.tooltipLabel {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+}
+
+.tooltipValue {
+    font-weight: 600;
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+    .chartSection {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .chartContainer {
+        padding: 16px;
+    }
+
+    .chartWrapper {
+        height: 300px;
+    }
+
+    .pieChart {
+        height: 250px;
+    }
+
+    .chartTitle {
+        font-size: 16px;
+    }
+
+    .pieLegend {
+        gap: 6px;
+    }
+
+    .legendText {
+        font-size: 12px;
+    }
+}
