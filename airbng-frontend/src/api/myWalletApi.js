@@ -14,7 +14,14 @@ export const walletApi = {
     });
   },
   // 포인트 출금
-  withdrawPoint: (data) => httpAuth.post("/wallet/withdraw", data),
+  // withdrawPoint: (data) => httpAuth.post("/wallet/me/withdraw", data),
+  withdrawPoint: (data, idemKey) => {
+    return httpAuth.post("/wallet/me/withdraw", data, {
+      headers: {
+        "Idempotency-Key": idemKey,
+      },
+    });
+  },
 
   // 지갑 사용 내역 조회
   getWalletHistory: (memberId, params) =>

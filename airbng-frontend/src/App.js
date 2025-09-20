@@ -21,6 +21,7 @@ import MyInfoPage from "./pages/MyInfoPage";
 import MyWallet from "./pages/MyWallet";
 import AccountRegister from "./pages/AccountRegister";
 import MyWalletCharge from "./pages/MyWalletCharge";
+import MyWalletWithdraw from "./pages/MyWalletWithdraw";
 
 function App() {
   function getActiveNav(pathname) {
@@ -89,6 +90,10 @@ function App() {
           <Route
             path="/page/mypage/wallet/charge"
             element={<MyWalletCharge />}
+          />
+          <Route
+            path="/page/mypage/wallet/withdraw"
+            element={<MyWalletWithdraw />}
           />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}

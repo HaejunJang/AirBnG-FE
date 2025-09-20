@@ -130,7 +130,7 @@ export default function MyWallet() {
       alert("출금을 위해서는 먼저 계좌를 등록해주세요.");
       return;
     }
-    navigate("/page/wallet/withdraw");
+    navigate("/page/mypage/wallet/withdraw");
   };
 
   // 사용내역 페이지로 이동
@@ -314,7 +314,7 @@ export default function MyWallet() {
                       {maskAccountNumber(primaryAccount.accountNumber)}
                     </p>
                     <p className={styles.holderName}>
-                      소유자 : {primaryAccount.holderName}
+                      계좌주 : {primaryAccount.holderName}
                     </p>
                   </div>
                 </div>
@@ -377,7 +377,7 @@ export default function MyWallet() {
                         계좌번호 : {maskAccountNumber(account.accountNumber)}
                       </p>
                       <p className={styles.holderName}>
-                        소유자 :{account.holderName}
+                        계좌주 : {account.holderName}
                       </p>
                     </div>
                   </div>
