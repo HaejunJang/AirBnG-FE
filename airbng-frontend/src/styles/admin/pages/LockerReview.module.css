@@ -44,7 +44,7 @@
 }
 
 .statLabel {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     color: #6c757d;
     margin-bottom: 8px;
     font-weight: 500;
@@ -57,16 +57,17 @@
 }
 
 .textOrange {
-    color: #fd7e14;
+    color: hsl(28, 70%, 56%);
 }
 
 .textGreen {
-    color: #28a745;
+    color: hsl(231, 55%, 56%);
 }
 
 .textRed {
-    color: #dc3545;
+    color: hsl(355, 65%, 56%);
 }
+
 
 .backButtonContainer {
     margin-bottom: 30px;

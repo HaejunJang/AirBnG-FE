@@ -3,7 +3,6 @@
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    margin-bottom: 20px;
 }
 
 .subTitle {
@@ -85,17 +84,17 @@
 }
 
 .summaryPending {
-    background-color: hsla(231, 55%, 56%, 0.4);
+    background-color: hsla(231, 55%, 56%, 0.2);
     /*border-left: 3px solid hsl(45, 85%, 55%);*/
 }
 
 .summaryApproved {
-    background-color: hsla(231, 55%, 56%, 0.4);
+    background-color: hsla(231, 55%, 56%, 0.2);
     /*border-left: 3px solid hsl(231, 55%, 56%);*/
 }
 
 .summaryRejected {
-    background-color: hsla(231, 55%, 56%, 0.4);
+    background-color: hsla(231, 55%, 56%, 0.2);
     /*border-left: 3px solid hsl(350, 70%, 60%);*/
 }
 

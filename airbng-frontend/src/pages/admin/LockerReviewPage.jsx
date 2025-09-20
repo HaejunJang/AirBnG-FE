@@ -75,9 +75,27 @@ const StorageReviewContent = () => {
     };
 
     // 요약 카드에서 아이템 클릭 핸들러
+    // const handleSummaryItemClick = async (item, status) => {
+    //     try {
+    //         setLoading(true);
+    //         const response = await getLockerReviewDetail(item.lockerReviewId);
+    //         setSelectedStorage(response.data);
+    //         setShowStorageDetail(true);
+    //     } catch (error) {
+    //         console.error('보관소 상세 정보를 불러오는 중 오류 발생:', error);
+    //         alert('보관소 상세 정보를 불러올 수 없습니다.');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const handleSummaryItemClick = async (item, status) => {
         try {
             setLoading(true);
+
+            // 클릭한 아이템의 상태로 selectedStatus 업데이트
+            setSelectedStatus(status);
+
             const response = await getLockerReviewDetail(item.lockerReviewId);
             setSelectedStorage(response.data);
             setShowStorageDetail(true);
