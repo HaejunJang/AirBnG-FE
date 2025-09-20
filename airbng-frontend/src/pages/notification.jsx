@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSSE } from '../context/SseContext';
 import { loadDeletedIds, saveDeletedIds } from '../hooks/useSSEManager';
-import {getNotification, hasreadAlarm} from '../api/notification';
+import { getNotification, hasreadAlarm } from '../api/notification';
 import '../styles/pages/notification.css';
-import {useDot} from "../hooks/useDot";
-import {useNavigate} from "react-router-dom";
-
+import { useDot } from "../hooks/useDot";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ title, showBackButton, backUrl }) => (
     <div className="header">
@@ -22,8 +21,7 @@ const Header = ({ title, showBackButton, backUrl }) => (
 );
 
 const Welcome = ({ subtitle }) => {
-    const navigate = useNavigate(); // 여기서 훅 사용
-
+    const navigate = useNavigate();
     return (
         <div className="welcome-container">
             <div>
@@ -58,7 +56,6 @@ const NotificationItem = ({ notification, onRemove }) => {
         LOCKER_REJECTED: 'locker-rejected'
     };
 
-    // 보관소 승인/거절 알림에서는 예약번호 숨김
     const showReservationId = !['LOCKER_APPROVED', 'LOCKER_REJECTED'].includes(notification.type);
 
     return (
@@ -88,56 +85,42 @@ const NotificationItem = ({ notification, onRemove }) => {
     );
 };
 
-const NotificationList = ({ notifications, deletedNotificationIds, onRemove, onClearAll }) => {
-    // 고유 키 생성 함수 (여러 필드 조합으로 생성)
-// 고유 키 생성 함수 (여러 필드 조합으로 생성)
-    const getAlarmKey = useCallback((alarm) => {
-        if (!alarm) {
-            return null;
-        }
+const safeStr = (v) => {
+    if (v === null || v === undefined) return '';
+    try { return String(v).trim(); } catch { return '';
+    }
+};
 
-        // id가 있으면 사용 (가장 확실한 고유키)
-        if (alarm.id) {
-            return `${alarm.id}`;
-        }
+const normalizeDeletedMap = (maybe) => {
+    if (!maybe) return new Map();
+    if (maybe instanceof Map) return maybe;
+    if (Array.isArray(maybe)) return new Map(maybe);
+    if (typeof maybe === 'object') return new Map(Object.entries(maybe));
+    return new Map();
+};
 
-        // eventId가 있으면 사용 (보관소 알림에서 사용할 수 있음)
-        if (alarm.eventId) {
-            return `${alarm.eventId}`;
-        }
+const getDeletedTimeFrom = (deletedMapLike, key) => {
+    if (!deletedMapLike || !key) return undefined;
+    if (deletedMapLike instanceof Map) return deletedMapLike.get(key);
+    if (Array.isArray(deletedMapLike)) {
+        const m = new Map(deletedMapLike);
+        return m.get(key);
+    }
+    if (typeof deletedMapLike === 'object') {
+        return deletedMapLike[key];
+    }
+    return undefined;
+};
 
-        // 예약 관련 알림: reservationId + receiverId + type + receivedAt
-        if (alarm.reservationId && alarm.receiverId && alarm.type && alarm.receivedAt) {
-            return `${alarm.reservationId}-${alarm.receiverId}-${alarm.type}-${alarm.receivedAt}`;
-        }
-
-        // 보관소 알림 등: type + receivedAt + receiverId로 고유키 생성
-        if (alarm.type && alarm.receivedAt && alarm.receiverId) {
-            return `${alarm.type}-${alarm.receivedAt}-${alarm.receiverId}`;
-        }
-
-        // 최후의 수단: type + receivedAt
-        if (alarm.type && alarm.receivedAt) {
-            return `${alarm.type}-${alarm.receivedAt}`;
-        }
-
-        // 그래도 안되면 전체 객체를 JSON으로
-        return JSON.stringify(alarm);
-    }, []);
-
+const NotificationList = ({ notifications, deletedNotificationIds, onRemove, onClearAll, getAlarmKey }) => {
     const TWENTY_THREE_HOURS = 23 * 60 * 60 * 1000;
 
     // 삭제되지 않았거나 23시간이 지난 알림만 표시
-    const visibleNotifications = notifications.filter((notification) => {
+    const visibleNotifications = (notifications || []).filter((notification) => {
         const key = getAlarmKey(notification);
-        const deletedTime = deletedNotificationIds.get(key);
+        const deletedTime = getDeletedTimeFrom(deletedNotificationIds, key);
 
-        // 삭제되지 않았으면 표시
-        if (!deletedTime) {
-            return true;
-        }
-
-        // 23시간이 지났으면 다시 표시
+        if (!deletedTime) return true;
         const now = Date.now();
         return (now - deletedTime) >= TWENTY_THREE_HOURS;
     });
@@ -164,68 +147,72 @@ const NotificationList = ({ notifications, deletedNotificationIds, onRemove, onC
                 </button>
             </div>
             <div className="notification-list">
-                {visibleNotifications.map((notification, idx) => (
-                    <NotificationItem
-                        key={`${getAlarmKey(notification)}-${idx}`}
-                        notification={notification}
-                        onRemove={onRemove}
-                    />
-                ))}
+                {visibleNotifications.map((notification, idx) => {
+                    const key = getAlarmKey(notification) || `idx-${idx}`;
+                    return (
+                        <NotificationItem
+                            key={`${key}-${idx}`}
+                            notification={notification}
+                            onRemove={onRemove}
+                        />
+                    );
+                })}
             </div>
         </>
     );
 };
 
+
 const NotificationApp = () => {
+    const { alarms, isConnected, memberId } = useSSE();
+    const { hideDot } = useDot(memberId);
 
-    const { alarms, isConnected, memberId } = useSSE(); // 전역 알림 상태
-    const { hideDot } = useDot(memberId); // DOT 상태 관리
-    const [deletedRef, setDeletedRef] = useState(() => loadDeletedIds(memberId));
+    // loadDeletedIds가 반환하는 형태가 Map이 아닐 수 있으니 안전하게 처리
+    const [deletedRef, setDeletedRef] = useState(() => normalizeDeletedMap(loadDeletedIds(memberId)));
 
-    // 23시간 밀리초
     const TWENTY_THREE_HOURS = 23 * 60 * 60 * 1000;
 
-    // 고유 키 생성 함수 (여러 필드 조합으로 생성)
+    // 통일된 키 생성 함수 — NotificationList에 prop으로 전달
     const getAlarmKey = useCallback((alarm) => {
-        if (!alarm) {
-            return null;
+        if (!alarm) return null;
+
+        const type = safeStr(alarm.type);
+        const receiver = safeStr(alarm.receiverId || alarm.receiver || alarm.to || alarm.receiverId);
+        const message = safeStr(alarm.message);
+        const receivedAt = safeStr(alarm.receivedAt);
+        const reservationId = safeStr(alarm.reservationId);
+
+        if (alarm.id) return `id-${safeStr(alarm.id)}`;
+        if (alarm.eventId) return `event-${safeStr(alarm.eventId)}`;
+
+        // 보관소 승인/거절: message 포함해서 키 생성
+        if (['LOCKER_APPROVED', 'LOCKER_REJECTED'].includes(type)) {
+            //message가 다르면 새 알림으로 취급
+            return `locker-${type}-${message}-${receiver}-${receivedAt}`;
         }
 
-        // id가 있으면 사용 (가장 확실한 고유키)
-        if (alarm.id) {
-            return `${alarm.id}`;
+        // 예약 관련 알림
+        if (reservationId && receiver && type && receivedAt) {
+            return `res-${reservationId}-${receiver}-${type}-${receivedAt}`;
         }
 
-        // eventId가 있으면 사용 (보관소 알림에서 사용할 수 있음)
-        if (alarm.eventId) {
-            return `${alarm.eventId}`;
-        }
+        // 일반
+        if (type && receivedAt && receiver) return `${type}-${receivedAt}-${receiver}`;
 
-        // 예약 관련 알림: reservationId + receiverId + type + receivedAt
-        if (alarm.reservationId && alarm.receiverId && alarm.type && alarm.receivedAt) {
-            return `${alarm.reservationId}-${alarm.receiverId}-${alarm.type}-${alarm.receivedAt}`;
-        }
+        if (type && receivedAt) return `${type}-${receivedAt}`;
 
-        // 보관소 알림 등: type + receivedAt + receiverId로 고유키 생성
-        if (alarm.type && alarm.receivedAt && alarm.receiverId) {
-            return `${alarm.type}-${alarm.receivedAt}-${alarm.receiverId}`;
+        try {
+            return `json-${JSON.stringify(alarm)}`;
+        } catch (e) {
+            return `unknown-${Math.random()}`;
         }
-
-        // 최후의 수단: type + receivedAt
-        if (alarm.type && alarm.receivedAt) {
-            return `${alarm.type}-${alarm.receivedAt}`;
-        }
-
-        // 그래도 안되면 전체 객체를 JSON으로
-        return JSON.stringify(alarm);
     }, []);
 
     // 컴포넌트 마운트 시 브라우저 알림 권한 확인
     useEffect(() => {
         if (typeof window !== 'undefined' && 'Notification' in window) {
             if (Notification.permission === 'default') {
-                Notification.requestPermission().then((permission) => {
-                });
+                Notification.requestPermission().then((permission) => {});
             } else {
                 console.log('[NotificationApp] 현재 브라우저 알림 권한:', Notification.permission);
             }
@@ -236,11 +223,11 @@ const NotificationApp = () => {
     useEffect(() => {
         const now = Date.now();
         setDeletedRef((prev) => {
+            const prevMap = normalizeDeletedMap(prev);
             const newMap = new Map();
             let cleanedCount = 0;
 
-            // 23시간이 지나지 않은 삭제 기록만 유지
-            for (const [key, deletedTime] of prev) {
+            for (const [key, deletedTime] of prevMap) {
                 if ((now - deletedTime) < TWENTY_THREE_HOURS) {
                     newMap.set(key, deletedTime);
                 } else {
@@ -248,9 +235,12 @@ const NotificationApp = () => {
                 }
             }
 
-            // 변경사항이 있으면 저장
             if (cleanedCount > 0) {
-                saveDeletedIds(newMap, memberId);
+                try {
+                    saveDeletedIds(newMap, memberId);
+                } catch (e) {
+                    console.warn('[NotificationApp] saveDeletedIds 실패', e);
+                }
             }
 
             return newMap;
@@ -258,43 +248,41 @@ const NotificationApp = () => {
     }, [TWENTY_THREE_HOURS, memberId]);
 
     // 개별 알림 삭제
-    const removeNotification = useCallback(
-        (notification) => {
-            if (!notification) {
-                return;
-            }
+    const removeNotification = useCallback((notification) => {
+        if (!notification) return;
 
-            const key = getAlarmKey(notification);
-            if (!key) {
-                return;
-            }
-
-            const now = Date.now();
-
-            setDeletedRef((prevMap) => {
-                const newMap = new Map(prevMap);
-                newMap.set(key, now);
-
-                try {
-                    saveDeletedIds(newMap, memberId);
-                } catch (error) {
-                }
-
-                return newMap;
-            });
-        },
-        [getAlarmKey, memberId]
-    );
-
-    // 모든 알림 삭제
-    const clearAllNotifications = useCallback(() => {
-        if (!alarms || alarms.length === 0) {;
+        const key = getAlarmKey(notification);
+        if (!key) {
+            console.warn('[removeNotification] key 생성 실패', notification);
             return;
         }
 
         const now = Date.now();
 
-        setDeletedRef((prevMap) => {
+        setDeletedRef((prevMapLike) => {
+            const prevMap = normalizeDeletedMap(prevMapLike);
+            const newMap = new Map(prevMap);
+            newMap.set(key, now);
+
+            try {
+                saveDeletedIds(newMap, memberId);
+            } catch (error) {
+                console.error('[NotificationApp] 전체 삭제 저장 실패:', error);
+            }
+
+            console.log('[removeNotification] 삭제 처리:', key, 'time:', now);
+            return newMap;
+        });
+    }, [getAlarmKey, memberId]);
+
+    // 모든 알림 삭제
+    const clearAllNotifications = useCallback(() => {
+        if (!alarms || alarms.length === 0) return;
+
+        const now = Date.now();
+
+        setDeletedRef((prevMapLike) => {
+            const prevMap = normalizeDeletedMap(prevMapLike);
             const newMap = new Map(prevMap);
             let newDeletedCount = 0;
 
@@ -305,7 +293,6 @@ const NotificationApp = () => {
 
                 const existingDeletedTime = prevMap.get(key);
 
-                // 이미 삭제되었지만 23시간이 지난 경우 또는 아직 삭제되지 않은 경우
                 if (!existingDeletedTime || (now - existingDeletedTime >= TWENTY_THREE_HOURS)) {
                     newMap.set(key, now);
                     newDeletedCount++;
@@ -318,9 +305,10 @@ const NotificationApp = () => {
                 console.error('[NotificationApp] 전체 삭제 저장 실패:', error);
             }
 
+            console.log('[clearAllNotifications] 삭제된 알림 수:', newDeletedCount);
             return newMap;
         });
-    }, [alarms, getAlarmKey, TWENTY_THREE_HOURS, memberId]);
+    }, [alarms, getAlarmKey, memberId]);
 
     // 알림 페이지 진입 시 읽음 처리
     useEffect(() => {
@@ -330,11 +318,10 @@ const NotificationApp = () => {
             const receiverId = String(event.detail?.receiverId);
             const myId = String(memberId);
 
-            // 내가 받은 알림이고, 현재 알림 페이지면 → 즉시 읽음 처리
             if (receiverId === myId && window.location.pathname === '/page/notification') {
                 try {
-                    await hasreadAlarm();  // 서버 읽음 처리
-                    hideDot();             // dot 숨김
+                    await hasreadAlarm();
+                    hideDot();
                     window.dispatchEvent(new CustomEvent('alarmRead', { detail: { readMemberId: memberId } }));
                 } catch (e) {
                     console.error('[NotificationApp] SSE 알림 읽음 처리 실패', e);
@@ -364,6 +351,7 @@ const NotificationApp = () => {
                                 deletedNotificationIds={deletedRef}
                                 onRemove={removeNotification}
                                 onClearAll={clearAllNotifications}
+                                getAlarmKey={getAlarmKey} // 통일된 키 생성기 전달
                             />
                         </>
                     )}

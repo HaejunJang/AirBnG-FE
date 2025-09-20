@@ -105,7 +105,7 @@ export const SSEProvider = ({ children, memberId }) => {
                         const notification = new Notification(title, {
                             body: message,
                             icon: options.icon || '/favicon.ico',
-                            tag: options.tag || 'sse-notification',
+                            tag: options.tag || 'sse-notification-${Date.now()}',
                             ...options
                         });
 
