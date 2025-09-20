@@ -5,9 +5,14 @@ export const walletApi = {
   // 지갑 정보 조회 (잔액 + 연동 계좌)
   getWalletInfo: () => httpAuth.get("/wallet/me/overview"),
 
-  // 포인트 충전
-  chargePoint: (data) => httpAuth.post("/wallet/charge", data),
-
+  // 포인트 충전 - 헤더 설정 방식 수정
+  chargePoint: (data, idemKey) => {
+    return httpAuth.post("/wallet/me/topup", data, {
+      headers: {
+        "Idempotency-Key": idemKey,
+      },
+    });
+  },
   // 포인트 출금
   withdrawPoint: (data) => httpAuth.post("/wallet/withdraw", data),
 

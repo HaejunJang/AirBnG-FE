@@ -20,6 +20,7 @@ import { getUserProfile } from "./utils/jwtUtil";
 import MyInfoPage from "./pages/MyInfoPage";
 import MyWallet from "./pages/MyWallet";
 import AccountRegister from "./pages/AccountRegister";
+import MyWalletCharge from "./pages/MyWalletCharge";
 
 function App() {
   function getActiveNav(pathname) {
@@ -84,6 +85,10 @@ function App() {
           <Route
             path="/page/mypage/account/add"
             element={<AccountRegister />}
+          />
+          <Route
+            path="/page/mypage/wallet/charge"
+            element={<MyWalletCharge />}
           />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}

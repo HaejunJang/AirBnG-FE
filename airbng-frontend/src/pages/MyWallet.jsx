@@ -121,7 +121,7 @@ export default function MyWallet() {
 
   // 충전 페이지로 이동
   const goToCharge = () => {
-    navigate("/page/wallet/charge");
+    navigate("/page/mypage/wallet/charge");
   };
 
   // 출금 페이지로 이동
