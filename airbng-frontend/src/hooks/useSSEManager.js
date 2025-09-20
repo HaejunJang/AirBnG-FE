@@ -144,15 +144,18 @@ export const useSSEManager = (memberId) => {
                     const alarmData = JSON.parse(event.data);
                     console.log('[SSE Hook] 알림 수신:', alarmData);
                     handleAlarmEvent(alarmData);
+                    showNotification(
+                        'AirBnG 알림', // title
+                        alarmData.message || '새 알림이 도착했습니다.', // message
+                        { tag: `alarm-${alarmData.id || Date.now()}` }
+                    );
                 } catch (e) {
                     console.error('[SSE Hook] 알림 데이터 파싱 오류:', e, 'Raw data:', event.data);
                 }
             });
 
-            // onopen은 단순히 HTTP 연결만 확인 (실제 연결 완료가 아님)
             eventSourceRef.current.onopen = () => {
                 console.log('[SSE Hook] HTTP 연결 열림 (아직 서버 준비 대기중)');
-                // updateConnectionStatus는 여기서 호출하지 않음
             };
 
             eventSourceRef.current.onerror = (error) => {

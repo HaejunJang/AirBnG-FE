@@ -148,7 +148,7 @@ export const SSEProvider = ({ children, memberId }) => {
             });
 
             // 브라우저 알림 표시 (모든 페이지에서)
-            showNotification('예약 알림', data.message);
+            showNotification('알림', data.message);
 
             //dot을 위한 이벤트
             window.dispatchEvent(
