@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Header from "../components/Header/Header";
+import { Modal, useModal } from "../components/common/ModalUtil";
 import "../styles/pages/MyPage.css";
-import { useMyInfo } from "../hooks/useMyInfo";
 import { infoApi } from "../api/infoApi";
-import { getUserProfile } from "../utils/jwtUtil";
 
 export default function MyPage() {
   const { user, ready, isLoggedIn, logout, setUser } = useAuth();
@@ -75,13 +75,9 @@ export default function MyPage() {
 
   // ---- 로딩 & 모달 상태 ----
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState({
-    show: false,
-    type: "info", // 'info' | 'confirm' | 'error'
-    title: "",
-    message: "",
-    onConfirm: null,
-  });
+  const { modalState, hideModal, showError, showLogin, showConfirm } =
+    useModal();
+
   //  짐페이 잔액 상태
   const [balance, setBalance] = useState(null);
   const [balLoading, setBalLoading] = useState(false);
@@ -200,37 +196,8 @@ export default function MyPage() {
   const showLoading = () => setLoading(true);
   const hideLoading = () => setLoading(false);
 
-  const showInfoModal = (title, message, onConfirm = null) =>
-    setShowModal({ show: true, type: "info", title, message, onConfirm });
-
-  const showConfirmModal = (title, message, onConfirm) =>
-    setShowModal({ show: true, type: "confirm", title, message, onConfirm });
-
-  const showErrorModal = (title, message) =>
-    setShowModal({
-      show: true,
-      type: "error",
-      title,
-      message,
-      onConfirm: null,
-    });
-
-  const closeModal = () =>
-    setShowModal({
-      show: false,
-      type: "info",
-      title: "",
-      message: "",
-      onConfirm: null,
-    });
-
   // ---- 네비게이션 핸들러 ----
   const redirectParam = encodeURIComponent(location.pathname);
-
-  // 뒤로가기 핸들러 추가
-  const handleBack = () => {
-    navigate(-1);
-  };
 
   const goToLogin = () => {
     showLoading();
@@ -248,10 +215,7 @@ export default function MyPage() {
 
   const requireLoginThen = (task) => {
     if (!isLoggedIn) {
-      showInfoModal("로그인 필요", "로그인이 필요한 서비스입니다.", () => {
-        closeModal();
-        goToLogin();
-      });
+      showLogin();
       return false;
     }
     return true;
@@ -275,13 +239,12 @@ export default function MyPage() {
 
   // ---- 로그아웃 ----
   const onLogout = () => {
-    showConfirmModal("로그아웃", "정말로 로그아웃하시겠습니까?", async () => {
-      closeModal();
+    showConfirm("로그아웃", "정말로 로그아웃하시겠습니까?", async () => {
       showLoading();
       try {
         await logout(); // AuthContext가 서버 요청 + 클라이언트 정리
       } catch (e) {
-        showErrorModal(
+        showError(
           "알림",
           "서버와 통신 중 문제가 있었지만 로그아웃을 완료했습니다."
         );
@@ -446,50 +409,6 @@ export default function MyPage() {
     );
   };
 
-  const Modal = () => {
-    if (!showModal.show) return null;
-    return (
-      <div className="modal-overlay" onClick={closeModal}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>{showModal.title}</h3>
-          </div>
-          <div className="modal-body">
-            <p>{showModal.message}</p>
-          </div>
-          <div className="modal-footer">
-            {showModal.type === "confirm" ? (
-              <>
-                <button className="btn btn-secondary" onClick={closeModal}>
-                  취소
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    if (showModal.onConfirm) showModal.onConfirm();
-                    else closeModal();
-                  }}
-                >
-                  확인
-                </button>
-              </>
-            ) : (
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  if (showModal.onConfirm) showModal.onConfirm();
-                  else closeModal();
-                }}
-              >
-                확인
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const Loading = () => {
     if (!loading) return null;
     return (
@@ -515,12 +434,7 @@ export default function MyPage() {
 
   return (
     <div className="container">
-      <header className="header">
-        <div className="headerLeft">
-          <button className="backButton" onClick={handleBack} />
-        </div>
-        <h1 className="header-content">마이페이지</h1>
-      </header>
+      <Header headerTitle="마이페이지" />
       <main className="main-content">
         {!isLoggedIn || !user?.id ? (
           <>
@@ -533,7 +447,18 @@ export default function MyPage() {
       </main>
 
       {/* 모달 & 로딩 */}
-      <Modal />
+      <Modal
+        show={modalState.show}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+        onClose={hideModal}
+      />
       <Loading />
     </div>
   );
