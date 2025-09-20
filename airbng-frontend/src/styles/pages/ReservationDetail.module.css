@@ -1,4 +1,4 @@
-.reservation-detail {
+.reservationDetail {
   max-width: 412px;
   margin: 0 auto;
   background-color: #ffffff;
@@ -6,7 +6,7 @@
   position: relative;
 }
 
-.reservation-detail__header {
+.header {
   display: flex;
   align-items: center;
   padding: 16px 20px;
@@ -17,7 +17,7 @@
   z-index: 100;
 }
 
-.reservation-detail__back-btn {
+.backBtn {
   background: none;
   border: none;
   padding: 4px;
@@ -29,11 +29,11 @@
   justify-content: center;
 }
 
-.reservation-detail__back-btn:hover {
+.backBtn:hover {
   color: #5463ff;
 }
 
-.reservation-detail__title {
+.title {
   font-size: 18px;
   font-weight: 600;
   color: #333333;
@@ -43,29 +43,30 @@
   margin-right: 40px; /* Back button width compensation */
 }
 
-.reservation-detail__content {
+.content {
   padding: 20px;
 }
 
 /* Reservation Success Section */
-.reservation-success {
+.reservationSuccess {
   text-align: center;
-  padding: 40px 20px 32px 20px;
+  padding: 40px 20px 60px 20px;
   margin-bottom: 24px;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.success-icon {
+.successIcon {
   margin-bottom: 16px;
   display: flex;
   justify-content: center;
 }
 
-.success-title {
+.successTitle {
   font-size: 18px;
   font-weight: 600;
   color: #4561db;
@@ -73,22 +74,16 @@
   line-height: 1.4;
 }
 
-.success-message {
-  font-size: 14px;
-  color: #666666;
-  margin: 0;
-}
-
 /* Locker Info Section */
-.locker-info {
+.lockerInfo {
   display: flex;
-  align-items: flex-start; /* center에서 flex-start로 변경 */
+  align-items: flex-start;
   margin-bottom: 32px;
   padding-bottom: 20px;
   border-bottom: 1px solid #f0f0f0;
 }
 
-.locker-info__image {
+.lockerImage {
   width: 86px;
   height: 86px;
   border-radius: 8px;
@@ -97,68 +92,68 @@
   background-color: #f8f8f8;
 }
 
-.locker-info__details {
+.lockerDetails {
   flex: 1;
 }
 
-.locker-info__name {
+.lockerName {
   font-size: 16px;
   font-weight: 600;
   color: #333333;
-  margin: 0 0 4px 0; /* 하단 마진 추가 */
+  margin: 0 0 4px 0;
 }
 
-.locker-info__address {
+.lockerAddress {
   font-size: 14px;
   color: #666666;
   margin: 0;
 }
 
 /* Reservation Sections */
-.reservation-section {
+.reservationSection {
   margin-bottom: 24px;
 }
 
-.section-title {
+.sectionTitle {
   font-size: 16px;
   font-weight: 600;
   color: #333333;
   margin: 0 0 12px 0;
 }
 
-.section-content {
+.sectionContent {
   display: flex;
   align-items: center;
   font-size: 14px;
   color: #333333;
 }
 
-.section-icon {
+.sectionIcon {
   color: #666666;
   margin-right: 8px;
   flex-shrink: 0;
 }
 
-.jim-types {
+.jimTypes {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.jim-type-item {
+.jimTypeItem {
   display: flex;
   align-items: center;
   font-size: 14px;
   color: #333333;
 }
 
-.jim-type-item .section-icon {
+.jimTypeItem .sectionIcon {
   margin-right: 8px;
 }
 
-/* Pricing Section */
-.price-calculation {
-  background-color: #f9fafb;
+/* Price Calculation Section */
+.priceCalculation {
+  background-color: #f6f7fe;
   padding: 1rem;
   border-radius: 0.5rem;
   display: flex;
@@ -166,77 +161,40 @@
   gap: 0.5rem;
 }
 
-.pricing-section {
-  background-color: rgba(69, 97, 219, 0.05); /* #4561DB 5% */
-  border-radius: 8px;
-  padding: 22px 22px 35px 22px; /* 상단22, 좌우22, 하단35 */
-  margin: 32px 0 24px 0;
-  width: 375px;
-  height: 225px;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.pricing-item {
+.priceItem {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px; /* 8px에서 12px로 증가 */
+  font-size: 0.875rem;
 }
 
-.pricing-item:last-of-type {
-  margin-bottom: 20px; /* 16px에서 20px로 증가 */
+.priceDivider {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 0.5rem 0;
 }
 
-.pricing-label {
-  font-size: 14px;
-  color: #666666;
-}
-
-.pricing-value {
-  font-size: 14px;
-  color: #333333;
-  font-weight: 500;
-}
-
-.pricing-total {
+.priceTotal {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding-top: 15px; /* 12px에서 15px로 증가 */
-  border-top: 1px solid #e0e0e0;
-  position: absolute;
-  bottom: 35px; /* 하단에서 35px 위치 */
-  left: 22px;
-  right: 22px;
-}
-
-.pricing-total-label {
-  font-size: 16px;
   font-weight: 600;
-  color: #333333;
+  font-size: 1rem;
 }
 
-.pricing-total-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: #4561db; /* #5463FF에서 #4561DB로 변경 */
-}
-
-/* Notice - pricing-section 왼쪽 끝과 맞춤 */
+/* Notice */
 .notice {
   margin-bottom: 32px;
-  margin-left: 0; /* pricing-section과 같은 왼쪽 정렬 */
+  margin-left: 0;
 }
 
 .notice p {
   font-size: 12px;
-  color: #4561db; /* #999999에서 #4561DB로 변경 */
+  color: #4561db;
   margin: 5px 0 0 3px;
-  text-align: left; /* center에서 left로 변경 */
+  text-align: left;
 }
+
 /* Action Buttons */
-.action-buttons {
+.actionButtons {
   display: flex;
   gap: 12px;
   position: fixed;
@@ -252,8 +210,8 @@
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.btn-cancel,
-.btn-confirm {
+.btnCancel,
+.btnConfirm {
   width: 50%;
   height: 52px;
   border-radius: 8px;
@@ -267,52 +225,47 @@
   justify-content: center;
 }
 
-.btn-cancel {
+.btnCancel {
   background-color: rgba(69, 97, 219, 0.1);
   color: #4561db;
   border: 1px solid rgba(69, 97, 219, 0.2);
 }
 
-.btn-cancel:hover {
+.btnCancel:hover {
   background-color: rgba(69, 97, 219, 0.15);
 }
 
-.btn-confirm {
+.btnConfirm {
   background-color: #4561db;
   color: #ffffff;
 }
 
-.btn-confirm:hover {
+.btnConfirm:hover {
   background-color: #3d52c4;
 }
 
-.btn-confirm:active,
-.btn-cancel:active {
+.btnConfirm:active,
+.btnCancel:active {
   transform: translateY(1px);
 }
 
 /* Responsive adjustments */
 @media (max-width: 412px) {
-  .reservation-detail {
+  .reservationDetail {
     max-width: 100%;
   }
 
-  .reservation-detail__header {
+  .header {
     padding: 16px 16px;
   }
 
-  .reservation-detail__content {
+  .content {
     padding: 16px;
     padding-bottom: 100px; /* 버튼 공간 확보 */
   }
 
-  .action-buttons {
+  .actionButtons {
     width: 100%;
     padding: 16px 16px 20px 16px;
-  }
-
-  .pricing-section {
-    width: 100%;
-    max-width: 375px;
   }
 }

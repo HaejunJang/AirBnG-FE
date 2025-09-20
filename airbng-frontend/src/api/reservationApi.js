@@ -53,3 +53,11 @@ export const postReservation = async (req, idemkey) => {
   });
   return response.data;
 };
+
+// 예약 상세보기
+export const getReservationDetail = async (reservationId, memberId) => {
+  const response = await httpAuth.get(
+    `/reservations/${reservationId}/members/${memberId}/detail`
+  );
+  return response.data;
+};
