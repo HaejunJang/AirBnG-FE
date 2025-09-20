@@ -281,13 +281,20 @@ const useModal = () => {
   );
 
   const showLoading = useCallback(
-    (title = "잠시만 기다려주세요", message = "처리 중...") => {
+    (title = "잠시만 기다려주세요", message = "처리 중...", delayMs = 0) => {
       showModal({
         type: "loading",
         title,
         message,
         showCancel: false,
       });
+
+      // delayMs가 지정되면 Promise로 반환하여 await 가능하게 함
+      if (delayMs > 0) {
+        return new Promise((resolve) => {
+          setTimeout(resolve, delayMs);
+        });
+      }
     },
     [showModal]
   );
