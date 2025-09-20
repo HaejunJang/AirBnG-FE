@@ -538,7 +538,7 @@ function ReservationFormPage() {
     if (!validateForm()) return;
 
     // 로딩 모달 표시
-    showLoading("결제 처리 중입니다...", "잠시만 기다려주세요");
+    await showLoading("결제 처리 중입니다...", "잠시만 기다려주세요", 500);
 
     const startDateStr = dateArray[selectedDateRange.startDate];
     const endDateStr = dateArray[selectedDateRange.endDate];
@@ -566,54 +566,52 @@ function ReservationFormPage() {
     attemptedRef.current = true; // 제출 시도됨
 
     // 1초 대기 후 API 호출
-    setTimeout(() => {
-      postReservation(requestData, getOrCreateIdemKey(idemScope))
-        .then((data) => {
-          if (data.code === 4000) {
-            // 로딩 모달 숨기고 바로 성공 모달 표시
-            showSuccess("예약이 완료되었습니다!", "", () => {
+    postReservation(requestData, getOrCreateIdemKey(idemScope))
+      .then((data) => {
+        if (data.code === 4000) {
+          // 로딩 모달 숨기고 바로 성공 모달 표시
+          showSuccess("예약이 완료되었습니다!", "", () => {
+            done(idemScope);
+            const reservationId = data.result?.reservationId || 0;
+            if (reservationId === 0) {
+              navigate("/page/home");
+            } else {
+              sessionStorage.setItem("lockerId", lockerId);
+              navigate(
+                "/page/reservations/detail/" +
+                  reservationId +
+                  "?from=reservation"
+              );
+            }
+          });
+        } else if (data.code === 3005) {
+          showWarning("이용 불가", "보관소가 비활성화 되었습니다.", () => {
+            done(idemScope);
+            navigate(-1);
+          });
+        } else if (data.code === 9002) {
+          showError(
+            "예약 실패",
+            "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
+            () => {
+              // TODO : 로그인 후 돌아왔을 때, 선택 내역 남겨두기
               done(idemScope);
-              const reservationId = data.result?.reservationId || 0;
-              if (reservationId === 0) {
-                navigate("/page/home");
-              } else {
-                sessionStorage.setItem("lockerId", lockerId);
-                navigate(
-                  "/page/reservations/detail/" +
-                    reservationId +
-                    "?from=reservation"
-                );
-              }
-            });
-          } else if (data.code === 3005) {
-            showWarning("이용 불가", "보관소가 비활성화 되었습니다.", () => {
-              done(idemScope);
-              navigate(-1);
-            });
-          } else if (data.code === 9002) {
-            showError(
-              "예약 실패",
-              "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
-              () => {
-                // TODO : 로그인 후 돌아왔을 때, 선택 내역 남겨두기
-                done(idemScope);
-                navigate("/page/login");
-              }
-            );
-          } else {
-            showError("예약 실패", data.message, () => {
-              console.log(data);
-              // TODO: 실패 시 멱등키 유지 → 사용자가 다시 시도하면 같은 키로 재전송
+              navigate("/page/login");
+            }
+          );
+        } else {
+          showError("예약 실패", data.message, () => {
+            console.log(data);
+            // TODO: 실패 시 멱등키 유지 → 사용자가 다시 시도하면 같은 키로 재전송
 
-              // navigate(-1);
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("API 요청 실패:", error);
-          showError("예약 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
-        });
-    }, 500); // 500ms 대기
+            // navigate(-1);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("API 요청 실패:", error);
+        showError("예약 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
+      });
   };
 
   // 날짜 렌더링
