@@ -60,7 +60,7 @@ function AdminApp() {
                     </AdminRoute>
                 }/>
 
-                <Route path="/admin" element={<Navigate to="/admin/home" replace/>}/>
+                <Route path="/admin" element={<Navigate to="/admin/login" replace/>}/>
 
                 <Route path="/admin/*" element={
                     <AdminRoute>
