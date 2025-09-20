@@ -245,7 +245,7 @@ export default function WalletCharge() {
               type="text"
               value={chargeAmount ? formatWon(parseInt(chargeAmount)) : ""}
               onChange={handleAmountChange}
-              placeholder="충전 금액 입력 (최소 1만원)"
+              placeholder="충전 금액 입력 (최소 1000원)"
               className={styles.amountField}
             />
           </div>
