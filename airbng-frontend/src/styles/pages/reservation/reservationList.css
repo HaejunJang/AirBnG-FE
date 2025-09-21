@@ -20,8 +20,7 @@
   flex-direction: column;
   max-width: 412px;
   width: 100%;
-  padding: 60px 20px 24px;
-  overflow: auto; /* 전체 스크롤 막기 */
+  padding: 60px 10px 24px;
   background-color: #ffffff;
   min-height: 100vh;
 }
@@ -199,8 +198,8 @@
 .reservation-list {
   padding: 15px;
   position: relative;
-  overflow-y: auto;
-  height: calc(100vh - 220px);
+  overflow-y: visible; /* 필요하면 스크롤 허용 */
+  height: auto;
   margin-top: 0;
 }
 
