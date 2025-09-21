@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import styles from "../styles/pages/ReservationDetail.module.css";
-import { getReservationDetail } from "../api/reservationApi";
+import {
+  getReservationDetail,
+  confirmReservationApi,
+  cancelReservationApi,
+} from "../api/reservationApi";
 
 import { useAuth } from "../context/AuthContext";
 
@@ -9,6 +13,7 @@ import RotateIcon from "../assets/3d-rotate.svg";
 import BoxIcon from "../assets/box.svg";
 import CalendarIcon from "../assets/calendar copy.svg";
 import ClockIcon from "../assets/clock copy.svg";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 const ReservationDetail = () => {
   const navigate = useNavigate();
@@ -26,6 +31,8 @@ const ReservationDetail = () => {
   const [reservationData, setReservationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { showError, showSuccess } = useModal();
 
   // 스크롤 최상단으로 이동
   useEffect(() => {
@@ -155,9 +162,22 @@ const ReservationDetail = () => {
   console.log("reservationData:", reservationData);
   console.log("data:", data);
 
-  // userRole 계산: keeperId와 현재 사용자 ID 비교
-  const userRole = data?.keeperId === memberId ? "keeper" : "dropper";
+  // userRole 계산: keeperId, dropperId와 현재 사용자 ID 비교
+  const userRole =
+    data?.keeperId === memberId
+      ? "keeper"
+      : data?.dropperId === memberId
+      ? "dropper"
+      : "unknown";
   console.log("계산된 userRole:", userRole);
+  console.log(
+    "keeperId:",
+    data?.keeperId,
+    "dropperId:",
+    data?.dropperId,
+    "memberId:",
+    memberId
+  );
 
   if (!data) {
     return (
@@ -263,22 +283,30 @@ const ReservationDetail = () => {
     }
   };
 
-  const handleConfirm = async () => {
-    try {
-      const action = userRole === "keeper" ? "승인" : "확인";
-      console.log(action);
-
-      // API 호출 예시 (실제 엔드포인트에 맞게 수정 필요)
-      // await http.put(`/AirBnG/reservations/${reservationId}/confirm`);
-      // 또는
-      // await http.put(`/AirBnG/reservations/${reservationId}/approve`);
-
-      // 성공 후 이전 페이지로 이동하거나 상태 업데이트
-      // navigate(-1);
-    } catch (err) {
-      console.error("확인/승인 에러:", err);
-      alert(err.response?.data?.message || "처리 중 오류가 발생했습니다.");
-    }
+  // 승인/거절 핸들러
+  const handleConfirm = async (approve) => {
+    const approveStr = approve ? "승인" : "거절";
+    confirmReservationApi(reservationId, memberId, approve)
+      .then((data) => {
+        if (data.code === 1000) {
+          console.log(
+            approveStr + " 성공 - 변경된 예약 상태 : ",
+            data.result.state
+          );
+          showSuccess(approveStr + "되었습니다!", "");
+        } else {
+          showError(approveStr + " 실패", data.message, () => {
+            console.log(data);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("API 요청 실패:", error);
+        showError(
+          approveStr + " 실패",
+          "네트워크 오류. 잠시 후 다시 시도해주세요."
+        );
+      });
   };
 
   const handleBackClick = () => {
@@ -443,13 +471,34 @@ const ReservationDetail = () => {
           <p>* 30분안에 승인하지 않으면 자동거절됩니다.</p>
         </div>
 
-        <div className={styles.actionButtons}>
-          <button className={styles.btnCancel} onClick={handleCancel}>
-            {userRole === "keeper" ? "거절" : "취소"}
-          </button>
-          <button className={styles.btnConfirm} onClick={handleConfirm}>
-            {userRole === "keeper" ? "승인" : "확인"}
-          </button>
+        <div
+          className={styles.actionButtons}
+          style={userRole === "dropper" ? { justifyContent: "center" } : {}}
+        >
+          {userRole === "keeper" ? (
+            <>
+              <button
+                className={styles.btnCancel}
+                onClick={handleConfirm(false)}
+              >
+                거절
+              </button>
+              <button
+                className={styles.btnConfirm}
+                onClick={handleConfirm(true)}
+              >
+                승인
+              </button>
+            </>
+          ) : userRole === "dropper" ? (
+            <button
+              className={styles.btnCancel}
+              onClick={handleCancel}
+              style={{ width: "100%" }}
+            >
+              취소
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

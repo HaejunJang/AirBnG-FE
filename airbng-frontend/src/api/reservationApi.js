@@ -31,6 +31,13 @@ export const cancelReservationApi = (reservationId, memberId) => {
   );
 };
 
+// 예약 승인/거절
+export const confirmReservationApi = (reservationId, memberId, approve) => {
+  return httpAuth.post(
+    `/reservations/${reservationId}/members/${memberId}/confirm?approve=${approve}`
+  );
+};
+
 // 예약 폼 가져오기
 export const getReservationForm = async (lockerId) => {
   const response = await httpAuth.get(
