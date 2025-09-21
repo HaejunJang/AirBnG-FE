@@ -57,9 +57,9 @@ const MyInfoPage = () => {
       return;
     }
 
-    // 사용자 정보 로드
+   // 사용자 정보 로드 (loadUserInfo 의존성 제거)
     loadUserInfo(user.id);
-  }, [isLoggedIn, user, navigate, loadUserInfo, showError]);
+  }, [isLoggedIn, user?.id, showLogin]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
