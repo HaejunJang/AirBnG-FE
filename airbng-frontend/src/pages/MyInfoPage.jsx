@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMyInfo } from "../hooks/useMyInfo";
 import ProfileImageUpload from "../components/info/ProfileImageUpload";
@@ -10,11 +10,9 @@ import Header from "../components/Header/Header";
 import { Modal, useModal } from "../components/common/ModalUtil";
 
 const MyInfoPage = () => {
-  const navigate = useNavigate();
-  const { user, isLoggedIn } = useAuth();
-  const { modalState, showSuccess, showError, hideModal, showLogin } =
-    useModal();
-  // const urlMemberId = searchParams.get('memberId');
+    const navigate = useNavigate();
+    const { user, isLoggedIn } = useAuth();
+    const { modalState, showSuccess, showError, hideModal, showLogin } = useModal();
 
   const {
     userInfo,
@@ -33,33 +31,32 @@ const MyInfoPage = () => {
     setError,
   } = useMyInfo();
 
-  // 원래 닉네임 저장 → 닉네임이 바뀌었는지 비교
-  //const originalNicknameRef = useRef(null);
+    // useCallback으로 함수를 메모이제이션
+    const handleLoadUserInfo = useCallback(() => {
+        if (user?.id) {
+            loadUserInfo(user.id);
+        }
+    }, [user?.id, loadUserInfo]);
 
-  // memberId로 사용자 정보 로드 후 최초 1번만 원래 닉네임 저장
-  //1) memberId로 사용자 정보 로드
+    const handleAuthCheck = useCallback(() => {
+        if (!isLoggedIn || !user?.id) {
+            showLogin();
+            return false;
+        }
+        return true;
+    }, [isLoggedIn, user?.id, showLogin]);
 
-  // 2) 원래 닉네임 저장 (최초 1번만)
-  // useEffect(() => {
-  //     if (userInfo?.nickname && originalNicknameRef.current === null) {
-  //         originalNicknameRef.current = userInfo.nickname;
-  //     }
-  // }, [userInfo?.nickname]);
+    useEffect(() => {
+        console.log("로그인 상태:", isLoggedIn);
+        console.log("사용자 정보:", user);
 
-  // 닉네임이 바뀌었는지 여부 확인
-  //const isNicknameChanged = userInfo.nickname !== originalNicknameRef.current;
-  useEffect(() => {
-    console.log("로그인 상태:", isLoggedIn);
-    console.log("사용자 정보:", user);
+        if (!handleAuthCheck()) {
+            return;
+        }
 
-    if (!isLoggedIn || !user?.id) {
-      showLogin();
-      return;
-    }
-
-    // 사용자 정보 로드
-    loadUserInfo(user.id);
-  }, [isLoggedIn, user, navigate, loadUserInfo, showError]);
+        // 사용자 정보 로드
+        handleLoadUserInfo();
+    }, [isLoggedIn, user?.id]); // 함수들을 의존성에서 제거
 
   const handleSubmit = async (e) => {
     e.preventDefault();
