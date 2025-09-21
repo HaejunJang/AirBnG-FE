@@ -175,7 +175,8 @@
 }
 
 .btnCancel,
-.btnConfirm {
+.btnConfirm,
+.btnDisabled {
   width: 50%;
   height: 52px;
   border-radius: 8px;
@@ -206,6 +207,18 @@
 
 .btnConfirm:hover {
   background-color: #3d52c4;
+}
+
+.btnDisabled {
+  background-color: #f0f0f0;
+  color: #999999;
+  cursor: not-allowed;
+  border: 1px solid #e0e0e0;
+}
+
+.btnDisabled:hover {
+  background-color: #f0f0f0;
+  color: #999999;
 }
 
 .btnConfirm:active,
