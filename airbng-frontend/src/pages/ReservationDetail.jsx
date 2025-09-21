@@ -415,7 +415,7 @@ const ReservationDetail = () => {
               width="20"
               height="20"
             />
-            <span>직접 직 건네주기</span>
+            <span>직접 짐 건네주기</span>
           </div>
         </div>
 
