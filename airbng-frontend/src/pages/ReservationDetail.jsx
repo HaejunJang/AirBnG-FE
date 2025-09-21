@@ -6,9 +6,8 @@ import {
   confirmReservationApi,
   cancelReservationApi,
 } from "../api/reservationApi";
-
+import Header from "../components/Header/Header";
 import { useAuth } from "../context/AuthContext";
-
 import RotateIcon from "../assets/3d-rotate.svg";
 import BoxIcon from "../assets/box.svg";
 import CalendarIcon from "../assets/calendar copy.svg";
@@ -78,20 +77,7 @@ const ReservationDetail = () => {
   if (!reservationId || !memberId) {
     return (
       <div className={styles.reservationDetail}>
-        <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M19 12H5M12 19L5 12L12 5"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className={styles.title}>예약 상세</h1>
-        </div>
+        <Header headerTitle="예약 상세" showBackButton />
         <div className={styles.content}>
           <div className="error-message">
             잘못된 접근입니다. 필요한 정보가 없습니다.
@@ -105,20 +91,7 @@ const ReservationDetail = () => {
   if (loading) {
     return (
       <div className={styles.reservationDetail}>
-        <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className={styles.title}>예약 상세</h1>
-        </div>
+        <Header headerTitle="예약 상세" showBackButton />
         <div className={styles.content}>
           <div style={{ textAlign: "center", padding: "50px 0" }}>
             로딩 중...
@@ -131,20 +104,7 @@ const ReservationDetail = () => {
   if (error) {
     return (
       <div className={styles.reservationDetail}>
-        <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className={styles.title}>예약 상세</h1>
-        </div>
+        <Header headerTitle="예약 상세" showBackButton />
         <div className={styles.content}>
           <div
             style={{ textAlign: "center", padding: "50px 0", color: "#ff4444" }}
@@ -182,20 +142,7 @@ const ReservationDetail = () => {
   if (!data) {
     return (
       <div className={styles.reservationDetail}>
-        <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className={styles.title}>예약 상세</h1>
-        </div>
+        <Header headerTitle="예약 상세" showBackButton />
         <div className={styles.content}>
           <div style={{ textAlign: "center", padding: "50px 0" }}>
             데이터가 없습니다.
@@ -315,20 +262,11 @@ const ReservationDetail = () => {
 
   return (
     <div className={styles.reservationDetail}>
-      <div className={styles.header}>
-        <button className={styles.backBtn} onClick={handleBackClick}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M15 18L9 12L15 6"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <h1 className={styles.title}>예약 상세</h1>
-      </div>
+      <Header
+        headerTitle="예약 상세"
+        showBackButton
+        onBack={handleBackToList}
+      />
 
       <div className={styles.content}>
         {/* 예약 완료 메시지 (예약 직후에만 표시) */}
