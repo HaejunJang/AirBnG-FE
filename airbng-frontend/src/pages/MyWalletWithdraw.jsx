@@ -131,6 +131,7 @@ export default function WalletWithdraw() {
     setIsWithdrawing(true);
 
     try {
+      await showLoading("출금 처리 중입니다...", "잠시만 기다려주세요", 500);
       const scope = `wallet:withdraw:${selectedAccount.accountId}:${availableBalance}`;
       const idemKey = getOrCreateIdemKey(scope);
 

@@ -155,6 +155,7 @@ export default function WalletCharge() {
     setIsCharging(true);
 
     try {
+      await showLoading("충전 처리 중입니다...", "잠시만 기다려주세요", 500);
       // 멱등키 생성
       const scope = `wallet:topup:${selectedAccount.accountId}:${chargeAmount}`;
       const idemKey = getOrCreateIdemKey(scope);
