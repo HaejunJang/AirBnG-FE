@@ -137,18 +137,20 @@ export default function WalletCharge() {
   // 충전하기
   const handleCharge = async () => {
     if (!selectedAccount) {
-      alert("충전할 계좌를 선택해주세요.");
+      showError("계좌 선택", "충전할 계좌를 선택해주세요.");
       return;
     }
 
     if (!chargeAmount || parseInt(chargeAmount) < 1000) {
-      alert("충전 금액은 최소 1,000원 이상이어야 합니다.");
-      // TODO : alert 모달로 바꿔
+      showError(
+        "충전 금액 부족",
+        "충전 금액은 최소 1,000원 이상이어야 합니다."
+      );
       return;
     }
 
     if (parseInt(chargeAmount) > 300000) {
-      alert("1회 충전 가능 금액은 최대 300,000원입니다.");
+      showError("충전 금액 제한", "1회 충전 가능 금액은 최대 300,000원입니다.");
       return;
     }
 
@@ -178,16 +180,19 @@ export default function WalletCharge() {
           });
         });
       } else {
-        alert(response.data?.message || "충전에 실패했습니다.");
+        showError(
+          "충전 실패",
+          response.data?.message || "충전에 실패했습니다."
+        );
       }
     } catch (error) {
       console.error("충전 실패:", error);
       if (error.response?.status === 400) {
-        alert("잘못된 요청입니다. 입력 정보를 확인해주세요.");
+        showError("충전 실패", "입력 정보를 확인해주세요.");
       } else if (error.response?.status === 409) {
-        alert("이미 처리 중인 요청입니다. 잠시 후 다시 시도해주세요.");
+        showError("충전 실패", "이미 처리 중인 요청입니다.");
       } else {
-        alert("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+        showError("충전 실패", "다시 시도해주세요.");
       }
     } finally {
       setIsCharging(false);
@@ -348,10 +353,6 @@ export default function WalletCharge() {
           <h3 className={styles.infoTitle}>이용 안내</h3>
           <ul className={styles.infoList}>
             <li>짐페이는 충전완료부터 5년까지 사용할 수 있어요.</li>
-            <li>
-              짐페이 충 보유 가능 금액은 연령 200만원으로, 초과 시 충전이
-              제한됩니다.
-            </li>
             <li>
               짐페이 1회 충전 가능 금액은 최대 30만원으로, 초과 시 충전이
               제한됩니다.
