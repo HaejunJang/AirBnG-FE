@@ -5,6 +5,7 @@ import {
   getReservationDetail,
   confirmReservationApi,
   cancelReservationApi,
+  completeReservationApi,
 } from "../api/reservationApi";
 import Header from "../components/Header/Header";
 import { useAuth } from "../context/AuthContext";
@@ -13,6 +14,7 @@ import BoxIcon from "../assets/box.svg";
 import CalendarIcon from "../assets/calendar copy.svg";
 import ClockIcon from "../assets/clock copy.svg";
 import { Modal, useModal } from "../components/common/ModalUtil";
+import CheckIcon from "../assets/check_icon.svg";
 
 const ReservationDetail = () => {
   const navigate = useNavigate();
@@ -20,9 +22,6 @@ const ReservationDetail = () => {
   const { search } = useLocation();
   const urlParams = new URLSearchParams(search);
   const isFromReservation = urlParams.get("from") === "reservation"; // 예약 완료 직후인지 확인
-
-  console.log("reservationId:", typeof reservationId);
-  console.log("isFromReservation:", isFromReservation);
 
   const { user } = useAuth(); // AuthContext에서 사용자 정보 가져오기
   const memberId = user?.id; // memberId 파싱
@@ -43,13 +42,9 @@ const ReservationDetail = () => {
     try {
       setLoading(true);
       const response = await getReservationDetail(reservationId, memberId);
-      console.log("API 응답 성공:", response);
-      console.log("응답 데이터:", response.result);
-
       setReservationData(response.result);
     } catch (err) {
-      console.error("API 호출 에러 상세:", err);
-
+      console.error("예약 상세 정보 조회 실패:", err);
       setError(
         err.response?.result?.message || "예약 상세 정보를 불러올 수 없습니다."
       );
@@ -60,15 +55,7 @@ const ReservationDetail = () => {
 
   // 컴포넌트 마운트 시 API 호출
   useEffect(() => {
-    console.log("=== ReservationDetail 디버깅 ===");
-    console.log("reservationId:", reservationId);
-    console.log("memberId:", memberId);
-
     if (reservationId && memberId) {
-      console.log("API 호출할 값들:");
-      console.log("testReservationId:", reservationId);
-      console.log("testMemberId:", memberId);
-
       fetchReservationDetail(reservationId, memberId);
     }
   }, [reservationId, memberId]);
@@ -118,10 +105,6 @@ const ReservationDetail = () => {
 
   const data = reservationData?.result || reservationData;
 
-  console.log("=== 데이터 처리 단계 ===");
-  console.log("reservationData:", reservationData);
-  console.log("data:", data);
-
   // userRole 계산: keeperId, dropperId와 현재 사용자 ID 비교
   const userRole =
     data?.keeperId === memberId
@@ -129,15 +112,6 @@ const ReservationDetail = () => {
       : data?.dropperId === memberId
       ? "dropper"
       : "unknown";
-  console.log("계산된 userRole:", userRole);
-  console.log(
-    "keeperId:",
-    data?.keeperId,
-    "dropperId:",
-    data?.dropperId,
-    "memberId:",
-    memberId
-  );
 
   if (!data) {
     return (
@@ -214,89 +188,61 @@ const ReservationDetail = () => {
 
   const handleCancel = async () => {
     try {
-      const action = userRole === "keeper" ? "거절" : "취소";
-      console.log(action + "하기");
+      const response = await cancelReservationApi(reservationId);
+      const data = response.data;
 
-      // API 호출 예시 (실제 엔드포인트에 맞게 수정 필요)
-      // await http.put(`/AirBnG/reservations/${reservationId}/cancel`);
-      // 또는
-      // await http.put(`/AirBnG/reservations/${reservationId}/reject`);
-
-      // 성공 후 이전 페이지로 이동하거나 상태 업데이트
-      // navigate(-1);
-    } catch (err) {
-      console.error("취소/거절 에러:", err);
-      alert(err.response?.data?.message || "처리 중 오류가 발생했습니다.");
+      if (data.code === 1000) {
+        setReservationData((prevData) => ({
+          ...prevData,
+          state: data.result.state,
+        }));
+        showSuccess("예약이 취소되었습니다.", "");
+      } else {
+        showError("예약 취소 실패", data.message);
+      }
+    } catch (error) {
+      console.error("예약 취소 실패:", error);
+      showError("예약 취소 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
     }
   };
 
   // 승인/거절 핸들러
   const handleConfirm = async (approve) => {
     const approveStr = approve ? "승인" : "거절";
-    confirmReservationApi(reservationId, memberId, approve)
-      .then((data) => {
-        if (data.code === 1000) {
-          console.log(
-            approveStr + " 성공 - 변경된 예약 상태 : ",
-            data.result.state
-          );
-          showSuccess(approveStr + "되었습니다!", "");
-        } else {
-          showError(approveStr + " 실패", data.message, () => {
-            console.log(data);
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("API 요청 실패:", error);
-        showError(
-          approveStr + " 실패",
-          "네트워크 오류. 잠시 후 다시 시도해주세요."
-        );
-      });
-  };
 
-  const handleBackClick = () => {
-    navigate(-1); // 이전 페이지로 돌아가기
-  };
+    try {
+      const response = await confirmReservationApi(reservationId, approve);
+      const data = response.data;
 
+      if (data.code === 1000) {
+        // 상태 업데이트: reservationData의 state를 새로운 상태로 변경
+        setReservationData((prevData) => ({
+          ...prevData,
+          state: data.result.state,
+        }));
+        showSuccess(approveStr + "되었습니다!", "");
+      } else {
+        showError(approveStr + " 실패", data.message);
+      }
+    } catch (error) {
+      console.error(`예약 ${approveStr} 실패:`, error);
+      showError(
+        approveStr + " 실패",
+        "네트워크 오류. 잠시 후 다시 시도해주세요."
+      );
+    }
+  };
   return (
     <div className={styles.reservationDetail}>
-      <Header
-        headerTitle="예약 상세"
-        showBackButton
-        onBack={handleBackToList}
-      />
+      {isFromReservation && <Header headerTitle="예약 상세" showHomeButton />}
+      {!isFromReservation && <Header headerTitle="예약 상세" showBackButton />}
 
       <div className={styles.content}>
         {/* 예약 완료 메시지 (예약 직후에만 표시) */}
         {isFromReservation && (
           <div className={styles.reservationSuccess}>
             <div className={styles.successIcon}>
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 100 100"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  fill="#ffffff"
-                  stroke="#4561db"
-                  stroke-width="6"
-                />
-                <path
-                  d="M30 50l12 12 25-25"
-                  stroke="#4561db"
-                  stroke-width="6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  fill="none"
-                />
-              </svg>
+              <CheckIcon />
             </div>
             <h2 className={styles.successTitle}>예약이 완료되었습니다!</h2>
           </div>
@@ -409,35 +355,98 @@ const ReservationDetail = () => {
           <p>* 30분안에 승인하지 않으면 자동거절됩니다.</p>
         </div>
 
-        <div
-          className={styles.actionButtons}
-          style={userRole === "dropper" ? { justifyContent: "center" } : {}}
-        >
-          {userRole === "keeper" ? (
-            <>
-              <button
-                className={styles.btnCancel}
-                onClick={handleConfirm(false)}
+        {/* 상태별 버튼 렌더링 */}
+        {(() => {
+          const reservationState = data.state || data.result?.state;
+
+          if (reservationState === "PENDING") {
+            // PENDING 상태: keeper는 거절/승인, dropper는 취소
+            return (
+              <div
+                className={styles.actionButtons}
+                style={
+                  userRole === "dropper" ? { justifyContent: "center" } : {}
+                }
               >
-                거절
-              </button>
-              <button
-                className={styles.btnConfirm}
-                onClick={handleConfirm(true)}
+                {userRole === "keeper" ? (
+                  <>
+                    <button
+                      className={styles.btnCancel}
+                      onClick={() => handleConfirm(false)}
+                    >
+                      거절
+                    </button>
+                    <button
+                      className={styles.btnConfirm}
+                      onClick={() => handleConfirm(true)}
+                    >
+                      승인
+                    </button>
+                  </>
+                ) : userRole === "dropper" ? (
+                  <button
+                    className={styles.btnCancel}
+                    onClick={handleCancel}
+                    style={{ width: "100%" }}
+                  >
+                    취소
+                  </button>
+                ) : null}
+              </div>
+            );
+          } else if (reservationState === "CANCELLED") {
+            // CANCELLED 상태: keeper는 예약이 취소됐어요, dropper는 예약취소완료
+            return (
+              <div
+                className={styles.actionButtons}
+                style={{ justifyContent: "center" }}
               >
-                승인
-              </button>
-            </>
-          ) : userRole === "dropper" ? (
-            <button
-              className={styles.btnCancel}
-              onClick={handleCancel}
-              style={{ width: "100%" }}
-            >
-              취소
-            </button>
-          ) : null}
-        </div>
+                <button
+                  className={styles.btnDisabled}
+                  disabled
+                  style={{ width: "100%" }}
+                >
+                  {userRole === "keeper" ? "예약이 취소됐어요" : "예약취소완료"}
+                </button>
+              </div>
+            );
+          } else if (reservationState === "CONFIRMED") {
+            // CONFIRMED 상태: keeper는 예약승인완료, dropper는 예약이 승인됐어요
+            return (
+              <div
+                className={styles.actionButtons}
+                style={{ justifyContent: "center" }}
+              >
+                <button
+                  className={styles.btnDisabled}
+                  disabled
+                  style={{ width: "100%" }}
+                >
+                  {userRole === "keeper" ? "예약승인완료" : "예약이 승인됐어요"}
+                </button>
+              </div>
+            );
+          } else if (reservationState === "REJECTED") {
+            // REJECTED 상태: keeper는 예약반려완료, dropper는 예약이 반려됐어요
+            return (
+              <div
+                className={styles.actionButtons}
+                style={{ justifyContent: "center" }}
+              >
+                <button
+                  className={styles.btnDisabled}
+                  disabled
+                  style={{ width: "100%" }}
+                >
+                  {userRole === "keeper" ? "예약반려완료" : "예약이 반려됐어요"}
+                </button>
+              </div>
+            );
+          }
+
+          // 기본 상태 (알 수 없는 상태)
+          return null;
+        })()}
       </div>
     </div>
   );
