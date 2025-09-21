@@ -135,7 +135,7 @@ export default function MyWallet() {
 
   // 사용내역 페이지로 이동
   const goToHistory = () => {
-    navigate("/page/wallet/history");
+    navigate("/page/mypage/wallet/history");
   };
 
   // 계좌 등록 페이지로 이동

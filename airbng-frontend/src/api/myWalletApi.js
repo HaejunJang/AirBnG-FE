@@ -23,9 +23,13 @@ export const walletApi = {
     });
   },
 
-  // 지갑 사용 내역 조회
-  getWalletHistory: (memberId, params) =>
-    httpAuth.get(`/wallet/${memberId}/history`, { params }),
+  // 지갑 사용 내역 조회 함수 수정
+  getWalletHistory: (queryParams = "") => {
+    const url = queryParams
+      ? `/wallet/me/history?${queryParams}`
+      : "/wallet/me/history";
+    return httpAuth.get(url);
+  },
 
   // 계좌 등록
   registerAccount: (data) => httpAuth.post("/account", data),
