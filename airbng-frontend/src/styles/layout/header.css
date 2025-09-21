@@ -19,6 +19,11 @@
   border-bottom: 1px solid var(--border);
 }
 
+/* 보더 숨김 */
+.common-header.no-border {
+  border-bottom: none;
+}
+
 .header-title {
   font-weight: 600;
   color: var(--text);

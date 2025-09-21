@@ -26,6 +26,7 @@ export default function Header({
   className = "",
   onBack,
   onHome,
+  hideBorder = false,
 }) {
   const navigate = useNavigate();
 
@@ -41,7 +42,9 @@ export default function Header({
   };
 
   return (
-    <header className={`common-header ${className}`}>
+    <header
+      className={`common-header ${className} ${hideBorder ? "no-border" : ""}`}
+    >
       {showBackButton ? (
         <button
           type="button"

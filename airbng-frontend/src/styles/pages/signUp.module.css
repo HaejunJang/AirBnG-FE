@@ -1,42 +1,49 @@
 /** {*/
-/*    margin: 0;*/
-/*    padding: 0;*/
-/*    box-sizing: border-box;*/
+/*  margin: 0;*/
+/*  padding: 0;*/
+/*  box-sizing: border-box;*/
 /*}*/
 
 /*body {*/
-/*    width: 100%;*/
-/*    height: 100vh;*/
-/*    margin: 0;*/
-/*    background-color: #f8f9fa;*/
-/*    overflow-x: hidden;*/
-/*    overflow-y: auto;*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;*/
+/*  width: 100%;*/
+/*  min-height: 100dvh;*/
+/*  margin: 0;*/
+/*  background-color: #f8f9fa;*/
+/*  overflow-x: hidden;*/
+/*  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;*/
 /*}*/
 
-.pageContainer {
+.signupPageContainer {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  max-width: 412px;
-  width: 412px;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: var(--app-max-width);
   background-color: #ffffff;
   position: relative;
+  margin: 0 auto; /* 모바일(<=412px)에서 100% 폭 중앙 */
 }
 
-.editProfileContainer {
+.signupScroll {
   flex: 1;
-  padding: 80px 20px 40px 20px;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 60px 20px 40px;
+  padding-bottom: calc(var(--bottom-nav-height) + 40px);
+}
+
+.signupContainer {
+  flex: 1;
+  padding: 60px 20px 40px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
 
-.backButton {
+.signupBackButton {
   position: absolute;
-  top: 20px;
+  top: 28px;
   left: 20px;
   width: 40px;
   height: 40px;
@@ -50,29 +57,29 @@
   transition: background-color 0.2s ease;
 }
 
-.backButton:hover {
+.signupBackButton:hover {
   background-color: #f5f5f5;
 }
 
-.backButton svg {
+.signupBackButton svg {
   width: 24px;
   height: 24px;
   stroke: #333;
 }
 
-.editProfileHeader {
+.signupHeader {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
-.editProfileTitle {
+.signupTitle {
   font-size: 24px;
   font-weight: 700;
   color: #333;
   margin-bottom: 8px;
 }
 
-.editProfileSubtitle {
+.signupSubtitle {
   font-size: 14px;
   color: #666;
 }
@@ -81,7 +88,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 12px;
 }
 
 .profileImageContainer {
@@ -91,7 +98,7 @@
 
 .profileImage {
   width: 80px;
-  height: 80px;
+  /* height: 80px; */
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #e0e0e0;
@@ -136,40 +143,10 @@
   text-align: center;
 }
 
-#profileInput {
-  display: none;
-}
-
-.loadingContainer {
-  text-align: center;
-  padding: 40px 20px;
-  color: #666;
-}
-
-.loadingSpinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #4561db;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.editProfileForm {
+.signupForm {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  /*height: calc(100vh - 310px);*/
 }
 
 .inputGroup {
@@ -196,25 +173,20 @@
 }
 
 .formInput {
-  flex: 1;
-  height: 35px;
+  width: 100%;
+  height: 50px;
   padding: 0 16px;
   border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border-radius: 10px;
   font-size: 16px;
   background-color: #ffffff;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .formInput:focus {
   outline: none;
   border-color: #4561db;
-}
-
-.formInput:disabled {
-  background-color: #f8f9fa;
-  color: #666;
-  cursor: not-allowed;
+  box-shadow: 0 0 0 3px rgba(69, 97, 219, 0.3);
 }
 
 .formInput::placeholder {
@@ -229,13 +201,18 @@
   border-color: #ef4444;
 }
 
-.inputHelp {
-  font-size: 12px;
-  color: #999;
-  margin-top: 4px;
+.success {
+  border-color: #10b981 !important;
+  color: #10b981;
+}
+
+.error {
+  border-color: #ef4444 !important;
+  color: #ef4444;
 }
 
 .checkButton {
+  flex-shrink: 0;
   height: 35px;
   padding: 0 16px;
   background-color: #4561db;
@@ -280,7 +257,7 @@
   color: #ef4444;
 }
 
-.saveButton {
+.signupButton {
   width: 100%;
   height: 50px;
   background-color: #4561db;
@@ -291,38 +268,49 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  margin-top: 20px;
-
-  /*position: relative; !* fixed 제거 *!*/
-  /*transform: none;*/
-  /*left: auto;*/
-  /*bottom: auto;*/
-  /*z-index: auto;*/
+  margin-top: 16px;
 }
 
-.saveButton:hover {
+.signupButton:hover {
   background-color: #3548c4;
 }
 
-/*.saveButton:disabled {*/
-/*    background-color: #cccccc;*/
-/*    !*cursor: not-allowed;*!*/
-/*}*/
+.signupButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
 
-.errorMessage {
-  background-color: #fee;
-  color: #c33;
-  padding: 12px 16px;
-  border-radius: 4px;
+.loginSection {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.loginText {
   font-size: 14px;
-  margin-bottom: 16px;
-  border: 1px solid #fcc;
-  position: relative;
+  color: #666;
+}
+
+.loginLink {
+  color: #4561db;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.loginLink:hover {
+  text-decoration: none;
 }
 
 /* 반응형 디자인 */
-@media (max-width: 412px) {
-  .editProfileContainer {
-    padding: 80px 16px 40px;
+@media (min-width: 413px) {
+  .pageContainer {
+    margin: 0; /* footer와 동일 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--app-max-width);
+    max-width: var(--app-max-width);
   }
 }
