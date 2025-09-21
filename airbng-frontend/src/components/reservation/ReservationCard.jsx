@@ -13,7 +13,6 @@ import {
 } from "../../utils/reservation/reservationUtils";
 import logoImg from "../../assets/favicon.svg";
 import { cancelReservationApi } from "../../api/reservationApi";
-import { Modal, useModal } from "../common/ModalUtil";
 
 const ReservationCard = ({
   reservation,
@@ -22,11 +21,12 @@ const ReservationCard = ({
   activeMoreMenu,
   toggleMoreMenu,
   onShowConfirmModal,
+  onShowSuccess,
+  onShowError,
+  onShowConfirm,
 }) => {
   const navigate = useNavigate();
   const jimTypes = getJimTypesText(reservation.jimTypeResults);
-  const { modalState, showConfirm, showSuccess, showError, hideModal } =
-    useModal();
 
   // 예약 취소 처리 함수
   const handleCancelReservation = async (reservationId) => {
@@ -35,34 +35,42 @@ const ReservationCard = ({
       const data = response.data;
 
       if (data.code === 1000) {
-        showSuccess(
-          "예약 취소 완료",
-          "예약이 성공적으로 취소되었습니다.",
-          () => {
-            window.location.reload(); // 새로고침
-          }
-        );
+        if (onShowSuccess) {
+          onShowSuccess(
+            "예약 취소 완료",
+            "예약이 성공적으로 취소되었습니다.",
+            () => {
+              window.location.reload(); // 새로고침
+            }
+          );
+        }
       } else {
-        showError("예약 취소 실패", data.message, () => {
-          window.location.reload(); // 실패해도 새로고침
-        });
+        if (onShowError) {
+          onShowError("예약 취소 실패", data.message, () => {
+            window.location.reload(); // 실패해도 새로고침
+          });
+        }
       }
     } catch (error) {
       console.error("예약 취소 실패:", error);
-      showError("예약 취소 실패", "네트워크 오류가 발생했습니다.", () => {
-        window.location.reload(); // 오류시에도 새로고침
-      });
+      if (onShowError) {
+        onShowError("예약 취소 실패", "네트워크 오류가 발생했습니다.", () => {
+          window.location.reload(); // 오류시에도 새로고침
+        });
+      }
     }
   };
 
   // 예약 취소 확인 모달 표시
   const showCancelConfirm = (reservationId) => {
-    showConfirm(
-      "예약 취소",
-      "정말로 예약을 취소하시겠습니까?",
-      () => handleCancelReservation(reservationId), // 확인시 취소 API 호출
-      () => {} // 취소시 아무것도 안함
-    );
+    if (onShowConfirm) {
+      onShowConfirm(
+        "예약 취소",
+        "정말로 예약을 취소하시겠습니까?",
+        () => handleCancelReservation(reservationId), // 확인시 취소 API 호출
+        () => {} // 취소시 아무것도 안함
+      );
+    }
   };
 
   const renderActionButtons = () => {
@@ -315,24 +323,7 @@ const ReservationCard = ({
     );
   }
 
-  return (
-    <>
-      {cardContent}
-      {/* Modal */}
-      <Modal
-        show={modalState.show}
-        type={modalState.type}
-        title={modalState.title}
-        message={modalState.message}
-        confirmText={modalState.confirmText}
-        cancelText={modalState.cancelText}
-        showCancel={modalState.showCancel}
-        onConfirm={modalState.onConfirm}
-        onCancel={modalState.onCancel}
-        onClose={hideModal}
-      />
-    </>
-  );
+  return cardContent;
 };
 
 export default ReservationCard;
