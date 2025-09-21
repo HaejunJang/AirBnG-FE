@@ -14,7 +14,7 @@ import BoxIcon from "../assets/box.svg";
 import CalendarIcon from "../assets/calendar copy.svg";
 import ClockIcon from "../assets/clock copy.svg";
 import { Modal, useModal } from "../components/common/ModalUtil";
-import CheckIcon from "../assets/check_icon.svg";
+import CheckIcon from "../components/reservation/CheckIcon";
 
 const ReservationDetail = () => {
   const navigate = useNavigate();
@@ -242,7 +242,7 @@ const ReservationDetail = () => {
         {isFromReservation && (
           <div className={styles.reservationSuccess}>
             <div className={styles.successIcon}>
-              <CheckIcon />
+              <CheckIcon strokeWidth={6} />
             </div>
             <h2 className={styles.successTitle}>예약이 완료되었습니다!</h2>
           </div>
