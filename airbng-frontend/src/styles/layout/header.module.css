@@ -1,7 +1,7 @@
 /* 전역 토큰(global.css)을 사용: --app-max-width, --header-height, --header-icon-size, --surface, --border, --text, --fast */
 
 /* 헤더 컴포넌트 */
-.common-header {
+.commonHeader {
   position: fixed;
   top: 0;
   left: 50%;
@@ -20,11 +20,11 @@
 }
 
 /* 보더 숨김 */
-.common-header.no-border {
+.commonHeader.noBorder {
   border-bottom: none;
 }
 
-.header-title {
+.headerTitle {
   font-weight: 600;
   color: var(--text);
   text-align: center;
@@ -35,16 +35,16 @@
 }
 
 /* 아이콘/스페이서 */
-.back-icon,
-.home-icon,
-.back-spacer,
-.header-spacer {
+.backIcon,
+.homeIcon,
+.backSpacer,
+.headerSpacer {
   width: var(--header-icon-size);
   height: var(--header-icon-size);
   flex-shrink: 0;
 }
 
-.back-icon {
+.backIcon {
   cursor: pointer;
   justify-self: start;
   transition: opacity var(--fast);
@@ -52,23 +52,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: none;
 }
 
-.home-icon,
-.menu-icon {
+.homeIcon,
+.menuIcon {
   cursor: pointer;
   width: var(--header-icon-size);
   height: var(--header-icon-size);
   transition: opacity var(--fast);
 }
 
-.back-icon:hover,
-.menu-icon:hover,
-.home-icon:hover {
+.backIcon:hover,
+.menuIcon:hover,
+.homeIcon:hover {
   opacity: 0.7;
 }
 
 /* 뒤로가기 버튼이 없는 경우 빈 공간 차지 */
-.back-spacer {
+.backSpacer {
   justify-self: start;
 }
