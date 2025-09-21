@@ -5,6 +5,7 @@ import { walletApi } from "../api/myWalletApi";
 import { getOrCreateIdemKey, clearIdemKey } from "../utils/idempotency";
 import styles from "../styles/pages/WalletWithdraw.module.css";
 import cardIcon from "../assets/cardIcon.svg";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 export default function WalletWithdraw() {
   const { isLoggedIn } = useAuth();
@@ -17,6 +18,15 @@ export default function WalletWithdraw() {
   //   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  //모달
+  const {
+    modalState,
+    hideModal,
+    showSuccess,
+    showError,
+    showConfirm,
+    showLoading,
+  } = useModal();
 
   // 은행 아이콘 매핑 함수
   const getBankIcon = (bankCode) => {
@@ -132,16 +142,23 @@ export default function WalletWithdraw() {
 
       if (response.status === 200 && response.data.code === 1000) {
         clearIdemKey(scope);
-        alert("전액 출금 완료");
-        navigate("/page/mypage/wallet", {
-          state: {
-            message: `${formatWon(
-              availableBalance
-            )}이 성공적으로 출금되었습니다.`,
-          },
-        });
+        // alert("전액 출금 완료");
+        showSuccess(
+          "출금 완료",
+          `${formatWon(availableBalance)}이 출금되었습니다.`,
+          () => {
+            navigate("/page/mypage/wallet", {
+              state: {
+                message: `${formatWon(availableBalance)}이 출금되었습니다.`,
+              },
+            });
+          }
+        );
       } else {
-        alert(response.data?.message || "출금에 실패했습니다.");
+        // alert(response.data?.message || "출금에 실패했습니다.");
+        showError("출금에 실패했습니다.", () => {
+          console.log("실패");
+        });
       }
     } catch (error) {
       // 에러 처리...
@@ -296,6 +313,16 @@ export default function WalletWithdraw() {
             ? "출금 중..."
             : `전액 출금 (${formatWon(availableBalance)})`}
         </button>
+        {/* 모달 컴포넌트 */}
+        <Modal
+          show={modalState.show}
+          type={modalState.type}
+          title={modalState.title}
+          message={modalState.message}
+          confirmText={modalState.confirmText}
+          onConfirm={modalState.onConfirm}
+          onClose={hideModal}
+        />
       </main>
     </div>
   );

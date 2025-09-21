@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { walletApi } from "../api/myWalletApi";
 import { getOrCreateIdemKey, clearIdemKey } from "../utils/idempotency";
 import styles from "../styles/pages/WalletCharge.module.css";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 export default function WalletCharge() {
   const { user, isLoggedIn } = useAuth();
@@ -16,6 +17,16 @@ export default function WalletCharge() {
   const [chargeAmount, setChargeAmount] = useState("");
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [isCharging, setIsCharging] = useState(false);
+
+  //모달
+  const {
+    modalState,
+    hideModal,
+    showSuccess,
+    showError,
+    showConfirm,
+    showLoading,
+  } = useModal();
 
   // 은행 아이콘 매핑 함수
   const getBankIcon = (bankCode) => {
@@ -42,7 +53,7 @@ export default function WalletCharge() {
     if (amount == null) return "0원";
     const num = typeof amount === "number" ? amount : Number(amount);
     if (Number.isNaN(num)) return "0원";
-    return new Intl.NumberFormat("ko-KR").format(num) + "원";
+    return new Intl.NumberFormat("ko-KR").format(num);
   };
 
   // 계좌번호 마스킹
@@ -132,6 +143,7 @@ export default function WalletCharge() {
 
     if (!chargeAmount || parseInt(chargeAmount) < 1000) {
       alert("충전 금액은 최소 1,000원 이상이어야 합니다.");
+      // TODO : alert 모달로 바꿔
       return;
     }
 
@@ -157,14 +169,12 @@ export default function WalletCharge() {
       if (response.status === 200 && response.data.code === 1000) {
         clearIdemKey(scope);
 
-        alert("충전 완료 - 추후에 모달로 바꿔");
-        // 성공 메시지와 함께 지갑 페이지로 이동
-        navigate("/page/mypage/wallet", {
-          state: {
-            message: `${formatWon(
-              parseInt(chargeAmount)
-            )}이 성공적으로 충전되었습니다.`,
-          },
+        showSuccess("충전 완료", `정상적으로 충전되었습니다.`, () => {
+          navigate("/page/mypage/wallet", {
+            state: {
+              message: `${formatWon(parseInt(chargeAmount))}`,
+            },
+          });
         });
       } else {
         alert(response.data?.message || "충전에 실패했습니다.");
@@ -300,7 +310,7 @@ export default function WalletCharge() {
                       />
                       <div className={styles.bankDetails}>
                         <div className={styles.bankName}>
-                          {account.bankCodes?.[0]?.korName || "은행"}
+                          {account.bankCodes?.[0]?.korName || "은행"}은행
                           {account.primary && (
                             <span className={styles.primaryBadge}>주계좌</span>
                           )}
@@ -359,6 +369,16 @@ export default function WalletCharge() {
         >
           {isCharging ? "충전 중..." : "충전하기"}
         </button>
+        {/* 모달 컴포넌트 */}
+        <Modal
+          show={modalState.show}
+          type={modalState.type}
+          title={modalState.title}
+          message={modalState.message}
+          confirmText={modalState.confirmText}
+          onConfirm={modalState.onConfirm}
+          onClose={hideModal}
+        />
       </main>
     </div>
   );
