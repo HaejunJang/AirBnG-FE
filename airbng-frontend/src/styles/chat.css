@@ -131,34 +131,40 @@
   box-shadow: none;
   margin-top: 0 !important;
   margin-inline: calc(var(--page-pad, 16px) * -1);
-  border-top: 1px solid color-mix(in oklab, var(--primary) 12%, var(--border));
-  border-bottom: 1px solid color-mix(in oklab, var(--primary) 12%, var(--border));
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
 }
-.chat-list--full .chat-item { padding: 16px var(--page-pad, 16px); gap: 14px; border-bottom: 1px solid color-mix(in oklab, var(--primary) 8%, var(--border)); }
-.chat-list--full .chat-item:last-child { border-bottom: 0; }
-.chat-list--full .chat-item__avatar { width: 48px; height: 48px; }
+.chat-list--full .chat-item { 
+  padding: 20px var(--page-pad, 16px); 
+  gap: 16px; 
+  border-bottom: 1px solid #e8e8e8;
+  transition: background-color 0.2s ease;
+}
+
+.chat-list--full .chat-item:hover { background-color: #f8f9fa; }
+.chat-list--full .chat-item__avatar { width: 52px; height: 52px; }
 
 /* 리스트 공통 */
 .chat-list {
-  background: color-mix(in oklab, var(--primary) 3%, var(--surface));
-  border: 1px solid color-mix(in oklab, var(--primary) 10%, var(--border));
-  box-shadow: var(--shadow-md);
+  background: #fff;
+  border: 0;
+  box-shadow: none;
   margin-top: 0 !important;
   overflow: hidden;
 }
 .chat-item {
   display: grid;
-  grid-template-columns: 48px 1fr auto;
+  grid-template-columns: 52px 1fr auto;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
+  gap: 16px;
+  padding: 20px 16px;
+  border-bottom: 1px solid #e8e8e8;
   cursor: pointer;
-  transition: background var(--fast), transform var(--fast);
+  transition: background-color 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
 }
-@media (hover:hover){ .chat-item:hover { background: color-mix(in oklab, var(--primary) 6%, #fff); } }
-.chat-item:active { transform: scale(.998); }
-.chat-item:last-child { border-bottom: 0; }
+@media (hover:hover){ .chat-item:hover { background: #f8f9fa; } }
+.chat-item:active { transform: none; }
 
 /* ===== StartConversation 전용 헤더 보정 ===== */
 
@@ -222,12 +228,14 @@
 /* 아바타(이미지/이니셜) */
 .chat-item__avatar,
 .chat-item__avatar-fallback {
-  width: 44px; height: 44px; border-radius: 50%;
+  width: 52px; height: 52px; border-radius: 50%;
   display: grid; place-items: center;
-  font-weight: 800;
-  background: color-mix(in oklab, var(--primary) 8%, #eef2ff);
-  color: var(--primary);
+  font-weight: 600;
+  font-size: 18px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 .chat-item__avatar img {
   width: 100%; height: 100%; object-fit: cover; display: block;
@@ -235,15 +243,32 @@
 
 /* 텍스트/메타 */
 .chat-item__main { min-width: 0; }
-.chat-item__name { font-weight: 800; color: var(--text-strong); font-size: var(--fs-16); }
-.chat-item__preview { color: color-mix(in oklab, var(--text) 70%, white); font-size: var(--fs-13); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
-.chat-item__meta { display: grid; justify-items: end; align-content: center; gap: 6px; margin-left: 8px; }
+.chat-item__name { 
+  font-weight: 600; 
+  color: #1a1a1a; 
+  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.chat-item__preview { 
+  color: #8e8e93; 
+  font-size: 14px; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  white-space: nowrap; 
+  margin-top: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text', sans-serif;
+  line-height: 1.4;
+}
+.chat-item__meta { display: grid; justify-items: end; align-content: center; gap: 8px; margin-left: 12px; }
 .chat-item__badge {
-  min-width: 22px; height: 22px; padding: 0 8px; border-radius: 999px;
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px;
   display: inline-grid; place-items: center;
-  font-size: var(--fs-12); font-weight: 700;
-  background: var(--danger); color: #fff;
-  box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 4px 10px rgba(0,0,0,.08);
+  font-size: 12px; font-weight: 600;
+  background: var(--primary); 
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0,122,255,0.3);
 }
 
 /* =============================================================
@@ -445,7 +470,7 @@
   min-width: 18px; height: 18px; padding: 0 6px; border-radius: 999px;
   display: inline-grid; place-items: center;
   font-size: 11px; font-weight: 800;
-  background: var(--danger); color: #fff;
+  background: var(--chatting); color: #fff;
   box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 4px 10px rgba(0,0,0,.08);
   margin-right: 4px;
   transform: translateY(1px);
@@ -628,9 +653,9 @@
   border-radius: 999px;
 }
 .msg-image-wrap[data-failed="true"] {
-  outline: 2px solid color-mix(in oklab, var(--danger) 90%, #000);
+  outline: 2px solid color-mix(in oklab, var(--chatting) 90%, #000);
 }
-.msg-error { color: color-mix(in oklab, var(--danger) 85%, #000); font-size: 12px; margin-top: 6px; }
+.msg-error { color: color-mix(in oklab, var(--chatting) 85%, #000); font-size: 12px; margin-top: 6px; }
 
 /* hover 살짝 확대 (포인터 있는 환경만) */
 @media (hover:hover) {
