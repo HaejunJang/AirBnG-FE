@@ -607,9 +607,14 @@ const LockerDetails = () => {
                 convId = res?.id || res?.convId || res?.data?.result?.convId;
                 // 2. 없으면 새로 생성
                 if (!convId) {
-                  const createRes = await getOrCreateConversation(lockerDetail.keeperId);
+                  const createRes = await getOrCreateConversation(
+                    lockerDetail.keeperId
+                  );
                   console.log("getOrCreateConversation result:", createRes);
-                  convId = createRes?.id || createRes?.convId || createRes?.data?.result?.convId;
+                  convId =
+                    createRes?.id ||
+                    createRes?.convId ||
+                    createRes?.data?.result?.convId;
                 }
                 // 3. 있으면 이동, 없으면 에러
                 if (convId) {
@@ -622,8 +627,11 @@ const LockerDetails = () => {
               }
             }}
             disabled={isMyLocker}
+            aria-label="채팅하기"
           >
-            채팅
+            <svg className={styles.chatIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
           </button>
         </div>
       </div>

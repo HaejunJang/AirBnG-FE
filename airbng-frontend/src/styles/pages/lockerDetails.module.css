@@ -438,22 +438,18 @@ body {
 }
 
 .chatGoBtn {
+  width: 48px;
+  height: 48px;
   flex: none;
-  min-width: 80px;
   margin-left: auto;
-  padding: 12px 0;
   background: #fff;
   color: #4561db;
-  border: 2px solid #4561db;
+  border: 2px solid #ccd4fa;
   border-radius: 12px;
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: 
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s,
-    box-shadow 0.2s;
+  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(69, 97, 219, 0.08);
   display: flex;
   align-items: center;
@@ -463,18 +459,18 @@ body {
 
 .chatGoBtn:hover,
 .chatGoBtn:focus {
-  background: #4561db;
-  color: #fff;
-  border-color: #3651c7;
+  background: rgb(211, 224, 255);
+  color: #4561db;
+  border-color: #4561db;
   box-shadow: 0 4px 16px rgba(69, 97, 219, 0.15);
   outline: none;
-  transform: translateY(-2px) scale(1.04);
+  transform: scale(1.05);
 }
 
 .chatGoBtn:active {
-  background: #3651c7;
+  background: #4561db;
   color: #fff;
-  border-color: #3651c7;
+  border-color: #4561db;
   box-shadow: 0 2px 8px rgba(69, 97, 219, 0.08);
   transform: scale(0.98);
 }
@@ -487,4 +483,14 @@ body {
   cursor: not-allowed;
   box-shadow: none;
   opacity: 0.7;
+}
+
+.chatIcon {
+  width: 22px;
+  height: 22px;
+  transition: all 0.3s ease;
+}
+
+.chatGoBtn:hover .chatIcon {
+  transform: scale(1.1);
 }
