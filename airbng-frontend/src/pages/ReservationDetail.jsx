@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import styles from "../styles/pages/ReservationDetail.module.css";
-import { getReservationDetail } from "../api/reservationApi";
-
+import {
+  getReservationDetail,
+  confirmReservationApi,
+  cancelReservationApi,
+  completeReservationApi,
+} from "../api/reservationApi";
+import Header from "../components/Header/Header";
 import { useAuth } from "../context/AuthContext";
-
 import RotateIcon from "../assets/3d-rotate.svg";
 import BoxIcon from "../assets/box.svg";
 import CalendarIcon from "../assets/calendar copy.svg";
 import ClockIcon from "../assets/clock copy.svg";
+import { Modal, useModal } from "../components/common/ModalUtil";
+import CheckIcon from "../components/reservation/CheckIcon";
 
 const ReservationDetail = () => {
   const navigate = useNavigate();
@@ -17,15 +23,14 @@ const ReservationDetail = () => {
   const urlParams = new URLSearchParams(search);
   const isFromReservation = urlParams.get("from") === "reservation"; // 예약 완료 직후인지 확인
 
-  console.log("reservationId:", typeof reservationId);
-  console.log("isFromReservation:", isFromReservation);
-
   const { user } = useAuth(); // AuthContext에서 사용자 정보 가져오기
   const memberId = user?.id; // memberId 파싱
 
   const [reservationData, setReservationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { showError, showSuccess } = useModal();
 
   // 스크롤 최상단으로 이동
   useEffect(() => {
@@ -37,13 +42,9 @@ const ReservationDetail = () => {
     try {
       setLoading(true);
       const response = await getReservationDetail(reservationId, memberId);
-      console.log("API 응답 성공:", response);
-      console.log("응답 데이터:", response.result);
-
       setReservationData(response.result);
     } catch (err) {
-      console.error("API 호출 에러 상세:", err);
-
+      console.error("예약 상세 정보 조회 실패:", err);
       setError(
         err.response?.result?.message || "예약 상세 정보를 불러올 수 없습니다."
       );
@@ -54,15 +55,7 @@ const ReservationDetail = () => {
 
   // 컴포넌트 마운트 시 API 호출
   useEffect(() => {
-    console.log("=== ReservationDetail 디버깅 ===");
-    console.log("reservationId:", reservationId);
-    console.log("memberId:", memberId);
-
     if (reservationId && memberId) {
-      console.log("API 호출할 값들:");
-      console.log("testReservationId:", reservationId);
-      console.log("testMemberId:", memberId);
-
       fetchReservationDetail(reservationId, memberId);
     }
   }, [reservationId, memberId]);
@@ -71,20 +64,7 @@ const ReservationDetail = () => {
   if (!reservationId || !memberId) {
     return (
       <div className={styles.reservationDetail}>
-        <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M19 12H5M12 19L5 12L12 5"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className={styles.title}>예약 상세</h1>
-        </div>
+        <Header headerTitle="예약 상세" showBackButton />
         <div className={styles.content}>
           <div className="error-message">
             잘못된 접근입니다. 필요한 정보가 없습니다.
@@ -98,20 +78,7 @@ const ReservationDetail = () => {
   if (loading) {
     return (
       <div className={styles.reservationDetail}>
-        <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className={styles.title}>예약 상세</h1>
-        </div>
+        <Header headerTitle="예약 상세" showBackButton />
         <div className={styles.content}>
           <div style={{ textAlign: "center", padding: "50px 0" }}>
             로딩 중...
@@ -124,20 +91,7 @@ const ReservationDetail = () => {
   if (error) {
     return (
       <div className={styles.reservationDetail}>
-        <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className={styles.title}>예약 상세</h1>
-        </div>
+        <Header headerTitle="예약 상세" showBackButton />
         <div className={styles.content}>
           <div
             style={{ textAlign: "center", padding: "50px 0", color: "#ff4444" }}
@@ -151,31 +105,18 @@ const ReservationDetail = () => {
 
   const data = reservationData?.result || reservationData;
 
-  console.log("=== 데이터 처리 단계 ===");
-  console.log("reservationData:", reservationData);
-  console.log("data:", data);
-
-  // userRole 계산: keeperId와 현재 사용자 ID 비교
-  const userRole = data?.keeperId === memberId ? "keeper" : "dropper";
-  console.log("계산된 userRole:", userRole);
+  // userRole 계산: keeperId, dropperId와 현재 사용자 ID 비교
+  const userRole =
+    data?.keeperId === memberId
+      ? "keeper"
+      : data?.dropperId === memberId
+      ? "dropper"
+      : "unknown";
 
   if (!data) {
     return (
       <div className={styles.reservationDetail}>
-        <div className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h1 className={styles.title}>예약 상세</h1>
-        </div>
+        <Header headerTitle="예약 상세" showBackButton />
         <div className={styles.content}>
           <div style={{ textAlign: "center", padding: "50px 0" }}>
             데이터가 없습니다.
@@ -247,90 +188,61 @@ const ReservationDetail = () => {
 
   const handleCancel = async () => {
     try {
-      const action = userRole === "keeper" ? "거절" : "취소";
-      console.log(action + "하기");
+      const response = await cancelReservationApi(reservationId);
+      const data = response.data;
 
-      // API 호출 예시 (실제 엔드포인트에 맞게 수정 필요)
-      // await http.put(`/AirBnG/reservations/${reservationId}/cancel`);
-      // 또는
-      // await http.put(`/AirBnG/reservations/${reservationId}/reject`);
-
-      // 성공 후 이전 페이지로 이동하거나 상태 업데이트
-      // navigate(-1);
-    } catch (err) {
-      console.error("취소/거절 에러:", err);
-      alert(err.response?.data?.message || "처리 중 오류가 발생했습니다.");
+      if (data.code === 1000) {
+        setReservationData((prevData) => ({
+          ...prevData,
+          state: data.result.state,
+        }));
+        showSuccess("예약이 취소되었습니다.", "");
+      } else {
+        showError("예약 취소 실패", data.message);
+      }
+    } catch (error) {
+      console.error("예약 취소 실패:", error);
+      showError("예약 취소 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
     }
   };
 
-  const handleConfirm = async () => {
+  // 승인/거절 핸들러
+  const handleConfirm = async (approve) => {
+    const approveStr = approve ? "승인" : "거절";
+
     try {
-      const action = userRole === "keeper" ? "승인" : "확인";
-      console.log(action);
+      const response = await confirmReservationApi(reservationId, approve);
+      const data = response.data;
 
-      // API 호출 예시 (실제 엔드포인트에 맞게 수정 필요)
-      // await http.put(`/AirBnG/reservations/${reservationId}/confirm`);
-      // 또는
-      // await http.put(`/AirBnG/reservations/${reservationId}/approve`);
-
-      // 성공 후 이전 페이지로 이동하거나 상태 업데이트
-      // navigate(-1);
-    } catch (err) {
-      console.error("확인/승인 에러:", err);
-      alert(err.response?.data?.message || "처리 중 오류가 발생했습니다.");
+      if (data.code === 1000) {
+        // 상태 업데이트: reservationData의 state를 새로운 상태로 변경
+        setReservationData((prevData) => ({
+          ...prevData,
+          state: data.result.state,
+        }));
+        showSuccess(approveStr + "되었습니다!", "");
+      } else {
+        showError(approveStr + " 실패", data.message);
+      }
+    } catch (error) {
+      console.error(`예약 ${approveStr} 실패:`, error);
+      showError(
+        approveStr + " 실패",
+        "네트워크 오류. 잠시 후 다시 시도해주세요."
+      );
     }
   };
-
-  const handleBackClick = () => {
-    navigate(-1); // 이전 페이지로 돌아가기
-  };
-
   return (
     <div className={styles.reservationDetail}>
-      <div className={styles.header}>
-        <button className={styles.backBtn} onClick={handleBackClick}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M15 18L9 12L15 6"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <h1 className={styles.title}>예약 상세</h1>
-      </div>
+      {isFromReservation && <Header headerTitle="예약 상세" showHomeButton />}
+      {!isFromReservation && <Header headerTitle="예약 상세" showBackButton />}
 
       <div className={styles.content}>
         {/* 예약 완료 메시지 (예약 직후에만 표시) */}
         {isFromReservation && (
           <div className={styles.reservationSuccess}>
             <div className={styles.successIcon}>
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 100 100"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  fill="#ffffff"
-                  stroke="#4561db"
-                  stroke-width="6"
-                />
-                <path
-                  d="M30 50l12 12 25-25"
-                  stroke="#4561db"
-                  stroke-width="6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  fill="none"
-                />
-              </svg>
+              <CheckIcon strokeWidth={6} />
             </div>
             <h2 className={styles.successTitle}>예약이 완료되었습니다!</h2>
           </div>
@@ -443,14 +355,98 @@ const ReservationDetail = () => {
           <p>* 30분안에 승인하지 않으면 자동거절됩니다.</p>
         </div>
 
-        <div className={styles.actionButtons}>
-          <button className={styles.btnCancel} onClick={handleCancel}>
-            {userRole === "keeper" ? "거절" : "취소"}
-          </button>
-          <button className={styles.btnConfirm} onClick={handleConfirm}>
-            {userRole === "keeper" ? "승인" : "확인"}
-          </button>
-        </div>
+        {/* 상태별 버튼 렌더링 */}
+        {(() => {
+          const reservationState = data.state || data.result?.state;
+
+          if (reservationState === "PENDING") {
+            // PENDING 상태: keeper는 거절/승인, dropper는 취소
+            return (
+              <div
+                className={styles.actionButtons}
+                style={
+                  userRole === "dropper" ? { justifyContent: "center" } : {}
+                }
+              >
+                {userRole === "keeper" ? (
+                  <>
+                    <button
+                      className={styles.btnCancel}
+                      onClick={() => handleConfirm(false)}
+                    >
+                      거절
+                    </button>
+                    <button
+                      className={styles.btnConfirm}
+                      onClick={() => handleConfirm(true)}
+                    >
+                      승인
+                    </button>
+                  </>
+                ) : userRole === "dropper" ? (
+                  <button
+                    className={styles.btnCancel}
+                    onClick={handleCancel}
+                    style={{ width: "100%" }}
+                  >
+                    취소
+                  </button>
+                ) : null}
+              </div>
+            );
+          } else if (reservationState === "CANCELLED") {
+            // CANCELLED 상태: keeper는 예약이 취소됐어요, dropper는 예약취소완료
+            return (
+              <div
+                className={styles.actionButtons}
+                style={{ justifyContent: "center" }}
+              >
+                <button
+                  className={styles.btnDisabled}
+                  disabled
+                  style={{ width: "100%" }}
+                >
+                  {userRole === "keeper" ? "예약이 취소됐어요" : "예약취소완료"}
+                </button>
+              </div>
+            );
+          } else if (reservationState === "CONFIRMED") {
+            // CONFIRMED 상태: keeper는 예약승인완료, dropper는 예약이 승인됐어요
+            return (
+              <div
+                className={styles.actionButtons}
+                style={{ justifyContent: "center" }}
+              >
+                <button
+                  className={styles.btnDisabled}
+                  disabled
+                  style={{ width: "100%" }}
+                >
+                  {userRole === "keeper" ? "예약승인완료" : "예약이 승인됐어요"}
+                </button>
+              </div>
+            );
+          } else if (reservationState === "REJECTED") {
+            // REJECTED 상태: keeper는 예약반려완료, dropper는 예약이 반려됐어요
+            return (
+              <div
+                className={styles.actionButtons}
+                style={{ justifyContent: "center" }}
+              >
+                <button
+                  className={styles.btnDisabled}
+                  disabled
+                  style={{ width: "100%" }}
+                >
+                  {userRole === "keeper" ? "예약반려완료" : "예약이 반려됐어요"}
+                </button>
+              </div>
+            );
+          }
+
+          // 기본 상태 (알 수 없는 상태)
+          return null;
+        })()}
       </div>
     </div>
   );

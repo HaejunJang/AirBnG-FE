@@ -11,7 +11,7 @@ const LockerItem = ({ locker, isSelected, onClick }) => {
     const handleButtonClick = (e) => {
         if (isSelected) {
             e.stopPropagation();
-            navigate(`/page/lockerDetails?lockerId=${encodeURIComponent(locker.lockerId)}`);
+            navigate(`/page/lockers/${locker.lockerId}`);
         }
     };
 

@@ -69,7 +69,7 @@
 
 /* 지갑 카드 */
 .walletCard {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   border-radius: 20px;
   padding: 25px 25px 20px 25px; /* 아래 패딩 조정 */
   margin-bottom: 20px;
