@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { registerLocker } from '../api/lockerApi';
 import { getJimTypes } from '../api/jimTypeApi';
+import { useModal } from '../components/common/ModalUtil';
 
 export default function useLockerRegisterForm({ keeperId }) {
-  // step
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
 
@@ -15,11 +15,10 @@ export default function useLockerRegisterForm({ keeperId }) {
   const [latitude, setLat] = useState(null);
   const [longitude, setLng] = useState(null);
   const [images, setImages] = useState([]);
-  const [startTime, setStartTime] = useState('08:00'); // UI용 (서버 아직 미사용)
-  const [endTime, setEndTime] = useState('21:00');     // UI용 (서버 아직 미사용)
-
-  // 짐 타입 (서버에 존재하는 고정 5개 id에 맞춰 초기화)
+  const [startTime, setStartTime] = useState('08:00');
+  const [endTime, setEndTime] = useState('21:00');
   const [jim, setJim] = useState([]);
+  const modal = useModal();
 
   useEffect(() => {
     (async () => {
@@ -53,11 +52,11 @@ export default function useLockerRegisterForm({ keeperId }) {
 
   const submit = useCallback(async () => {
     if (!keeperId) {
-      alert('로그인이 필요합니다. (keeperId 누락)');
+      modal.showError('로그인 필요', '로그인이 필요합니다. (keeperId 누락)');
       return { ok: false };
     }
     if (!jim.some(j => j.selected)) {
-      alert('최소 하나 이상의 짐 타입을 선택해주세요.');
+      modal.showError('선택 필요', '최소 하나 이상의 짐 타입을 선택해주세요.');
       return { ok: false };
     }
 
@@ -79,7 +78,7 @@ export default function useLockerRegisterForm({ keeperId }) {
       return { ok: true };
     } catch (e) {
       console.error(e);
-      alert(e?.response?.data?.message || '등록 중 오류가 발생했습니다.');
+      modal.showError('등록 오류', e?.response?.data?.message || '등록 중 오류가 발생했습니다.');
       return { ok: false };
     } finally {
       setSubmitting(false);

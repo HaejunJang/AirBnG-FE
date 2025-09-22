@@ -26,6 +26,7 @@ const ReservationDetail = () => {
   const { user } = useAuth(); // AuthContext에서 사용자 정보 가져오기
   const memberId = user?.id; // memberId 파싱
 
+  console.log("memberId:", memberId);
   const [reservationData, setReservationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -358,8 +359,11 @@ const ReservationDetail = () => {
         {/* 상태별 버튼 렌더링 */}
         {(() => {
           const reservationState = data.state || data.result?.state;
+          console.log("예약 상태:", reservationState);
+          console.log("data: ", data);
 
           if (reservationState === "PENDING") {
+            console.log("userRole:", userRole);
             // PENDING 상태: keeper는 거절/승인, dropper는 취소
             return (
               <div

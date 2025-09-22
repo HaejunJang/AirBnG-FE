@@ -11,7 +11,9 @@ import {
   toggleLockerActivation,
   deleteLocker,
 } from "../api/lockerApi";
+import { Modal, useModal } from "../components/common/ModalUtil";
 import "../styles/pages/locker.css";
+import "../styles/pages/manage.css";
 
 const unbox = (res) => res?.data?.result ?? res?.data?.data ?? res?.data;
 
@@ -21,6 +23,7 @@ export default function LockerRootPage() {
   const [hasLocker, setHasLocker] = useState(false);
   const [locker, setLocker] = useState(null);
   const navigate = useNavigate();
+  const modal = useModal();
 
   const load = useCallback(async () => {
     try {
@@ -63,20 +66,39 @@ export default function LockerRootPage() {
 
   const handleToggle = useCallback(async () => {
     if (!locker?.lockerId) return;
-    const ok = window.confirm(
-      locker.isAvailable === "YES" ? "정말 중지하겠습니까?" : "보관소를 재개하시겠습니까?"
+    modal.showConfirm(
+      locker.isAvailable === "YES" ? "중지 확인" : "재개 확인",
+      locker.isAvailable === "YES"
+        ? "정말 중지하겠습니까?"
+        : "보관소를 재개하시겠습니까?",
+      async () => {
+        await toggleLockerActivation(locker.lockerId);
+        await load();
+        modal.showSuccess(
+          locker.isAvailable === "YES" ? "중지 완료" : "재개 완료",
+          locker.isAvailable === "YES"
+            ? "보관소가 중지되었습니다."
+            : "보관소가 재개되었습니다."
+        );
+      }
     );
-    if (!ok) return;
-    await toggleLockerActivation(locker.lockerId);
-    await load();
-  }, [locker, load]);
+  }, [locker, load, modal]);
 
   const handleDelete = useCallback(async () => {
     if (!locker?.lockerId) return;
-    if (!window.confirm("정말 삭제하시겠습니까? 삭제된 정보는 복구할 수 없습니다.")) return;
-    await deleteLocker(locker.lockerId);
-    await load();
-  }, [locker, load]);
+    modal.showConfirm(
+      "삭제 확인",
+      "정말 삭제하시겠습니까? 삭제된 정보는 복구할 수 없습니다.",
+      async () => {
+        await deleteLocker(locker.lockerId);
+        await load();
+        modal.showSuccess(
+          "삭제 완료",
+          "보관소가 삭제되었습니다."
+        );
+      }
+    );
+  }, [locker, load, modal]);
 
   if (!ready) return null;
   if (!isLoggedIn) return <LockerWelcome />;
@@ -93,13 +115,14 @@ export default function LockerRootPage() {
               onManage={handleManage}
               onDetail={handleDetail}
               onToggle={handleToggle}
-              onDelete={handleDelete} // 현재 없음 - 나중에 추가
+              onDelete={handleDelete}
             />
           ) : (
             <EmptyLockerCTA onRegister={() => navigate("/page/lockers/register")} />
           )}
         </main>
       </div>
+      <Modal {...modal.modalState} onClose={modal.hideModal} />
     </div>
   );
 }

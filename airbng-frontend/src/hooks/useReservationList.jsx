@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { getReservationList, deleteReservationApi, cancelReservationApi} from "../api/reservationApi";
+import { getReservationList, deleteReservationApi, cancelReservationApi } from "../api/reservationApi";
+import { useModal } from "../components/common/ModalUtil";
 
 const periodOptions = ["1W", "3M", "6M", "1Y", "2Y", "ALL"];
 
@@ -13,6 +14,7 @@ const useReservationList = (memberId) => {
     const [reservations, setReservations] = useState([]);
     const [showEmpty, setShowEmpty] = useState(false);
     const [backendMessage, setBackendMessage] = useState("");
+    const modal = useModal();
 
     //예약 가져오기
     const fetchReservations = useCallback(
@@ -104,11 +106,11 @@ const useReservationList = (memberId) => {
      const cancelReservation = async (navigate, reservationId, memberId) => {
         try {
             await cancelReservationApi(reservationId, memberId);
-            alert("예약이 취소되었습니다.");
-            navigate("/reservations");
+            modal.showSuccess("예약 취소 완료", "예약이 취소되었습니다.", () => {
+                navigate("/reservations");
+            });
         } catch (err) {
-            console.error("예약 취소 실패:", err);
-            alert("예약 취소에 실패했습니다.");
+            modal.showError("예약 취소 실패", "예약 취소에 실패했습니다.");
         }
     };
 
