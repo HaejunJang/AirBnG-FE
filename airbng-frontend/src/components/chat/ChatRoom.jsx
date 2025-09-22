@@ -7,6 +7,7 @@ import useChatRoom from '../../hooks/useChatRoom';
 import useStomp from '../../hooks/useStomp';
 import usePersonalQueues from '../../hooks/usePersonalQueues';
 import usePeer from '../../hooks/usePeer';
+import { decideReservation } from '../../api/chatApi';
 import { markRead as markReadApi, uploadAttachment } from '../../api/chatApi'; // ← 추가
 import { decorateWithDividers } from '../../utils/chatDate';
 import '../../styles/chat.css';
@@ -251,6 +252,16 @@ export default function ChatRoom({ convId, meId }) {
     }
   }, [convId, meId, pushLocal, applyAck]);
 
+  // ====== 예약 승인/거절 핸들러 ======
+  const approveReservation = useCallback(async (reservationId) => {
+    await decideReservation({ convId, reservationId, approve: true });
+    // 서버가 시스템 메시지 브로드캐스트 해주므로 추가 전송 불필요
+  }, [convId]);
+
+  const rejectReservation = useCallback(async (reservationId, reason) => {
+    await decideReservation({ convId, reservationId, approve: false, reason });
+  }, [convId]);
+
   return (
     <section className="chat-room">
       <header className="chat-room__header">
@@ -300,6 +311,8 @@ export default function ChatRoom({ convId, meId }) {
               presenceSettled={presenceSettled}
               convId={convId}
               meId={meId}
+              onApproveReservation={(reservationId) => approveReservation(reservationId)}
+              onRejectReservation={(reservationId, reason) => rejectReservation(reservationId, reason)}
             />
           );
         })}

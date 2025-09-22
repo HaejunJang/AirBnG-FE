@@ -90,12 +90,12 @@ export const sendTextByRest = async (convId, { text, msgId }) => {
   return unwrap(res); // Message
 };
 
-export const decideReservation = (convId, reservationId, approve, reason) => {
-  return httpAuth.post(
-    `/chat/conversations/${convId}/messages/reservation/${reservationId}/decision`,
-    { approve, reason }
-  );
-};
+export async function decideReservation({ convId, reservationId, approve, reason }) {
+  const url = `/chat/conversations/${encodeURIComponent(convId)}/messages/reservation/${reservationId}/decision`;
+  const body = { approve, ...(approve ? {} : { reason }) }; // 거절일 때만 reason 포함
+  const { data } = await httpAuth.post(url, body);
+  return data; // BaseResponse<MessageDto>
+}
 
 /* ===== Attachments ===== */
 export const uploadAttachment = async (convId, file, { kind = 'image', msgId }) => {

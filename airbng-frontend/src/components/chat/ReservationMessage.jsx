@@ -1,11 +1,20 @@
 import React, { memo, useMemo, useState, useEffect } from 'react';
+import RejectReasonModal from './RejectReasonModal';
 
 function parseLocalDateTime(v) {
   if (!v) return null;
   if (typeof v === 'number') return new Date(v);
   if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+
+  // 배열([y, M, d, hh, mm, ss, nano]) 케이스 흡수
+  if (Array.isArray(v) && (v.length >= 3)) {
+    const [y, M, d, hh = 0, mm = 0, ss = 0] = v.map(Number);
+    // JS Date의 month는 0-based
+    return new Date(y, (M - 1), d, hh, mm, ss);
+  }
+
   const s = String(v).trim();
-  const m1 = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+  const m1 = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?(?:\.(\d{1,9}))?$/);
   if (m1) {
     let [_, y, M, d, hh, mm, ss] = m1;
     return new Date(+y, +M - 1, +d, +hh, +mm, +(ss || 0));
@@ -24,6 +33,7 @@ const fmtTime = new Intl.DateTimeFormat('ko-KR', {
 export default memo(function ReservationMessage({ me, card, canAct, onApprove, onReject }) {
   const [acted, setActed] = useState(false);
   const [pending, setPending] = useState(false);
+  const [openReject, setOpenReject] = useState(false);
 
   const isDone = /^(approved|rejected|denied|completed|cancelled)$/i.test(card?.status || '');
   useEffect(() => { if (isDone) setActed(true); }, [isDone]);
@@ -61,10 +71,14 @@ export default memo(function ReservationMessage({ me, card, canAct, onApprove, o
     setPending(true); setActed(true);
     try { await onApprove?.(); } catch { setActed(false); } finally { setPending(false); }
   };
-  const handleReject = async () => {
+
+  const handleRejectClick = () => setOpenReject(true);
+
+  const submitReject = async (reason) => {
+    setOpenReject(false);
     if (pending) return;
     setPending(true); setActed(true);
-    try { await onReject?.(); } catch { setActed(false); } finally { setPending(false); }
+    try { await onReject?.(reason); } catch { setActed(false); } finally { setPending(false); }
   };
 
   return (
@@ -86,10 +100,15 @@ export default memo(function ReservationMessage({ me, card, canAct, onApprove, o
 
       {showActions && (
         <div className="rc__actions">
-          <button className="btn btn--outline" onClick={handleReject} disabled={pending}>거절</button>
+          <button className="btn btn--outline" onClick={handleRejectClick} disabled={pending}>거절</button>
           <button className="btn btn--primary" onClick={handleApprove} disabled={pending}>승인</button>
         </div>
       )}
+      <RejectReasonModal
+        open={openReject}
+        onClose={() => setOpenReject(false)}
+        onSubmit={submitReject}
+      />
     </div>
   );
 });

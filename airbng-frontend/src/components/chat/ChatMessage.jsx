@@ -1,6 +1,7 @@
 import React, { useMemo, memo } from 'react';
 import ReservationMessage from './ReservationMessage';
-import { decideReservation } from '../../api/chatApi';
+// decideReservation 직접 쓰지 말고, 부모 콜백 우선 (없으면 fallback)
+import { decideReservation as decideReservationApi } from '../../api/chatApi';
 
 function AttachmentView({ a, pending, failed }) {
   const isImage = a?.kind === 'image' || /^image\//.test(a?.mime || '');
@@ -33,18 +34,15 @@ function ChatMessage({
   me, msg, name, showName, avatarUrl,
   peerLastReadSeq, peerInRoom, presenceSettled,
   convId, meId,
+  onApproveReservation, onRejectReservation, // 부모 콜백(있으면 사용)
 }) {
+  // Hook은 최상단에서, 모든 렌더에서 항상 호출
   const seoulTimeFmt = useMemo(
     () => new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' }),
     []
   );
 
-  // const ms = typeof msg?.sentAtMs === 'number'
-  //   ? msg.sentAtMs
-  //   : (msg?.sentAt ? Date.parse(msg.sentAt) : Date.now());
-  // const timeLabel = seoulTimeFmt.format(new Date(ms));
-
-  // sentAtMs(숫자) > sentAt(파싱 성공) > 지금 시각 순으로 안전하게 선택
+  // 시간 레이블 안전 계산
   const pickMs = (m) => {
     if (Number.isFinite(m?.sentAtMs)) return m.sentAtMs;
     if (m?.sentAt) {
@@ -55,18 +53,14 @@ function ChatMessage({
   };
   const ms = pickMs(msg);
   let timeLabel = '';
-  try {
-    timeLabel = seoulTimeFmt.format(new Date(ms));
-  } catch {
-    // 혹시 모를 예외 대비: 현재 시각으로 대체
-    timeLabel = seoulTimeFmt.format(new Date());
-  }
+  try { timeLabel = seoulTimeFmt.format(new Date(ms)); }
+  catch { timeLabel = seoulTimeFmt.format(new Date()); }
 
+  // 읽음 배지 표시 로직
   const msgSeq  = Number(msg?.seq);
   const peerSeq = Number(peerLastReadSeq);
   const hasSeq = Number.isFinite(msgSeq);
   const peerHasSeq = Number.isFinite(peerSeq);
-
   const showUnreadBadge =
     me === true &&
     !msg?._pending &&
@@ -77,18 +71,30 @@ function ChatMessage({
   const initial = (name || '상').slice(0, 1);
   const text = msg?.text ?? '';
 
+  // ===== 본문(body) 생성 - 단일 분기 =====
   let body;
   if (msg?.type === 'reservation' && msg?.reservation) {
     const card = msg.reservation;
-    const onApprove = () => decideReservation(convId, card.reservationId, true).catch(console.error);
-    const onReject  = () => decideReservation(convId, card.reservationId, false).catch(console.error);
-    // 드로퍼가 카드 메시지를 보냄 → 내가 드로퍼가 아니고(canApprove=true)면 키퍼로 판단
+
+    // 부모 콜백이 오면 그걸 쓰고, 없으면 API로 fallback
+    const onApprove = () =>
+      onApproveReservation
+        ? onApproveReservation(card.reservationId)
+        : decideReservationApi({ convId, reservationId: card.reservationId, approve: true }).catch(console.error);
+
+    const onReject = (reason) =>
+      onRejectReservation
+        ? onRejectReservation(card.reservationId, reason)
+        : decideReservationApi({ convId, reservationId: card.reservationId, approve: false, reason }).catch(console.error);
+
+    // 버튼 노출 여부: 서버 페이로드가 최종 판단
     const canAct = !!card?.canApprove && Number(meId) !== Number(msg?.senderId);
+
     body = (
       <ReservationMessage
         me={me}
         card={card}
-        canAct={canAct}       
+        canAct={canAct}
         onApprove={onApprove}
         onReject={onReject}
       />
@@ -101,6 +107,7 @@ function ChatMessage({
     body = text;
   }
 
+  // ===== 렌더 =====
   if (me) {
     return (
       <div className="msg-row msg-row--me" data-read={showUnreadBadge ? 'n' : 'y'}>
