@@ -24,8 +24,13 @@ import ChatRoomPage from "./pages/ChatRoomPage";
 import LockerDetailsPage from "./pages/LockerDetailsPage";
 import Notification from "./pages/notification";
 import { SSEProvider } from "./context/SseContext";
-import { getUserProfile } from './utils/jwtUtil';
+import { getUserProfile } from "./utils/jwtUtil";
 import MyInfoPage from "./pages/MyInfoPage";
+import MyWallet from "./pages/MyWallet";
+import AccountRegister from "./pages/AccountRegister";
+import MyWalletCharge from "./pages/MyWalletCharge";
+import MyWalletWithdraw from "./pages/MyWalletWithdraw";
+import MyWalletHistory from "./pages/MyWalletHistory";
 
 function App() {
   useEffect(() => {
@@ -66,11 +71,19 @@ function App() {
           <Route path="/page/lockerSearch" element={<SearchFilterPage />} />
           <Route path="/page/lockers" element={<LockerRootPage />} />
           <Route path="/page/lockers/manage" element={<LockerManagePage />} />
-          <Route path="/page/lockers/register" element={<LockerRegisterPage />} />
+          <Route
+            path="/page/lockers/register"
+            element={<LockerRegisterPage />}
+          />
+
+          <Route
+            path="/page/lockers/:lockerId"
+            element={<LockerDetailsPage />}
+          />
           <Route path="/page/lockerDetails" element={<LockerDetailsPage />} />
           <Route path="/page/reservations/list" element={<ReservationList />} />
           <Route
-            path="/page/reservations/detail/:id"
+            path="/page/reservations/detail/:reservationId"
             element={<ReservationDetail />}
           />
           <Route
@@ -86,6 +99,25 @@ function App() {
           <Route path="/page/mypage/update" element={<MyInfoPage />} />
           <Route path="/page/notification" element={<Notification />} />
 
+          <Route path="/page/mypage/update" element={<MyInfoPage />} />
+
+          <Route path="/page/mypage/wallet" element={<MyWallet />} />
+          <Route
+            path="/page/mypage/account/add"
+            element={<AccountRegister />}
+          />
+          <Route
+            path="/page/mypage/wallet/charge"
+            element={<MyWalletCharge />}
+          />
+          <Route
+            path="/page/mypage/wallet/withdraw"
+            element={<MyWalletWithdraw />}
+          />
+          <Route
+            path="/page/mypage/wallet/history"
+            element={<MyWalletHistory />}
+          />
           <Route path="/page/mypage/update" element={<MyInfoPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}

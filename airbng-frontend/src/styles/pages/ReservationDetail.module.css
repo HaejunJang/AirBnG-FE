@@ -1,0 +1,271 @@
+.reservationDetail {
+  max-width: 412px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  min-height: 100vh;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  z-index: 100;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  margin-right: 12px;
+  cursor: pointer;
+  color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backBtn:hover {
+  color: #5463ff;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  margin-right: 40px; /* Back button width compensation */
+}
+
+.content {
+  padding: 20px;
+}
+
+/* Reservation Success Section */
+.reservationSuccess {
+  text-align: center;
+  padding: 40px 20px 60px 20px;
+  margin-bottom: 24px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.successIcon {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.successTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #4561db;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Locker Info Section */
+.lockerInfo {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.lockerImage {
+  width: 86px;
+  height: 86px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-right: 16px;
+  background-color: #f8f8f8;
+}
+
+.lockerDetails {
+  flex: 1;
+}
+
+.lockerName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0 0 4px 0;
+}
+
+.lockerAddress {
+  font-size: 14px;
+  color: #666666;
+  margin: 0;
+}
+
+/* Reservation Sections */
+.reservationSection {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0 0 12px 0;
+}
+
+.sectionContent {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #333333;
+}
+
+.sectionIcon {
+  color: #666666;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.jimTypes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jimTypeItem {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #333333;
+}
+
+.jimTypeItem .sectionIcon {
+  margin-right: 8px;
+}
+
+/* Price Calculation Section */
+.priceCalculation {
+  background-color: #f6f7fe;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.priceItem {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.priceDivider {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 0.5rem 0;
+}
+
+.priceTotal {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Notice */
+.notice {
+  margin-bottom: 32px;
+  margin-left: 0;
+}
+
+.notice p {
+  font-size: 12px;
+  color: #4561db;
+  margin: 5px 0 0 3px;
+  text-align: left;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 412px;
+  width: 100%;
+  padding: 16px 20px 20px 20px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  border-top: 1px solid #f0f0f0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btnCancel,
+.btnConfirm {
+  width: 50%;
+  height: 52px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnCancel {
+  background-color: rgba(69, 97, 219, 0.1);
+  color: #4561db;
+  border: 1px solid rgba(69, 97, 219, 0.2);
+}
+
+.btnCancel:hover {
+  background-color: rgba(69, 97, 219, 0.15);
+}
+
+.btnConfirm {
+  background-color: #4561db;
+  color: #ffffff;
+}
+
+.btnConfirm:hover {
+  background-color: #3d52c4;
+}
+
+.btnConfirm:active,
+.btnCancel:active {
+  transform: translateY(1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 412px) {
+  .reservationDetail {
+    max-width: 100%;
+  }
+
+  .header {
+    padding: 16px 16px;
+  }
+
+  .content {
+    padding: 16px;
+    padding-bottom: 100px; /* 버튼 공간 확보 */
+  }
+
+  .actionButtons {
+    width: 100%;
+    padding: 16px 16px 20px 16px;
+  }
+}

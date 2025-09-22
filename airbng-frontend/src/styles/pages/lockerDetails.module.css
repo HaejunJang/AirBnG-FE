@@ -1,694 +1,438 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
+    Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",
+    "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    sans-serif;
 }
 
 body {
-    background-color: #f5f5f5;
-    color: #333;
+  background-color: #f5f5f5;
+  color: #333;
 }
 
 .container {
-    max-width: 412px;
-    margin: 0 auto;
-    background-color: white;
-    min-height: 100vh;
-    position: relative;
-    padding-top: 60px;
+  max-width: 412px;
+  margin: 0 auto;
+  background-color: white;
+  min-height: 100vh;
+  position: relative;
+  padding-top: 60px;
 }
 
 /* 헤더 스타일 */
 .header {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 412px;
-    height: 60px;
-    background-color: white;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    border-bottom: 1px solid #eee;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 412px;
+  height: 60px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid #eee;
+  z-index: 1000;
 }
 
 .backButton {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 8px;
-    margin-right: 16px;
-    color: #333;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 16px;
+  color: #333;
 }
 
 .header {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 412px;
-    height: 60px;
-    background-color: white;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    border-bottom: 1px solid #eee;
-    z-index: 1000;
-    position: relative; /* 추가 */
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 412px;
+  height: 60px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid #eee;
+  z-index: 1000;
+  position: relative; /* 추가 */
 }
 
 .headerTitle {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
 }
 
 .backButton {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 8px;
-    color: #333;
-    z-index: 1; /* 제목보다 앞에 오도록 */
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  color: #333;
+  z-index: 1; /* 제목보다 앞에 오도록 */
 }
 
 .content {
-    display: flex;
-    flex-direction: column;
-    padding: 20px 24px;
-    background: #FFF;
-    padding-bottom: 120px; /* 하단 버튼 영역 확보 */
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px;
+  background: #fff;
+  padding-bottom: 120px; /* 하단 버튼 영역 확보 */
 }
 
 .lockerTitle {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: #333;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #333;
 }
 
 /* 이미지 슬라이더 스타일 */
 .imageSliderContainer {
-    width: 100%;
-    margin-bottom: 30px;
-    position: relative;
+  width: 100%;
+  margin-bottom: 30px;
+  position: relative;
 }
 
 .imageSlider {
-    position: relative;
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-    border-radius: 12px;
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 .imageTrack {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.3s ease-in-out;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease-in-out;
 }
 
 .imageSlide {
-    width: 100%;
-    height: 100%;
-    flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
 }
 
 .sliderImage {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    cursor: pointer;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
 }
 
 .sliderBtn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 10;
-    color: #333;
-    transition: all 0.2s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  color: #333;
+  transition: all 0.2s ease;
 }
 
 .sliderBtn:hover {
-    background: white;
-    transform: translateY(-50%) scale(1.1);
+  background: white;
+  transform: translateY(-50%) scale(1.1);
 }
 
 .sliderBtn.prev {
-    left: 12px;
+  left: 12px;
 }
 
 .sliderBtn.next {
-    right: 12px;
+  right: 12px;
 }
 
 /* 이미지 인디케이터 - 사진 하단 중앙에 작게 위치 */
 .sliderIndicators {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    justify-content: center;
-    gap: 6px;
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  gap: 6px;
 }
 
 .indicator {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.6);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .indicator.active {
-    background: white;
-    transform: scale(1.3);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  background: white;
+  transform: scale(1.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* 가격 섹션 스타일 */
 .priceSection {
-    margin-bottom: 20px;
-    margin-top: 20px;
+  margin-bottom: 20px;
+  margin-top: 20px;
 }
 
 .priceTitle {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
 }
 
 .priceItems {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .priceItemRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .priceItemRow:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .priceType {
-    font-size: 16px;
-    font-weight: 500;
-    color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
 }
 
 .priceAmount {
-    font-size: 16px;
-    font-weight: 600;
-    color: #4561DB;
+  font-size: 16px;
+  font-weight: 600;
+  color: #4561db;
 }
 
 /* 정보 섹션 스타일 - 한줄로 표시 */
 .infoSection {
-    background: #f8f9fa;
-    border-radius: 12px;
-    padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
 }
 
 .infoRow {
-    display: flex;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e9ecef;
 }
 
 .infoRow:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .infoItem {
-    display: flex;
-    align-items: center;
-    width: 100%;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
 .infoIcon {
-    font-size: 18px;
-    margin-right: 12px;
-    flex-shrink: 0;
+  font-size: 18px;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
 .infoContent {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
 }
 
 .infoLabel {
-    font-size: 14px;
-    font-weight: 500;
-    color: #666;
-    min-width: 60px;
-    flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  min-width: 60px;
+  flex-shrink: 0;
 }
 
 .infoValue {
-    font-size: 15px;
-    font-weight: 500;
-    color: #333;
-    line-height: 1.4;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.4;
 }
 
 /* 하단 버튼 섹션 */
 .bottomSection {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 412px;
-    background: white;
-    border-top: 1px solid #eee;
-    z-index: 100;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 412px;
+  background: white;
+  border-top: 1px solid #eee;
+  z-index: 100;
 }
 
 .bottomButtons {
-    padding: 16px 24px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
+  padding: 16px 24px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 /* 찜 버튼 스타일 */
 .zzimBtn {
-    width: 48px;
-    height: 48px;
-    border: 2px solid #ddd;
-    border-radius: 12px;
-    background: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-    position: relative;
+  width: 48px;
+  height: 48px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  position: relative;
 }
 
 .zzimBtn:hover {
-    border-color: #ff6b6b;
-    background-color: #fff5f5;
-    transform: scale(1.05);
+  border-color: #ff6b6b;
+  background-color: #fff5f5;
+  transform: scale(1.05);
 }
 
 .zzimBtn.active {
-    border-color: #ff6b6b;
-    background-color: #fff5f5;
+  border-color: #ff6b6b;
+  background-color: #fff5f5;
 }
 
 .zzimBtn.loading {
-    pointer-events: none;
-    opacity: 0.7;
+  pointer-events: none;
+  opacity: 0.7;
 }
 
 .heartIcon {
-    width: 24px;
-    height: 24px;
-    transition: all 0.3s ease;
+  width: 24px;
+  height: 24px;
+  transition: all 0.3s ease;
 }
 
 .zzimBtn:hover .heartIcon {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 .zzimBtn.active .heartIcon {
-    animation: heartBeat 0.6s ease-in-out;
+  animation: heartBeat 0.6s ease-in-out;
+}
+
+.zzimBtn.disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  border: 2px solid #ddd;
+}
+
+.zzimBtn.disabled .heartIcon {
+  stroke: #ccc !important;
+  fill: none !important;
 }
 
 /* 찜 버튼 로딩 애니메이션 */
 .zzimLoader {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #ff6b6b;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #ff6b6b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes heartBeat {
-    0% { transform: scale(1); }
-    25% { transform: scale(1.2); }
-    50% { transform: scale(1); }
-    75% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .reserveBtn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    background: #4561DB;
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #4561db;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .reserveBtn:hover {
-    background-color: #3651C7;
+  background-color: #3651c7;
 }
 
 .reserveBtn.disabled {
-    background-color: #cccccc;
-    color: #666666;
-    cursor: not-allowed;
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
 }
 
 .reserveBtn.disabled:hover {
-    background-color: #cccccc;
-}
-
-/* 이미지 모달 스타일 */
-.imageModalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-}
-
-.imageModalContent {
-    position: relative;
-    width: 90%;
-    max-width: 500px;
-    height: 80%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.modalCloseBtn {
-    position: absolute;
-    top: -40px;
-    right: 0;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 2001;
-    padding: 8px;
-}
-
-.modalImageContainer {
-    position: relative;
-    width: 100%;
-    height: calc(100% - 50px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modalImage {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-}
-
-.modalSliderBtn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-    z-index: 2001;
-    color: #333;
-    transition: all 0.2s ease;
-}
-
-.modalSliderBtn:hover {
-    background: white;
-    transform: translateY(-50%) scale(1.1);
-}
-
-.modalSliderBtn.prev {
-    left: 16px;
-}
-
-.modalSliderBtn.next {
-    right: 16px;
-}
-
-.modalIndicators {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 20px;
-}
-
-.modalIndicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.modalIndicator.active {
-    background: white;
-    transform: scale(1.2);
-}
-
-/* 로딩 및 에러 상태 */
-.loading {
-    text-align: center;
-    padding: 40px;
-    font-size: 16px;
-    color: #666;
-}
-
-.error {
-    text-align: center;
-    padding: 40px;
-    color: #ff5722;
-    font-size: 16px;
-}
-
-
-/* 로그인 모달 스타일 */
-.centerModalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.centerModalContent {
-    background-color: #fff;
-    border-radius: 16px;
-    padding: 32px 24px 24px;
-    max-width: 300px;
-    width: 85%;
-    text-align: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    animation: modalFadeIn 0.3s ease-out;
-}
-
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.modalIcon {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-}
-
-.iconCircle {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-color: #FFF3CD;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.questionMark {
-    font-size: 28px;
-    font-weight: bold;
-    color: #F0AD4E;
-}
-
-.modalTitle {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 12px;
-    line-height: 1.4;
-}
-
-.modalDescription {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 24px;
-    line-height: 1.5;
-}
-
-.centerModalButtons {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-}
-
-.cancelBtn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background-color: #fff;
-    color: #666;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    min-width: 80px;
-}
-
-.cancelBtn:hover {
-    background-color: #f8f9fa;
-    border-color: #bbb;
-}
-
-.confirmBtn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    background-color: #4561DB;
-    color: #fff;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    min-width: 80px;
-}
-
-.confirmBtn:hover {
-    background-color: #3651C7;
-}
-
-/* 반응형 */
-@media (max-width: 480px) {
-    .imageSlider {
-        height: 180px;
-    }
-
-    .modalSliderBtn {
-        width: 36px;
-        height: 36px;
-        font-size: 16px;
-    }
-
-    .modalSliderBtn.prev {
-        left: 8px;
-    }
-
-    .modalSliderBtn.next {
-        right: 8px;
-    }
-
-    .zzimBtn {
-        width: 44px;
-        height: 44px;
-    }
-
-    .heartIcon {
-        width: 20px;
-        height: 20px;
-    }
-
-    .centerModalContent {
-        max-width: 280px;
-        padding: 28px 20px 20px;
-    }
-
-    .iconCircle {
-        width: 50px;
-        height: 50px;
-    }
-
-    .questionMark {
-        font-size: 24px;
-    }
-
-
+  background-color: #cccccc;
 }

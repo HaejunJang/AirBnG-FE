@@ -26,9 +26,9 @@ export const getStatusText = (state) => {
 
 //예약 상세 보기
 export const goToReservationDetail = (navigate, reservationId, memberId) => {
-    navigate(`/reservations/${reservationId}/members/${memberId}/detail`,{
-        state: { reservationId, memberId }
-    });
+  navigate(`/page/reservations/detail/${reservationId}`, {
+    state: { reservationId, memberId },
+  });
 };
 
 //다시 예약

@@ -1,0 +1,10 @@
+:root {
+    --app-max-width: 100%;
+    --header-height: 70px;
+}
+
+body {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+}

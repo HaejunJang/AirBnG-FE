@@ -30,7 +30,7 @@
 }
 
 .reservation-detail__back-btn:hover {
-  color: #5463FF;
+  color: #5463ff;
 }
 
 .reservation-detail__title {
@@ -45,6 +45,38 @@
 
 .reservation-detail__content {
   padding: 20px;
+}
+
+/* Reservation Success Section */
+.reservation-success {
+  text-align: center;
+  padding: 40px 20px 32px 20px;
+  margin-bottom: 24px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.success-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #4561db;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.success-message {
+  font-size: 14px;
+  color: #666666;
+  margin: 0;
 }
 
 /* Locker Info Section */
@@ -125,6 +157,15 @@
 }
 
 /* Pricing Section */
+.price-calculation {
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .pricing-section {
   background-color: rgba(69, 97, 219, 0.05); /* #4561DB 5% */
   border-radius: 8px;
@@ -179,7 +220,7 @@
 .pricing-total-value {
   font-size: 18px;
   font-weight: 700;
-  color: #4561DB; /* #5463FF에서 #4561DB로 변경 */
+  color: #4561db; /* #5463FF에서 #4561DB로 변경 */
 }
 
 /* Notice - pricing-section 왼쪽 끝과 맞춤 */
@@ -190,66 +231,62 @@
 
 .notice p {
   font-size: 12px;
-  color: #4561DB; /* #999999에서 #4561DB로 변경 */
-  margin: 0;
+  color: #4561db; /* #999999에서 #4561DB로 변경 */
+  margin: 5px 0 0 3px;
   text-align: left; /* center에서 left로 변경 */
 }
 /* Action Buttons */
 .action-buttons {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
   gap: 12px;
   position: fixed;
-  bottom: 54px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   max-width: 412px;
   width: 100%;
+  padding: 16px 20px 20px 20px;
   box-sizing: border-box;
   background-color: #ffffff;
+  border-top: 1px solid #f0f0f0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-cancel,
 .btn-confirm {
-  display: flex;
-  width: 180px;
-  height: 54px;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
+  width: 50%;
+  height: 52px;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-cancel {
-  background-color: rgba(69, 97, 219, 0.15); /* #4561DB 15% */
-  color: #4561DB; /* #4561DB 100% */
+  background-color: rgba(69, 97, 219, 0.1);
+  color: #4561db;
+  border: 1px solid rgba(69, 97, 219, 0.2);
 }
 
 .btn-cancel:hover {
-  background-color: rgba(69, 97, 219, 0.25);
+  background-color: rgba(69, 97, 219, 0.15);
 }
 
 .btn-confirm {
-  background-color: #4561DB; /* #5463FF에서 #4561DB로 변경 */
+  background-color: #4561db;
   color: #ffffff;
 }
 
 .btn-confirm:hover {
-  background-color: #3d52c4; /* hover색도 조정 */
+  background-color: #3d52c4;
 }
 
-.btn-confirm:active {
-  transform: translateY(1px);
-}
-
+.btn-confirm:active,
 .btn-cancel:active {
   transform: translateY(1px);
 }
@@ -259,63 +296,23 @@
   .reservation-detail {
     max-width: 100%;
   }
-  
+
   .reservation-detail__header {
     padding: 16px 16px;
   }
-  
+
   .reservation-detail__content {
     padding: 16px;
+    padding-bottom: 100px; /* 버튼 공간 확보 */
   }
-  
-  .action-buttons {
-    padding: 0 0 20px 0;
-  }
-  
-  .pricing-section {
-    width: 100%; /* 반응형에서는 전체 너비 사용 */
-    max-width: 375px;
-  }
-}
 
-/* Dark mode support (optional) */
-@media (prefers-color-scheme: dark) {
-  .reservation-detail {
-    background-color: #1a1a1a;
-    color: #ffffff;
+  .action-buttons {
+    width: 100%;
+    padding: 16px 16px 20px 16px;
   }
-  
-  .reservation-detail__header {
-    background-color: #1a1a1a;
-    border-bottom-color: #333333;
-  }
-  
-  .reservation-detail__title,
-  .locker-info__name,
-  .section-title {
-    color: #ffffff;
-  }
-  
-  .locker-info__address,
-  .pricing-label,
-  .section-icon {
-    color: #cccccc;
-  }
-  
+
   .pricing-section {
-    background-color: #2a2a2a;
-  }
-  
-  .pricing-total {
-    border-top-color: #444444;
-  }
-  
-  .btn-cancel {
-    background-color: #333333;
-    color: #cccccc;
-  }
-  
-  .btn-cancel:hover {
-    background-color: #444444;
+    width: 100%;
+    max-width: 375px;
   }
 }
