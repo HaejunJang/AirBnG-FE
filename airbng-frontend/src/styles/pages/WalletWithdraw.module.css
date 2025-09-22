@@ -387,7 +387,7 @@
   transform: none;
 }
 .walletCard {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   border-radius: 20px;
   padding: 25px;
   margin-bottom: 20px;

@@ -57,7 +57,7 @@ const MyInfoPage = () => {
       return;
     }
 
-   // 사용자 정보 로드 (loadUserInfo 의존성 제거)
+    // 사용자 정보 로드 (loadUserInfo 의존성 제거)
     loadUserInfo(user.id);
   }, [isLoggedIn, user?.id, showLogin]);
 
@@ -102,7 +102,11 @@ const MyInfoPage = () => {
 
   return (
     <div className={info.pageContainer}>
-      <Header headerTitle="내 정보 수정" showBackButton />
+      <Header
+        headerTitle="내 정보 수정"
+        showBackButton
+        backUrl="/page/mypage"
+      />
 
       <div className={info.editProfileContainer}>
         <div className={info.editProfileHeader}>

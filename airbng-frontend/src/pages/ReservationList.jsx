@@ -212,6 +212,9 @@ const ReservationList = () => {
               activeMoreMenu={activeMoreMenu}
               toggleMoreMenu={toggleMoreMenu}
               onShowConfirmModal={handleShowConfirmModal}
+              onShowSuccess={showSuccess}
+              onShowError={showError}
+              onShowConfirm={showConfirm}
               navigate={navigate}
             />
           ))}
