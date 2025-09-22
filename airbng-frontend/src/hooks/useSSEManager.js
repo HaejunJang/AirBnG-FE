@@ -16,6 +16,8 @@ export const useSSEManager = (memberId) => {
     const isInitializedRef = useRef(false);
     const connectionTimeoutRef = useRef(null); // 연결 타임아웃 추가
 
+    const processedEventIdsRef = useRef(new Set());
+
     // memberId 자동 감지
     const profile = getUserProfile();
     const resolvedMemberId = memberId || profile?.id || null;
@@ -144,31 +146,43 @@ export const useSSEManager = (memberId) => {
             });
 
             eventSourceRef.current.addEventListener('alarm', (event) => {
-                const eventId = Number(event.lastEventId || event.id || 0);
+                const eventId = event.lastEventId || event.id;
+                if (!eventId) return;
+
+                // 중복 체크
+                if (processedEventIdsRef.current.has(eventId)) {
+                    console.log('[SSE Hook] 중복 알림 무시:', eventId);
+                    return;
+                }
+
+                // 처리 완료 후 저장
+                processedEventIdsRef.current.add(eventId);
 
                 let alarmData;
                 try {
                     alarmData = JSON.parse(event.data);
                 } catch (e) {
                     console.error('[SSE Hook] 알림 파싱 오류:', e, 'Raw data:', event.data);
-                    // fallback: 깨진 경우 그냥 문자열로
                     alarmData = { message: event.data };
                 }
 
                 console.log('[SSE Hook] 알림 수신:', alarmData);
                 handleAlarmEvent(alarmData);
+
                 showNotification(
                     'AirBnG 알림',
                     alarmData.message || '새 알림이 도착했습니다.',
-                    { tag: `alarm-${alarmData.id || eventId || Date.now()}` }
+                    { tag: `alarm-${eventId}` } // tag도 eventId 기준으로 고정
                 );
 
-                // 마지막 처리 ID 갱신
-                if (!isNaN(eventId) && eventId > (lastProcessedRef.current || 0)) {
-                    lastProcessedRef.current = eventId;
-                    localStorage.setItem(lastProcessedKey, String(eventId));
+                // lastProcessed 갱신 (숫자형 ID인 경우)
+                const numericId = Number(eventId);
+                if (!isNaN(numericId) && numericId > (lastProcessedRef.current || 0)) {
+                    lastProcessedRef.current = numericId;
+                    localStorage.setItem(lastProcessedKey, String(numericId));
                 }
             });
+
 
             eventSourceRef.current.onopen = () => {
                 console.log('[SSE Hook] HTTP 연결 열림 (아직 서버 준비 대기중)');
