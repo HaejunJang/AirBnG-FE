@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { Modal, useModal } from '../../components/common/ModalUtil'; // ModalUtil import
 import styles from '../../styles/admin/pages/AdminLoginPage.module.css';
 
 const COOLDOWN_KEY = 'adminLoginCooldownUntil';
@@ -15,6 +16,16 @@ export default function AdminLoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    // ModalUtil 훅 사용
+    const {
+        modalState,
+        hideModal,
+        showSuccess,
+        showError,
+        showWarning,
+        showInfo,
+    } = useModal();
+
     const redirect = useMemo(() => {
         const sp = new URLSearchParams(location.search);
         return sp.get('redirect') || '/admin/home';
@@ -25,19 +36,6 @@ export default function AdminLoginPage() {
     const [submitting, setSubmitting] = useState(false);
     const [cooldownUntil, setCooldownUntil] = useState(0);
     const [countdown, setCountdown] = useState(0);
-
-    const [modal, setModal] = useState({
-        open: false,
-        type: 'info',
-        title: '',
-        message: '',
-        onConfirm: null,
-    });
-
-    const showModal = (type, title, message, onConfirm = null) =>
-        setModal({ open: true, type, title, message, onConfirm });
-    const closeModal = () =>
-        setModal({ open: false, type: 'info', title: '', message: '', onConfirm: null });
 
     useEffect(() => {
         const saved = Number(sessionStorage.getItem(cdKeyFor(email)) || 0);
@@ -74,7 +72,7 @@ export default function AdminLoginPage() {
         if (submitting || cooldownUntil) return;
 
         if (!email.trim() || !password.trim()) {
-            showModal('error', '로그인 실패', '이메일/비밀번호를 확인해주세요.');
+            showError('로그인 실패', '이메일/비밀번호를 확인해주세요.');
             return;
         }
 
@@ -84,8 +82,7 @@ export default function AdminLoginPage() {
 
             if (r?.ok) {
                 resetFailCount();
-                showModal('info', '로그인 성공', '관리자로 로그인되었습니다.', () => {
-                    closeModal();
+                showSuccess('로그인 성공', '관리자로 로그인되었습니다.', () => {
                     navigate(redirect, { replace: true });
                 });
                 return;
@@ -94,7 +91,7 @@ export default function AdminLoginPage() {
             if (r?.status === 429 || r?.code === 8003) {
                 const sec = Number(r?.retryAfter || DEFAULT_COOLDOWN);
                 startCooldown(sec);
-                showModal('warning', '요청이 너무 많습니다', `${sec}초 후 다시 시도해주세요.`);
+                showWarning('요청이 너무 많습니다', `${sec}초 후 다시 시도해주세요.`);
                 return;
             }
 
@@ -103,16 +100,16 @@ export default function AdminLoginPage() {
             if (next >= MAX_ATTEMPTS) {
                 startCooldown(DEFAULT_COOLDOWN);
                 setFailCount(0);
-                showModal('warning', '로그인 제한', `${DEFAULT_COOLDOWN}초 후 재시도 가능해요.`);
+                showWarning('로그인 제한', `${DEFAULT_COOLDOWN}초 후 재시도 가능해요.`);
             } else {
-                showModal('error', '로그인 실패', `이메일/비밀번호를 확인해주세요. (${next}/${MAX_ATTEMPTS})`);
+                showError('로그인 실패', `이메일/비밀번호를 확인해주세요. (${next}/${MAX_ATTEMPTS})`);
             }
         } catch {
-            showModal('error', '오류', '로그인 처리 중 문제가 발생했습니다. 다시 시도해주세요.');
+            showError('오류', '로그인 처리 중 문제가 발생했습니다. 다시 시도해주세요.');
         } finally {
             setSubmitting(false);
         }
-    }, [email, password, submitting, cooldownUntil, adminLogin, navigate, redirect, startCooldown]);
+    }, [email, password, submitting, cooldownUntil, adminLogin, navigate, redirect, startCooldown, showSuccess, showError, showWarning]);
 
     const disabled = submitting || cooldownUntil > 0;
 
@@ -164,30 +161,19 @@ export default function AdminLoginPage() {
                 </div>
             </div>
 
-            {/* 모달 */}
-            {modal.open && (
-                <div className={styles.modalOverlay} onClick={closeModal}>
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h3>{modal.title}</h3>
-                        </div>
-                        <div className={`${styles.modalBody} ${styles[modal.type]}`}>
-                            <p>{modal.message}</p>
-                        </div>
-                        <div className={styles.modalFooter}>
-                            <button
-                                className={styles.modalButton}
-                                onClick={() => {
-                                    if (modal.onConfirm) modal.onConfirm();
-                                    else closeModal();
-                                }}
-                            >
-                                확인
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* ModalUtil 컴포넌트 사용 */}
+            <Modal
+                show={modalState.show}
+                type={modalState.type}
+                title={modalState.title}
+                message={modalState.message}
+                confirmText={modalState.confirmText}
+                cancelText={modalState.cancelText}
+                showCancel={modalState.showCancel}
+                onConfirm={modalState.onConfirm}
+                onCancel={modalState.onCancel}
+                onClose={hideModal}
+            />
         </main>
     );
 }
