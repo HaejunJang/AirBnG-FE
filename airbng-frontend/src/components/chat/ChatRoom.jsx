@@ -11,6 +11,7 @@ import { decideReservation } from '../../api/chatApi';
 import { markRead as markReadApi, uploadAttachment } from '../../api/chatApi'; // ← 추가
 import { decorateWithDividers } from '../../utils/chatDate';
 import '../../styles/chat.css';
+import arrowLeft from '../../assets/arrow-left.svg';
 
 const PEER_ACTIVE_WINDOW_MS = 8000;
 const PRESENCE_PING_MS = 20000;
@@ -265,7 +266,9 @@ export default function ChatRoom({ convId, meId }) {
   return (
     <section className="chat-room">
       <header className="chat-room__header">
-        <button className="chat-room__back" onClick={() => nav(-1)} aria-label="뒤로">‹</button>
+        <button className="chat-room__back" onClick={() => nav(-1)} aria-label="뒤로">
+          <img src={arrowLeft} alt="뒤로" />
+        </button>
         <div className="chat-room__title">{displayName}</div>
         <div className="chat-room__more" />
       </header>

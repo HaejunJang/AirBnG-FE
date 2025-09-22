@@ -202,7 +202,6 @@
   display: grid;
   place-items: center;
   color: var(--text);
-  margin-top: -10px;
 }
 .chat-room__back:hover {
   background: color-mix(in oklab, var(--primary) 10%, #eef2ff);
@@ -426,7 +425,7 @@
 
 .bubble--you,
 .bubble--me {
-  text-align: center;            /* center → left */
+  text-align: left;            /* center → left */
   min-width: 56px;
   max-width: min(var(--bubble-max), 80vw);
 }

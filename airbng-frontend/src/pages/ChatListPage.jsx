@@ -11,9 +11,6 @@ export default function ChatListPage() {
       <div className="container">
         <Header 
           headerTitle="채팅"
-          showBackButton={true}
-          showHomeButton={true}
-          homeUrl="/"
         />
         <main className="main-content">
           {!ready ? (
