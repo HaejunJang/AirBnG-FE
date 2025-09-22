@@ -113,8 +113,42 @@ function ReservationFormPage() {
 
   // 충전 페이지로 이동
   const navigateToCharge = () => {
+    // 현재 상태 저장
+    const reservationState = {
+      selectedDateRange,
+      selectedStartTime,
+      selectedEndTime,
+      jimTypeCounts,
+      selectedPaymentMethod: selectedPaymentMethod?.id,
+      lockerId,
+    };
+    sessionStorage.setItem(
+      "reservationState",
+      JSON.stringify(reservationState)
+    );
     navigate("/page/mypage/wallet/charge");
   };
+
+  // useEffect 추가 (기존 useEffect들과 함께)
+  useEffect(() => {
+    // 저장된 상태 복원
+    const savedState = sessionStorage.getItem("reservationState");
+    if (savedState) {
+      const parsedState = JSON.parse(savedState);
+      setSelectedDateRange(parsedState.selectedDateRange);
+      setSelectedStartTime(parsedState.selectedStartTime);
+      setSelectedEndTime(parsedState.selectedEndTime);
+      setJimTypeCounts(parsedState.jimTypeCounts);
+      if (parsedState.selectedPaymentMethod) {
+        const method = paymentMethods.find(
+          (m) => m.id === parsedState.selectedPaymentMethod
+        );
+        setSelectedPaymentMethod(method || null);
+      }
+      // 상태 복원 후 삭제
+      sessionStorage.removeItem("reservationState");
+    }
+  }, []);
 
   // 사용자가 결과에 영향을 주는 값들을 수정 -> 직전 스코프 키 폐기
   useEffect(() => {

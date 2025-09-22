@@ -104,9 +104,15 @@ export default function WalletCharge() {
     }
   }, [isLoggedIn, fetchWalletData, navigate]);
 
-  // 뒤로가기
+  // 뒤로가기 처리
   const handleBack = () => {
-    navigate(-1);
+    // 예약 상태가 저장되어 있는 경우 예약 페이지로 돌아감
+    const hasReservationState = sessionStorage.getItem("reservationState");
+    if (hasReservationState) {
+      navigate(-1);
+    } else {
+      navigate("/page/mypage/wallet");
+    }
   };
 
   // 충전 금액 입력
@@ -171,13 +177,19 @@ export default function WalletCharge() {
 
       if (response.status === 200 && response.data.code === 1000) {
         clearIdemKey(scope);
+        // 예약 상태 확인 후 네비게이션 분기처리
+        const hasReservationState = sessionStorage.getItem("reservationState");
 
         showSuccess("충전 완료", `정상적으로 충전되었습니다.`, () => {
-          navigate("/page/mypage/wallet", {
-            state: {
-              message: `${formatWon(parseInt(chargeAmount))}`,
-            },
-          });
+          if (hasReservationState) {
+            navigate(-1); // 예약 페이지로 돌아가기
+          } else {
+            navigate("/page/mypage/wallet", {
+              state: {
+                message: `${formatWon(parseInt(chargeAmount))}`,
+              },
+            });
+          }
         });
       } else {
         showError(
