@@ -13,6 +13,7 @@ import {
 } from "../../utils/reservation/reservationUtils";
 import logoImg from "../../assets/favicon.svg";
 import { cancelReservationApi } from "../../api/reservationApi";
+import { useModal, Modal } from "../common/ModalUtil";
 
 const ReservationCard = ({
   reservation,
@@ -26,6 +27,7 @@ const ReservationCard = ({
   onShowConfirm,
 }) => {
   const navigate = useNavigate();
+  const modal = useModal();
   const jimTypes = getJimTypesText(reservation.jimTypeResults);
 
   // 예약 취소 처리 함수
@@ -35,42 +37,34 @@ const ReservationCard = ({
       const data = response.data;
 
       if (data.code === 1000) {
-        if (onShowSuccess) {
-          onShowSuccess(
-            "예약 취소 완료",
-            "예약이 성공적으로 취소되었습니다.",
-            () => {
-              window.location.reload(); // 새로고침
-            }
-          );
-        }
+        modal.showSuccess(
+          "예약 취소 완료",
+          "예약이 성공적으로 취소되었습니다.",
+          () => {
+            window.location.reload();
+          }
+        );
       } else {
-        if (onShowError) {
-          onShowError("예약 취소 실패", data.message, () => {
-            window.location.reload(); // 실패해도 새로고침
-          });
-        }
+        modal.showError("예약 취소 실패", data.message, () => {
+          window.location.reload();
+        });
       }
     } catch (error) {
       console.error("예약 취소 실패:", error);
-      if (onShowError) {
-        onShowError("예약 취소 실패", "네트워크 오류가 발생했습니다.", () => {
-          window.location.reload(); // 오류시에도 새로고침
-        });
-      }
+      modal.showError("예약 취소 실패", "네트워크 오류가 발생했습니다.", () => {
+        window.location.reload();
+      });
     }
   };
 
   // 예약 취소 확인 모달 표시
   const showCancelConfirm = (reservationId) => {
-    if (onShowConfirm) {
-      onShowConfirm(
-        "예약 취소",
-        "정말로 예약을 취소하시겠습니까?",
-        () => handleCancelReservation(reservationId), // 확인시 취소 API 호출
-        () => {} // 취소시 아무것도 안함
-      );
-    }
+    modal.showConfirm(
+      "예약 취소",
+      "정말로 예약을 취소하시겠습니까?",
+      () => handleCancelReservation(reservationId),
+      () => {}
+    );
   };
 
   const renderActionButtons = () => {
@@ -92,7 +86,13 @@ const ReservationCard = ({
         <div className="completed-actions">
           <button
             className="btn rebook-btn"
-            onClick={() => reBooking(navigate, reservation.lockerId || 1)}
+            onClick={() => {
+              if (!reservation.lockerId) {
+                modal.showError("예약 불가", "보관소 정보가 없어 다시 예약할 수 없습니다.");
+                return;
+              }
+              reBooking(navigate, reservation.lockerId);
+            }}
           >
             다시 예약
           </button>
@@ -202,7 +202,7 @@ const ReservationCard = ({
               className="btn rebook-btn"
               onClick={() => {
                 if (!reservation.lockerId) {
-                  alert("보관소 정보가 없어 다시 예약할 수 없습니다.");
+                  modal.showError("예약 불가", "보관소 정보가 없어 다시 예약할 수 없습니다.");
                   return;
                 }
                 reBooking(navigate, reservation.lockerId);
@@ -323,7 +323,12 @@ const ReservationCard = ({
     );
   }
 
-  return cardContent;
+  return (
+    <>
+      {cardContent}
+      <Modal {...modal.modalState} onClose={modal.hideModal} />
+    </>
+  );
 };
 
 export default ReservationCard;

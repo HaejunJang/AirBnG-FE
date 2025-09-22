@@ -436,3 +436,61 @@ body {
 .reserveBtn.disabled:hover {
   background-color: #cccccc;
 }
+
+.chatGoBtn {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  margin-left: auto;
+  background: #fff;
+  color: #4561db;
+  border: 2px solid #ccd4fa;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(69, 97, 219, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.chatGoBtn:hover,
+.chatGoBtn:focus {
+  background: rgb(211, 224, 255);
+  color: #4561db;
+  border-color: #4561db;
+  box-shadow: 0 4px 16px rgba(69, 97, 219, 0.15);
+  outline: none;
+  transform: scale(1.05);
+}
+
+.chatGoBtn:active {
+  background: #4561db;
+  color: #fff;
+  border-color: #4561db;
+  box-shadow: 0 2px 8px rgba(69, 97, 219, 0.08);
+  transform: scale(0.98);
+}
+
+.chatGoBtn[disabled],
+.chatGoBtn.disabled {
+  background: #f5f5f5;
+  color: #bbb;
+  border-color: #eee;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.chatIcon {
+  width: 22px;
+  height: 22px;
+  transition: all 0.3s ease;
+}
+
+.chatGoBtn:hover .chatIcon {
+  transform: scale(1.1);
+}

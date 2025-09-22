@@ -5,10 +5,12 @@ import ManageForm from '../components/locker/manage/ManageForm';
 import useLockerManageForm from '../hooks/useLockerManageForm';
 import { toggleLockerActivation, deleteLocker } from '../api/lockerApi';
 import '../styles/pages/manage.css';
+import { Modal, useModal } from '../components/common/ModalUtil';
 
 export default function LockerManagePage({ initial = null }) {
   const navigate = useNavigate();
   const { search } = useLocation();
+  const modal = useModal();
 
   const qId = new URLSearchParams(search).get('lockerId');
   const lockerId = initial?.lockerId ?? qId;
@@ -47,36 +49,56 @@ export default function LockerManagePage({ initial = null }) {
           replaceMode={replaceMode} setReplaceMode={setReplaceMode}
           onSubmit={async () => {
             await submit();
-            alert('보관소 정보가 수정되었습니다.');
-            navigate('/page/lockers');
+            modal.showSuccess(
+              "수정 완료",
+              "보관소 정보가 수정되었습니다.",
+              () => navigate('/page/lockers')
+            );
           }}
         />
 
         <div className="locker-action-buttons">
           <button
             className={`toggle-btn ${isActive ? 'btn-stop' : 'btn-restart'}`}
-            onClick={async () => {
-              const msg = isActive ? '정말 중지하겠습니까?' : '보관소를 재개하시겠습니까?';
-              if (window.confirm(msg)) {
-                await toggleLockerActivation(currentId);
-                await reload();
-              }
+            onClick={() => {
+              modal.showConfirm(
+                isActive ? '중지 확인' : '재개 확인',
+                isActive ? '정말 중지하겠습니까?' : '보관소를 재개하시겠습니까?',
+                async () => {
+                  await toggleLockerActivation(currentId);
+                  await reload();
+                  modal.showSuccess(
+                    isActive ? '중지 완료' : '재개 완료',
+                    isActive ? '보관소가 중지되었습니다.' : '보관소가 재개되었습니다.'
+                  );
+                }
+              );
             }}>
             {isActive ? '보관소 중지' : '보관소 재개'}
           </button>
 
           <button
             className="delete-locker-btn"
-            onClick={async () => {
-              if (window.confirm('정말 삭제하시겠습니까? 삭제된 정보는 복구할 수 없습니다.')) {
-                await deleteLocker(currentId);
-                navigate('/page/lockers');
-              }
+            onClick={() => {
+              modal.showConfirm(
+                '삭제 확인',
+                '정말 삭제하시겠습니까? 삭제된 정보는 복구할 수 없습니다.',
+                async () => {
+                  await deleteLocker(currentId);
+                  modal.showSuccess(
+                    '삭제 완료',
+                    '보관소가 삭제되었습니다.',
+                    () => navigate('/page/lockers')
+                  );
+                }
+              );
             }}>
             보관소 삭제
           </button>
         </div>
       </div>
+      {/* 모달 컴포넌트 추가 */}
+      <Modal {...modal.modalState} onClose={modal.hideModal} />
     </main>
   );
 }
