@@ -117,14 +117,14 @@ export default function WalletWithdraw() {
   // 출금하기
   const handleWithdraw = async () => {
     if (!selectedAccount) {
-      alert("출금할 계좌를 선택해주세요.");
+      showError("출금할 계좌를 선택해주세요.");
       return;
     }
 
     const availableBalance = walletData?.balance || 0;
 
     if (availableBalance === 0) {
-      alert("출금 가능한 금액이 없습니다.");
+      showError("출금 가능한 금액이 없습니다.");
       return;
     }
 

@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Modal, useModal } from '../common/ModalUtil';
 
 export default function RejectReasonModal({ open, onClose, onSubmit }) {
   const [reason, setReason] = useState('');
+  const modal = useModal();
+
   useEffect(() => { if (open) setReason(''); }, [open]);
   if (!open) return null;
 
   const submit = () => {
     const v = reason.trim();
-    if (!v) return alert('거절 사유를 입력해주세요.');
+    if (!v) {
+      modal.showError('입력 필요', '거절 사유를 입력해주세요.');
+      return;
+    }
     onSubmit?.(v);
   };
 
@@ -17,11 +23,10 @@ export default function RejectReasonModal({ open, onClose, onSubmit }) {
     if (e.key === 'Escape') onClose?.();
   };
 
-  const modal = (
+  const modalContent = (
     <div
       className="rj-backdrop"
       onClick={(e) => {
-        // 배경 자체를 클릭했을 때만 닫기 (자식 클릭 버블링 보호)
         if (e.target === e.currentTarget) onClose?.();
       }}
     >
@@ -41,7 +46,9 @@ export default function RejectReasonModal({ open, onClose, onSubmit }) {
           <button className="btn btn--danger" onClick={submit}>거절 확정</button>
         </div>
       </div>
+      {/* 모달 에러 메시지 */}
+      <Modal {...modal.modalState} onClose={modal.hideModal} />
     </div>
   );
-  return createPortal(modal, document.body);
+  return createPortal(modalContent, document.body);
 }

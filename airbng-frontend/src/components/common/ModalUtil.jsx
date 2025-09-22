@@ -46,7 +46,6 @@ const Modal = ({
     if (show) {
       document.addEventListener("keydown", handleEscKey);
     }
-
     return () => {
       document.removeEventListener("keydown", handleEscKey);
     };
@@ -103,7 +102,12 @@ const Modal = ({
   }
 
   return (
-    <div className="modal-util-overlay">
+    <div
+      className="modal-util-overlay"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClose) onClose();
+      }}
+    >
       <div className="modal-util">
         <div className="modal-util-content">
           {type === "loading" ? (

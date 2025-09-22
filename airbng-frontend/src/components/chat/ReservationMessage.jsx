@@ -35,7 +35,7 @@ export default memo(function ReservationMessage({ me, card, canAct, onApprove, o
   const [pending, setPending] = useState(false);
   const [openReject, setOpenReject] = useState(false);
 
-  const isDone = /^(approved|rejected|denied|completed|cancelled)$/i.test(card?.status || '');
+  const isDone = /^(confirmed|rejected|completed|cancelled)$/i.test(card?.status || '');
   useEffect(() => { if (isDone) setActed(true); }, [isDone]);
 
   // 다양한 키 지원
@@ -77,7 +77,8 @@ export default memo(function ReservationMessage({ me, card, canAct, onApprove, o
   const submitReject = async (reason) => {
     setOpenReject(false);
     if (pending) return;
-    setPending(true); setActed(true);
+    setPending(true);
+    setActed(true); 
     try { await onReject?.(reason); } catch { setActed(false); } finally { setPending(false); }
   };
 
@@ -98,7 +99,7 @@ export default memo(function ReservationMessage({ me, card, canAct, onApprove, o
         <div className="rc__row"><span className="rc__label">픽업</span><span className="rc__val">{pickupLabel}</span></div>
       </section>
 
-      {showActions && (
+      {showActions && !acted && (
         <div className="rc__actions">
           <button className="btn btn--outline" onClick={handleRejectClick} disabled={pending}>거절</button>
           <button className="btn btn--primary" onClick={handleApprove} disabled={pending}>승인</button>
