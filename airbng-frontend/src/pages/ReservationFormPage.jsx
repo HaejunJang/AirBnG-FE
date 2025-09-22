@@ -8,6 +8,7 @@ import tossIcon from "../../src/assets/toss_icon.png";
 import airbngIcon from "../../src/assets/favicon.svg";
 import { useAuth } from "../context/AuthContext";
 import { getOrCreateIdemKey, clearIdemKey } from "../utils/idempotency";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 function useQueryParam(name) {
   const { search } = useLocation();
@@ -47,17 +48,9 @@ function ReservationFormPage() {
     startTime: false,
     endTime: false,
   });
-  const [modal, setModal] = useState({
-    show: false,
-    type: "",
-    title: "",
-    message: "",
-    callback: null,
-  });
   const [startTimeOptions, setStartTimeOptions] = useState([]);
   const [endTimeOptions, setEndTimeOptions] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(""); // 결제 수단 상태 추가
-  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
 
   const paymentMethods = [
     { id: "jimpay", name: "짐페이머니", icon: airbngIcon, method: "WALLET" },
@@ -65,6 +58,14 @@ function ReservationFormPage() {
   ];
 
   const { user } = useAuth();
+  const {
+    modalState,
+    showSuccess,
+    showError,
+    showWarning,
+    showLoading,
+    hideModal,
+  } = useModal();
   const memberId = user?.id;
 
   // 최근 제출 시도의 스코프/시도 여부 기억
@@ -109,31 +110,6 @@ function ReservationFormPage() {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
     return m > 0 ? `${h}시간 ${m}분` : `${h}시간`;
-  };
-
-  // Modal 유틸리티
-  const ModalUtils = {
-    showSuccess: (message, title = "", callback = null) => {
-      setModal({ show: true, type: "success", title, message, callback });
-    },
-    showError: (message, title = "", callback = null) => {
-      setModal({ show: true, type: "error", title, message, callback });
-    },
-    showWarning: (message, title = "", callback = null) => {
-      setModal({ show: true, type: "warning", title, message, callback });
-    },
-    showLoading: (message = "처리 중...", title = "") => {
-      setModal({ show: true, type: "loading", title, message, callback: null });
-    },
-    hideModal: () => {
-      setModal({
-        show: false,
-        type: "",
-        title: "",
-        message: "",
-        callback: null,
-      });
-    },
   };
 
   // 초기 데이터 로드
@@ -562,7 +538,7 @@ function ReservationFormPage() {
     if (!validateForm()) return;
 
     // 로딩 모달 표시
-    ModalUtils.showLoading("결제 처리 중입니다...", "잠시만 기다려주세요");
+    await showLoading("결제 처리 중입니다...", "잠시만 기다려주세요", 500);
 
     const startDateStr = dateArray[selectedDateRange.startDate];
     const endDateStr = dateArray[selectedDateRange.endDate];
@@ -590,57 +566,52 @@ function ReservationFormPage() {
     attemptedRef.current = true; // 제출 시도됨
 
     // 1초 대기 후 API 호출
-    setTimeout(() => {
-      postReservation(requestData, getOrCreateIdemKey(idemScope))
-        .then((data) => {
-          if (data.code === 4000) {
-            // 로딩 모달 숨기고 바로 성공 모달 표시
-            ModalUtils.showSuccess("예약이 완료되었습니다!", "", () => {
+    postReservation(requestData, getOrCreateIdemKey(idemScope))
+      .then((data) => {
+        if (data.code === 4000) {
+          // 로딩 모달 숨기고 바로 성공 모달 표시
+          showSuccess("예약이 완료되었습니다!", "", () => {
+            done(idemScope);
+            const reservationId = data.result?.reservationId || 0;
+            if (reservationId === 0) {
+              navigate("/page/home");
+            } else {
+              sessionStorage.setItem("lockerId", lockerId);
+              navigate(
+                "/page/reservations/detail/" +
+                  reservationId +
+                  "?from=reservation"
+              );
+            }
+          });
+        } else if (data.code === 3005) {
+          showWarning("이용 불가", "보관소가 비활성화 되었습니다.", () => {
+            done(idemScope);
+            navigate(-1);
+          });
+        } else if (data.code === 9002) {
+          showError(
+            "예약 실패",
+            "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
+            () => {
+              // TODO : 로그인 후 돌아왔을 때, 선택 내역 남겨두기
               done(idemScope);
-              const reservationId = data.result?.reservationId || 0;
-              if (reservationId === 0) {
-                navigate("/page/home");
-              } else {
-                sessionStorage.setItem("lockerId", lockerId);
-                navigate("/page/reservation?reservationId=" + reservationId);
-              }
-            });
-          } else if (data.code === 3005) {
-            ModalUtils.showWarning(
-              "보관소가 비활성화 되었습니다.",
-              "이용 불가",
-              () => {
-                done(idemScope);
-                navigate(-1);
-              }
-            );
-          } else if (data.code === 9002) {
-            ModalUtils.showError(
-              "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
-              "예약 실패",
-              () => {
-                // TODO : 로그인 후 돌아왔을 때, 선택 내역 남겨두기
-                done(idemScope);
-                navigate("/page/login");
-              }
-            );
-          } else {
-            ModalUtils.showError(data.message, "예약 실패", () => {
-              console.log(data);
-              // TODO: 실패 시 멱등키 유지 → 사용자가 다시 시도하면 같은 키로 재전송
-
-              // navigate(-1);
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("API 요청 실패:", error);
-          ModalUtils.showError(
-            "네트워크 오류. 잠시 후 다시 시도해주세요.",
-            "예약 실패"
+              navigate("/page/login");
+            }
           );
-        });
-    }, 500); // 500ms 대기
+        } else {
+          showError("예약 실패", data.message, () => {
+            console.log(data);
+            // TODO: 실패 시 멱등키 유지 → 사용자가 다시 시도하면 같은 키로 재전송
+
+            // navigate(-1);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("API 요청 실패:", error);
+        showError("예약 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
+      });
   };
 
   // 날짜 렌더링
@@ -919,7 +890,11 @@ function ReservationFormPage() {
                 onClick={() => selectPaymentMethod(method.id)}
               >
                 <div className="payment-method-content">
-                  <img className="payment-method-icon" src={method.icon} />
+                  <img
+                    className="payment-method-icon"
+                    src={method.icon}
+                    alt={method.name}
+                  />
                   <div className="payment-method-name">{method.name}</div>
                   <div className="payment-method-radio">
                     <div
@@ -976,40 +951,19 @@ function ReservationFormPage() {
         </button>
       </div>
 
-      {/* 모달 */}
-      {modal.show && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            {modal.type === "loading" ? (
-              <>
-                <div className="loading-spinner"></div>
-                <h3 className="modal-title">{modal.title}</h3>
-                <p className="modal-message">{modal.message}</p>
-              </>
-            ) : (
-              <>
-                <h3 className="modal-title">{modal.title}</h3>
-                <p className="modal-message">{modal.message}</p>
-                <button
-                  className={`modal-button ${modal.type}`}
-                  onClick={() => {
-                    setModal({
-                      show: false,
-                      type: "",
-                      title: "",
-                      message: "",
-                      callback: null,
-                    });
-                    if (modal.callback) modal.callback();
-                  }}
-                >
-                  확인
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {/* ModalUtil Modal */}
+      <Modal
+        show={modalState.show}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+        onClose={hideModal}
+      />
     </div>
   );
 }

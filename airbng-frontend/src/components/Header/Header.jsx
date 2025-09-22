@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/layout/header.css";
+import styles from "../../styles/layout/header.module.css";
 import arrowLeftIcon from "../../assets/arrow-left.svg";
 import homeIcon from "../../assets/home.svg";
 /**
@@ -26,6 +26,7 @@ export default function Header({
   className = "",
   onBack,
   onHome,
+  hideBorder = false,
 }) {
   const navigate = useNavigate();
 
@@ -41,33 +42,37 @@ export default function Header({
   };
 
   return (
-    <header className={`common-header ${className}`}>
+    <header
+      className={`${styles.commonHeader} ${className} ${
+        hideBorder ? styles.noBorder : ""
+      }`}
+    >
       {showBackButton ? (
         <button
           type="button"
-          className="back-icon"
+          className={styles.backIcon}
           aria-label="뒤로가기"
           onClick={handleBack}
         >
           <img src={arrowLeftIcon} alt="" aria-hidden="true" />
         </button>
       ) : (
-        <div className="back-spacer" aria-hidden="true" />
+        <div className={styles.backSpacer} aria-hidden="true" />
       )}
 
-      <div className="header-title">{headerTitle}</div>
+      <div className={styles.headerTitle}>{headerTitle}</div>
 
       {showHomeButton ? (
         <button
           type="button"
-          className="home-icon"
+          className={styles.homeIcon}
           aria-label="홈으로"
           onClick={handleHome}
         >
           <img src={homeIcon} alt="" aria-hidden="true" />
         </button>
       ) : (
-        <div className="header-spacer" aria-hidden="true" />
+        <div className={styles.headerSpacer} aria-hidden="true" />
       )}
     </header>
   );
