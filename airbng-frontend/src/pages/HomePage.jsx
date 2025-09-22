@@ -56,7 +56,7 @@ function HomePage() {
   };
 
   const handlePopularClick = (lockerId) => {
-    navigate(`/page/lockerDetails?lockerId=${lockerId}`);
+    navigate(`/page/lockers/${lockerId}`);
   };
 
   return (

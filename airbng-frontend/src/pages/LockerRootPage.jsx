@@ -12,6 +12,7 @@ import {
   deleteLocker,
 } from "../api/lockerApi";
 import "../styles/pages/locker.css";
+import "../styles/pages/manage.css";
 
 const unbox = (res) => res?.data?.result ?? res?.data?.data ?? res?.data;
 
@@ -58,7 +59,7 @@ export default function LockerRootPage() {
 
   const handleDetail = useCallback(() => {
     if (!locker?.lockerId) return;
-    navigate(`/page/lockerDetails?lockerId=${locker.lockerId}`);
+    navigate(`/page/lockers/${locker.lockerId}`);
   }, [navigate, locker]);
 
   const handleToggle = useCallback(async () => {

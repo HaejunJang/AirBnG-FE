@@ -117,8 +117,8 @@ function ChatMessage({
               {body}
             </div>
             <div className="bubble-meta">
-              <time className="bubble-time">{timeLabel}</time>
               {showUnreadBadge && <span className="msg-unread">1</span>}
+              <time className="bubble-time">{timeLabel}</time>
             </div>
           </div>
         </div>
