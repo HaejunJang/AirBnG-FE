@@ -143,30 +143,8 @@ export const useSSEManager = (memberId) => {
                 setIsConnecting(false);
             });
 
-            // alarm 이벤트 리스너
-            // eventSourceRef.current.addEventListener('alarm', (event) => {
-            //     try {
-            //         const alarmData = JSON.parse(event.data);
-            //         console.log('[SSE Hook] 알림 수신:', alarmData);
-            //         handleAlarmEvent(alarmData);
-            //         showNotification(
-            //             'AirBnG 알림', // title
-            //             alarmData.message || '새 알림이 도착했습니다.', // message
-            //             { tag: `alarm-${alarmData.id || Date.now()}` }
-            //         );
-            //     } catch (e) {
-            //         console.error('[SSE Hook] 알림 데이터 파싱 오류:', e, 'Raw data:', event.data);
-            //     }
-            // });
-
             eventSourceRef.current.addEventListener('alarm', (event) => {
                 const eventId = Number(event.lastEventId || event.id || 0);
-
-                // 중복 방어
-                if (!isNaN(eventId) && eventId <= (lastProcessedRef.current || 0)) {
-                    console.log('[SSE Hook] 중복 이벤트 무시:', eventId);
-                    return;
-                }
 
                 let alarmData;
                 try {
