@@ -1,0 +1,474 @@
+.container {
+  width: 412px;
+  min-height: 100vh;
+  background: white;
+  overflow-y: auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  padding-bottom: 80px;
+  padding-top: var(--header-height, 60px);
+}
+
+/* 헤더 스타일 */
+.header {
+  position: fixed;
+  top: 0;
+  width: 412px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 1000;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.headerLeft {
+  position: absolute;
+  left: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  color: #333;
+  font-size: 20px;
+}
+
+.backButton:hover {
+  background: #f5f5f5;
+}
+
+.backButton::before {
+  content: "←";
+  font-size: 20px;
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  text-align: center;
+}
+
+/* 메인 컨텐츠 */
+.mainContent {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* 로딩 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4561db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 에러 */
+.error {
+  text-align: center;
+  padding: 40px 20px;
+  background: #fef5f5;
+  border-radius: 16px;
+  border: 1px solid #fecaca;
+}
+
+/* 보유 금액 섹션 */
+.balanceSection {
+  background: linear-gradient(135deg, #4561db 0%, #6366f1 100%);
+  border-radius: 16px;
+  padding: 24px;
+  color: white;
+  text-align: center;
+}
+
+.balanceInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.balanceLabel {
+  font-size: 14px;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.balanceAmount {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* 출금 금액 섹션 */
+.amountSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.limitInfo {
+  font-size: 14px;
+  color: #666;
+}
+
+.amountInput {
+  margin-bottom: 16px;
+}
+
+.amountField {
+  width: 100%;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  background: #f8f9fa;
+  box-sizing: border-box;
+}
+
+.amountField:focus {
+  outline: none;
+  border-color: #4561db;
+  background: white;
+}
+
+.amountField::placeholder {
+  color: #999;
+  font-weight: normal;
+}
+
+.amountButtons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.amountBtn {
+  padding: 12px 8px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4561db;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.amountBtn:hover:not(:disabled) {
+  background: #f8f9ff;
+  border-color: #4561db;
+}
+
+.amountBtn:disabled {
+  background: #f5f5f5;
+  color: #999;
+  border-color: #e0e0e0;
+  cursor: not-allowed;
+}
+
+/* 계좌 섹션 */
+.accountSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accountList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.accountCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.accountCard:hover {
+  border-color: #4561db;
+  background: #f8f9ff;
+}
+
+.accountCard.selected {
+  border-color: #4561db;
+  background: #f8f9ff;
+  box-shadow: 0 0 0 1px #4561db;
+}
+
+.accountInfo {
+  flex: 1;
+}
+
+.bankInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.bankIcon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.bankDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bankName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.primaryBadge {
+  background: #4561db;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.accountNumber {
+  font-size: 14px;
+  color: #666;
+}
+
+.holderName {
+  font-size: 13px;
+  color: #888;
+}
+
+.selectRadio {
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.selectRadio input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #4561db;
+  cursor: pointer;
+}
+
+.noAccount {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  color: #666;
+}
+
+/* 이용 안내 섹션 */
+.infoSection {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.infoTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.infoList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoList li {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+  position: relative;
+  padding-left: 8px;
+}
+
+.infoList li::before {
+  content: "•";
+  color: #4561db;
+  position: absolute;
+  left: 0;
+}
+
+/* 출금 버튼 */
+.withdrawBtn {
+  width: 100%;
+  padding: 18px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 20px;
+}
+
+.withdrawBtn:hover:not(.disabled) {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.withdrawBtn.disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  transform: none;
+}
+.walletCard {
+  background: #667eea;
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 20px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.walletHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.walletIcon {
+  font-size: 24px;
+}
+
+.walletTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.walletBalance {
+  position: relative;
+  z-index: 1;
+}
+
+.balanceLabel {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.balanceAmount {
+  font-size: 32px;
+  font-weight: 900;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 반응형 */
+@media (max-width: 414px) {
+  .container {
+    width: 100%;
+    box-shadow: none;
+  }
+
+  .header {
+    width: 100%;
+  }
+
+  .mainContent {
+    padding: 15px;
+    gap: 24px;
+  }
+
+  .amountButtons {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .amountBtn {
+    padding: 14px 12px;
+    font-size: 15px;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .balanceSection {
+    padding: 20px;
+  }
+
+  .balanceAmount {
+    font-size: 24px;
+  }
+}

@@ -56,7 +56,7 @@ const MyInfoPage = () => {
 
         // 사용자 정보 로드
         handleLoadUserInfo();
-    }, [isLoggedIn, user?.id]); // 함수들을 의존성에서 제거
+    }, [isLoggedIn, user?.id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,7 +99,11 @@ const MyInfoPage = () => {
 
   return (
     <div className={info.pageContainer}>
-      <Header headerTitle="내 정보 수정" showBackButton />
+      <Header
+        headerTitle="내 정보 수정"
+        showBackButton
+        backUrl="/page/mypage"
+      />
 
       <div className={info.editProfileContainer}>
         <div className={info.editProfileHeader}>

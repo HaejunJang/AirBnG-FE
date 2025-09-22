@@ -192,7 +192,7 @@
 
 /* 짐페이 카드 - 완전히 새로운 디자인 */
 .wallet-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   border-radius: 16px;
   padding: 0;
   cursor: pointer;
@@ -244,11 +244,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.wallet-label::before {
-  content: "💳";
-  font-size: 16px;
+  padding-left: 8px;
 }
 
 .wallet-amount {
