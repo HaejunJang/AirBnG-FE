@@ -597,12 +597,16 @@
 
 /* 첨부 버튼 */
 .chat-input__attach {
-  width: 44px; height: 44px; border-radius: 14px;
+  width: 44px; height: 44px; border-radius: 8px;
   display: grid; place-items: center;
   border: 1px solid var(--border);
   background: #fff; color: var(--text);
   box-shadow: var(--shadow-sm); grid-area: attach;
 }
+.chat-input__attach img {
+  border-radius: 8px;
+}
+
 .chat-input__attach:hover {
   background: color-mix(in oklab, var(--primary) 8%, #fff);
 }

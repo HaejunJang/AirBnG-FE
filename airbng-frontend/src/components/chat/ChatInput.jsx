@@ -131,7 +131,7 @@ export default function ChatInput({ onSend, onTyping, onAttach }) {
       />
       <button className="chat-input__send" onClick={send} aria-label="전송">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 12l15-7-4 7 4 7-15-7z" fill="currentColor" />
+          <path d="M20 12l-15-7 4 7-4 7 15-7z" fill="currentColor" />
         </svg>
       </button>
     </div>
