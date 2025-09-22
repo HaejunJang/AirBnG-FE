@@ -1,10 +1,9 @@
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef, useCallback} from 'react';
 import { infoApi, updateUserInfo } from '../api/infoApi';
 import defaultImage from '../assets/img_upload_ic.svg';
 import {httpAuth} from '../api/http';
 import {useAuth} from "../context/AuthContext";
 import {setUserProfile} from "../utils/jwtUtil";
-
 
 export const useMyInfo = () => {
     const { setUser, updateUser } = useAuth();
@@ -29,8 +28,8 @@ export const useMyInfo = () => {
     });
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-    // 사용자 정보 로드 - API 함수 사용
-    const loadUserInfo = async (memberId) => {
+    // useCallback으로 메모이제이션
+    const loadUserInfo = useCallback(async (memberId) => {
         if (!memberId) {
             console.log('memberId가 없습니다');
             return;
@@ -61,10 +60,10 @@ export const useMyInfo = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []); // 의존성 없음
 
     // 프로필 이미지 변경 처리
-    const handleProfileImageChange = (file) => {
+    const handleProfileImageChange = useCallback((file) => {
         if (!file) return;
 
         // 파일 크기 체크 (5MB)
@@ -87,10 +86,10 @@ export const useMyInfo = () => {
             setProfilePreview(e.target.result);
         };
         reader.readAsDataURL(file);
-    };
+    }, []);
 
-    // 닉네임 중복 확인 - httpAuth 사용
-    const checkNicknameDuplicate = async () => {
+    // 닉네임 중복 확인
+    const checkNicknameDuplicate = useCallback(async () => {
         const nickname = userInfo.nickname?.trim();
 
         if (!nickname) {
@@ -112,11 +111,9 @@ export const useMyInfo = () => {
         }
 
         try {
-            // httpAuth import해서 사용
             const response = await httpAuth.get(`/members/check-nickname?nickname=${encodeURIComponent(nickname)}`);
 
             if (response.status === 200 && response.data.code === 1000) {
-                // 백엔드가 문자열을 반환하므로 성공 메시지가 있으면 사용 가능
                 setNicknameValidation({
                     isChecked: true,
                     isValid: true,
@@ -133,19 +130,19 @@ export const useMyInfo = () => {
                 message: err.message || '닉네임 확인에 실패했습니다.'
             });
         }
-    };
+    }, [userInfo.nickname]);
 
     // 닉네임 입력 시 검증 상태 초기화
-    const resetNicknameValidation = () => {
+    const resetNicknameValidation = useCallback(() => {
         setNicknameValidation({
             isChecked: false,
             isValid: false,
             message: ''
         });
-    };
+    }, []);
 
     // 폼 유효성 검사
-    const validateForm = () => {
+    const validateForm = useCallback(() => {
         const { phone, nickname } = userInfo;
 
         if (!phone?.trim()) {
@@ -173,10 +170,10 @@ export const useMyInfo = () => {
         }
 
         return true;
-    };
+    }, [userInfo, nicknameValidation]);
 
     // 정보 수정 요청
-    const updateUserInfoHandler = async () => {
+    const updateUserInfoHandler = useCallback(async () => {
         console.log('수정 완료 버튼 클릭됨');
 
         if (!validateForm()) {
@@ -247,89 +244,18 @@ export const useMyInfo = () => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    // const updateUserInfoHandler2 = async () => {
-    //     console.log('수정 완료 버튼 클릭됨');
-    //
-    //     if (!validateForm()) {
-    //         console.log('폼 검증 실패');
-    //         return false;
-    //     }
-    //
-    //     console.log('폼 검증 성공, 수정 요청 시작');
-    //     setIsLoading(true);
-    //     setError('');
-    //
-    //     try {
-    //         const formData = new FormData();
-    //
-    //         const memberUpdateRequest = {
-    //             memberId: userInfo.memberId,
-    //             email: userInfo.email,
-    //             name: userInfo.name,
-    //             phone: userInfo.phone,
-    //             nickname: userInfo.nickname
-    //         };
-    //
-    //         formData.append(
-    //             'memberUpdateRequest',
-    //             new Blob([JSON.stringify(memberUpdateRequest)], { type: 'application/json' })
-    //         );
-    //
-    //         if (profileImage) {
-    //             formData.append('profileImage', profileImage);
-    //         }
-    //
-    //         const response = await updateUserInfo(formData);
-    //         console.log('API 응답:', response);
-    //
-    //         if (response.status === 200 && response.data.code === 1000) {
-    //             console.log('수정 성공');
-    //
-    //             // AuthContext + 로컬스토리지 업데이트
-    //             setUser(prevUser => {
-    //                 const updatedUser = {
-    //                     ...prevUser,
-    //                     name: userInfo.nickname, // nickname 통일!
-    //                 };
-    //
-    //                 setUserProfile({
-    //                     id: userInfo.memberId,
-    //                     nickname: userInfo.nickname,
-    //                     roles: updatedUser.roles || []
-    //                 });
-    //
-    //                 return updatedUser;
-    //             });
-    //
-    //             setShowSuccessModal(true);
-    //             return true;
-    //         } else {
-    //             throw new Error(response.data.message || '정보 수정에 실패했습니다.');
-    //         }
-    //     } catch (err) {
-    //         console.error('수정 요청 에러:', err);
-    //         setError(err.message || '정보 수정에 실패했습니다.');
-    //         return false;
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
+    }, [userInfo, profileImage, validateForm, updateUser]);
 
     // 입력값 업데이트
-    const updateUserField = (field, value) => {
+    const updateUserField = useCallback((field, value) => {
         setUserInfo(prev => ({ ...prev, [field]: value }));
-        setError(''); // 에러 메시지 초기화
-    };
+        setError('');
+    }, []);
 
-    // 전화번호 포맷팅 함수 (숫자만 입력받아서 010-0000-0000 형태로 변환)
-    const formatPhoneNumber = (value) => {
-        // 숫자만 추출
+    // 전화번호 포맷팅 함수
+    const formatPhoneNumber = useCallback((value) => {
         const phoneNumber = value.replace(/[^\d]/g, '');
 
-        // 길이에 따라 포맷팅
         if (phoneNumber.length <= 3) {
             return phoneNumber;
         } else if (phoneNumber.length <= 7) {
@@ -337,14 +263,14 @@ export const useMyInfo = () => {
         } else {
             return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7, 11)}`;
         }
-    };
+    }, []);
 
     // 전화번호 업데이트 함수
-    const updatePhoneField = (value) => {
+    const updatePhoneField = useCallback((value) => {
         const formattedPhone = formatPhoneNumber(value);
         setUserInfo(prev => ({...prev, phone: formattedPhone}));
         setError('');
-    };
+    }, [formatPhoneNumber]);
 
     return {
         userInfo,
