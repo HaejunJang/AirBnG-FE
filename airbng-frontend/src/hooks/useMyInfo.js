@@ -211,9 +211,26 @@ export const useMyInfo = () => {
             if (response.status === 200 && response.data.code === 1000) {
                 console.log('수정 성공');
 
+                // AuthContext 업데이트
                 updateUser({
-                    nickname: userInfo.nickname
+                    nickname: userInfo.nickname,
+                    profileImageUrl: response.data.result?.url || profilePreview
                 });
+
+                // 세션 스토리지에 업데이트된 프로필 정보 저장
+                try {
+                    const updatedProfile = {
+                        id: userInfo.memberId,
+                        nickname: userInfo.nickname,
+                        profileImageUrl: response.data.result?.url || profilePreview,
+                        roles: JSON.parse(sessionStorage.getItem("userProfile"))?.roles || ["USER"]
+                    };
+                    
+                    sessionStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+                    console.log('세션 스토리지 업데이트 완료:', updatedProfile);
+                } catch (sessionError) {
+                    console.error('세션 스토리지 업데이트 오류:', sessionError);
+                }
 
                 setShowSuccessModal(true);
                 return true;

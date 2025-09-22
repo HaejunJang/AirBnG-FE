@@ -71,7 +71,7 @@ const MyInfoPage = () => {
     const success = await updateUserInfo();
     if (success) {
       showSuccess("수정 완료!", "정보가 성공적으로 수정되었습니다.", () => {
-        navigate("/page/mypage");
+        navigate("/page/mypage?profileUpdated=true");
       });
     }
   };
