@@ -244,11 +244,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.wallet-label::before {
-  content: "💳";
-  font-size: 16px;
+  padding-left: 8px;
 }
 
 .wallet-amount {

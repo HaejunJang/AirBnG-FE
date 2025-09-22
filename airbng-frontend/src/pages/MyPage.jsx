@@ -5,6 +5,7 @@ import Header from "../components/Header/Header";
 import { Modal, useModal } from "../components/common/ModalUtil";
 import "../styles/pages/MyPage.css";
 import { infoApi } from "../api/infoApi";
+import cardIcon from "../assets/cardIcon.svg";
 
 export default function MyPage() {
   const { user, ready, isLoggedIn, logout, setUser } = useAuth();
@@ -294,6 +295,7 @@ export default function MyPage() {
       role="button"
     >
       <div className="wallet-row">
+        <img src={cardIcon} alt="짐페이" className="wallet-icon" />
         <span className="wallet-label">현재 짐페이</span>
         <span className="wallet-amount">
           {balLoading ? "불러오는 중…" : balError ? "—" : formatWon(balance)}
