@@ -20,6 +20,11 @@ export const useSSEManager = (memberId) => {
     const profile = getUserProfile();
     const resolvedMemberId = memberId || profile?.id || null;
 
+    const lastProcessedKey = `lastProcessedEventId_${resolvedMemberId}`;
+    const lastProcessedRef = useRef(
+        Number(localStorage.getItem(lastProcessedKey) || 0)
+    );
+
     console.log('[SSE Hook] memberId param:', memberId);
 
     // 연결 상태 업데이트
@@ -139,20 +144,56 @@ export const useSSEManager = (memberId) => {
             });
 
             // alarm 이벤트 리스너
+            // eventSourceRef.current.addEventListener('alarm', (event) => {
+            //     try {
+            //         const alarmData = JSON.parse(event.data);
+            //         console.log('[SSE Hook] 알림 수신:', alarmData);
+            //         handleAlarmEvent(alarmData);
+            //         showNotification(
+            //             'AirBnG 알림', // title
+            //             alarmData.message || '새 알림이 도착했습니다.', // message
+            //             { tag: `alarm-${alarmData.id || Date.now()}` }
+            //         );
+            //     } catch (e) {
+            //         console.error('[SSE Hook] 알림 데이터 파싱 오류:', e, 'Raw data:', event.data);
+            //     }
+            // });
+
             eventSourceRef.current.addEventListener('alarm', (event) => {
+                const eventId = Number(event.lastEventId || event.id || 0);
+
+                // 중복 방어
+                if (!isNaN(eventId) && eventId <= (lastProcessedRef.current || 0)) {
+                    console.log('[SSE Hook] 중복 이벤트 무시:', eventId);
+                    return;
+                }
+
+                let alarmData;
                 try {
-                    const alarmData = JSON.parse(event.data);
-                    console.log('[SSE Hook] 알림 수신:', alarmData);
-                    handleAlarmEvent(alarmData);
+                    alarmData = JSON.parse(event.data);
                 } catch (e) {
-                    console.error('[SSE Hook] 알림 데이터 파싱 오류:', e, 'Raw data:', event.data);
+                    console.error('[SSE Hook] 알림 파싱 오류:', e, 'Raw data:', event.data);
+                    // fallback: 깨진 경우 그냥 문자열로
+                    alarmData = { message: event.data };
+                }
+
+                console.log('[SSE Hook] 알림 수신:', alarmData);
+                handleAlarmEvent(alarmData);
+                showNotification(
+                    'AirBnG 알림',
+                    alarmData.message || '새 알림이 도착했습니다.',
+                    { tag: `alarm-${alarmData.id || eventId || Date.now()}` }
+                );
+
+                // 마지막 처리 ID 갱신
+                if (!isNaN(eventId) && eventId > (lastProcessedRef.current || 0)) {
+                    lastProcessedRef.current = eventId;
+                    localStorage.setItem(lastProcessedKey, String(eventId));
                 }
             });
 
-            // onopen은 단순히 HTTP 연결만 확인 (실제 연결 완료가 아님)
             eventSourceRef.current.onopen = () => {
                 console.log('[SSE Hook] HTTP 연결 열림 (아직 서버 준비 대기중)');
-                // updateConnectionStatus는 여기서 호출하지 않음
             };
 
             eventSourceRef.current.onerror = (error) => {
