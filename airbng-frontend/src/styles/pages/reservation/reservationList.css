@@ -20,28 +20,9 @@
   flex-direction: column;
   max-width: 412px;
   width: 100%;
-  padding: 40px 20px 24px;
-  overflow: auto; /* 전체 스크롤 막기 */
+  padding: 60px 10px 24px;
   background-color: #ffffff;
   min-height: 100vh;
-}
-
-.reservationlist-header {
-  position: relative;
-  max-width: 412px;
-  z-index: 1000;
-  background: white;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #eee;
-}
-
-.reservationlist-back-button {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
 }
 
 .tab-container {
@@ -217,8 +198,8 @@
 .reservation-list {
   padding: 15px;
   position: relative;
-  overflow-y: auto;
-  height: calc(100vh - 220px);
+  overflow-y: visible; /* 필요하면 스크롤 허용 */
+  height: auto;
   margin-top: 0;
 }
 

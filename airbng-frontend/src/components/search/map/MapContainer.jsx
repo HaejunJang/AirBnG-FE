@@ -26,7 +26,7 @@ const MapContainer = ({
 
     // 상세보기 네비게이션 핸들러
     const handleDetailNavigation = useCallback((lockerId) => {
-        navigate(`/page/lockerDetails?lockerId=${encodeURIComponent(lockerId)}`);
+        navigate(`/page/lockers/${lockerId}`);
     }, [navigate]);
 
     // 인포윈도우 템플릿 생성

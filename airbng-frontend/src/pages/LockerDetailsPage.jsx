@@ -161,6 +161,10 @@ const LockerDetails = () => {
 
           setLockerDetail(apiData.result);
 
+          // 이미지 인덱스 초기화 (새로고침 시 항상 첫 번째 이미지부터 시작)
+          setCurrentImageIndex(0);
+          setModalImageIndex(0);
+
           sessionStorage.setItem(
             `lockerData_${apiData.result.lockerId}`,
             JSON.stringify({
@@ -224,7 +228,14 @@ const LockerDetails = () => {
   // 이미지 처리 헬퍼 함수
   const getDisplayImages = () => {
     if (lockerDetail?.images && lockerDetail.images.length > 0) {
-      return lockerDetail.images.slice(0, 5);
+      // 이미지 배열 파일명기준 정렬
+      const sortedImages = [...lockerDetail.images].sort((a, b) => {
+        // URL이나 파일명으로 정렬
+        const aStr = String(a || "");
+        const bStr = String(b || "");
+        return aStr.localeCompare(bStr);
+      });
+      return sortedImages.slice(0, 5);
     }
     return [favicon]; // 이미지가 없을 때 favicon 반환
   };
