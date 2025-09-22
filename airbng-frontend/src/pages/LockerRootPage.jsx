@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header/Header";
 import LockerWelcome from "../components/locker/LockerWelcome";
+import { useModal, Modal } from "../components/common/ModalUtil";
 import LockerSummaryCard from "../components/locker/LockerSummaryCard";
 import EmptyLockerCTA from "../components/locker/EmptyLockerCTA";
 import {
@@ -13,6 +14,7 @@ import {
     deleteLocker,
 } from "../api/lockerApi";
 import "../styles/pages/locker.css";
+import "../styles/common/modalUtil.css"
 
 const unbox = (res) => res?.data?.result ?? res?.data?.data ?? res?.data;
 
@@ -23,27 +25,29 @@ export default function LockerRootPage() {
     const [locker, setLocker] = useState(null);
     const [lockerStatus, setLockerStatus] = useState("REGISTER");
     const [canRegister, setCanRegister] = useState(false);
-
-    // 모달 상태 추가
-    const [showModal, setShowModal] = useState(false);
-    const [modalMessage, setModalMessage] = useState('');
-    const [modalType, setModalType] = useState('info'); // 'info', 'warning', 'error', 'success'
-
+    const { modalState, hideModal, showWarning } = useModal();
     const navigate = useNavigate();
 
-    // 모달 표시 함수
-    const showNotificationModal = (message, type = 'info') => {
-        setModalMessage(message);
-        setModalType(type);
-        setShowModal(true);
-    };
-
-    // 모달 닫기
-    const closeModal = () => {
-        setShowModal(false);
-        setModalMessage('');
-        setModalType('info');
-    };
+    // // 모달 상태 추가
+    // const [showModal, setShowModal] = useState(false);
+    // const [modalMessage, setModalMessage] = useState('');
+    // const [modalType, setModalType] = useState('info'); // 'info', 'warning', 'error', 'success'
+    //
+    // const navigate = useNavigate();
+    //
+    // // 모달 표시 함수
+    // const showNotificationModal = (message, type = 'info') => {
+    //     setModalMessage(message);
+    //     setModalType(type);
+    //     setShowModal(true);
+    // };
+    //
+    // // 모달 닫기
+    // const closeModal = () => {
+    //     setShowModal(false);
+    //     setModalMessage('');
+    //     setModalType('info');
+    // };
 
     const load = useCallback(async () => {
         try {
@@ -141,38 +145,31 @@ export default function LockerRootPage() {
                         <EmptyLockerCTA
                             onRegister={() => {
                                 if (!canRegister) {
-                                    showNotificationModal("심사 중인 보관소가 있습니다.\n심사를 기다려주세요.", 'warning');
+                                    showWarning("등록불가", "심사 중인 보관소가 있습니다.\n심사를 기다려주세요.");
                                     return;
                                 }
                                 navigate("/page/lockers/register");
                             }}
                             disabled={!canRegister}
                         />
+
                     )}
                 </main>
             </div>
 
             {/* 알림 모달 */}
-            {showModal && (
-                <div className="modal-overlay" onClick={closeModal}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <div className={`modal-icon ${modalType}-icon`}>
-                            {modalType === 'warning' ? '⚠' :
-                                modalType === 'error' ? '❌' :
-                                    modalType === 'success' ? '✅' : 'ℹ'}
-                        </div>
-                        <h3 className="modal-title">
-                            {modalType === 'warning' ? '알림' :
-                                modalType === 'error' ? '오류' :
-                                    modalType === 'success' ? '완료' : '안내'}
-                        </h3>
-                        <p className="modal-message">{modalMessage}</p>
-                        <button className="modal-button" onClick={closeModal}>
-                            확인
-                        </button>
-                    </div>
-                </div>
-            )}
+            <Modal
+                show={modalState.show}
+                type={modalState.type}
+                title={modalState.title}
+                message={modalState.message}
+                confirmText={modalState.confirmText}
+                cancelText={modalState.cancelText}
+                showCancel={modalState.showCancel}
+                onConfirm={modalState.onConfirm}
+                onCancel={modalState.onCancel}
+                onClose={hideModal}
+            />
         </div>
     );
 }
