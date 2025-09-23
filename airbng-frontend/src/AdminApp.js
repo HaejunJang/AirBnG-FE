@@ -21,7 +21,9 @@ function AdminApp() {
 
                 {/* 모든 관리자 페이지는 자동으로 레이아웃 적용 */}
                 <Route path="/admin/home" element={
-                    <AdminDashboardPage/>
+                    <AdminRoute>
+                        <StorageReviewPage/>
+                    </AdminRoute>
                 }/>
 
                 <Route path="/admin/storage-review" element={

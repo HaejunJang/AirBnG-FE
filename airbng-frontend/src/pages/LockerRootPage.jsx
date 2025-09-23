@@ -26,29 +26,8 @@ export default function LockerRootPage() {
     const [locker, setLocker] = useState(null);
     const [lockerStatus, setLockerStatus] = useState("REGISTER");
     const [canRegister, setCanRegister] = useState(false);
-    const { modalState, hideModal, showWarning } = useModal();
+    const { modalState, hideModal, showWarning, modal } = useModal();
     const navigate = useNavigate();
-
-    // // 모달 상태 추가
-    // const [showModal, setShowModal] = useState(false);
-    // const [modalMessage, setModalMessage] = useState('');
-    // const [modalType, setModalType] = useState('info'); // 'info', 'warning', 'error', 'success'
-    //
-    // const navigate = useNavigate();
-    //
-    // // 모달 표시 함수
-    // const showNotificationModal = (message, type = 'info') => {
-    //     setModalMessage(message);
-    //     setModalType(type);
-    //     setShowModal(true);
-    // };
-    //
-    // // 모달 닫기
-    // const closeModal = () => {
-    //     setShowModal(false);
-    //     setModalMessage('');
-    //     setModalType('info');
-    // };
 
     const load = useCallback(async () => {
         try {

@@ -3,7 +3,7 @@
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     padding: 30px;
-    /*margin-top: 80px;*/
+    margin-top: -20px;
 }
 
 .contentTitle {
@@ -44,7 +44,7 @@
 }
 
 .statLabel {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: #6c757d;
     margin-bottom: 8px;
     font-weight: 500;
@@ -69,9 +69,9 @@
 }
 
 
-.backButtonContainer {
-    margin-bottom: 30px;
-}
+/*.backButtonContainer {*/
+/*    margin-bottom: 30px;*/
+/*}*/
 
 .backButton {
     display: flex;
@@ -245,28 +245,17 @@
     pointer-events: none;
 }
 
-.squareButton {
-    width: 80px;
-    height: 50px;
-    background-color: hsl(231, 55%, 56%);
-    color: #ffffff;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;   /* 가로 중앙 정렬 */
-    align-items: center;       /* 세로 중앙 정렬 */
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.2s;
-    position: relative;       /* 위치 조정 가능 */
-    top: 15px;                 /* 살짝 아래로 이동 */
-    left: 10px;                /* 살짝 오른쪽으로 이동 */
-}
+/*.squareButton {*/
+/*    background-color: #ffffff;*/
+/*    border: 1px solid #dee2e6;*/
+/*    cursor: pointer;*/
+/*    font-weight: 600;*/
+/*    font-size: 1.3rem;*/
+/*}*/
 
-.squareButton:hover {
-    background-color: hsla(231, 55%, 56%, 0.7);
-}
+/*.squareButton:hover {*/
+/*    background-color: hsla(231, 55%, 56%, 0.7);*/
+/*}*/
 
 
 /*.contentCard {*/
