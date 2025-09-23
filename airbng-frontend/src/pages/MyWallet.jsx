@@ -66,13 +66,21 @@ export default function MyWallet() {
   const handleSetPrimary = (accountId) => {
     console.log("주계좌 변경:", accountId);
     setActiveDropdown(null);
-    // TODO: API 연동
+    walletApi.setPrimaryAccount(accountId).then((response) => {
+      if (response.status === 200 && response.data.code === 1000) {
+        showSuccess("변경 완료", "주계좌가 성공적으로 변경되었습니다.", fetchWalletData);
+      } else {
+        showError(
+          "변경 실패",
+          response.data?.message || "주계좌 변경에 실패했습니다."
+        );
+      }
+    });
   };
 
   const handleDeleteAccount = (accountId) => {
     console.log("계좌 삭제:", accountId);
     setActiveDropdown(null);
-    // TODO: API 연동
     showConfirm("계좌 삭제", "정말로 이 계좌를 삭제하시겠습니까?", async () => {
       walletApi.deleteAccount(accountId).then((response) => {
         if (response.status === 200 && response.data.code === 1000) {
