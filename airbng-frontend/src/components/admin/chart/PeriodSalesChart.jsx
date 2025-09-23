@@ -189,16 +189,33 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
-                <div className={styles.customTooltip}>
-                    <p className={styles.tooltipLabel}>{label}</p>
+                <div style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid #e1e8ed',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    color: '#2c3e50',
+                    fontSize: '14px',
+                    minWidth: '120px'
+                }}>
+                    <p style={{
+                        margin: '0 0 8px 0',
+                        fontWeight: '600',
+                        color: '#333'
+                    }}>{label}</p>
                     {payload.map((entry, index) => (
-                        <p key={index} style={{ color: entry.color }}>
+                        <p key={index} style={{
+                            margin: '4px 0',
+                            color: entry.color,
+                            fontWeight: '500'
+                        }}>
                             {entry.dataKey === 'sales' ? '매출: ' : '주문수: '}
-                            <span className={styles.tooltipValue}>
-                                {entry.dataKey === 'sales'
-                                    ? `${entry.value.toLocaleString()}원`
-                                    : `${entry.value}건`}
-                            </span>
+                            <span style={{ fontWeight: '600' }}>
+                            {entry.dataKey === 'sales'
+                                ? `${entry.value.toLocaleString()}원`
+                                : `${entry.value}건`}
+                        </span>
                         </p>
                     ))}
                 </div>
