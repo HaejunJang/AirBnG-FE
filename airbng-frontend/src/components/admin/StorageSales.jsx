@@ -1,67 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../../styles/admin/pages/StorageSalesPage.module.css';
 import StorageSalesChart from './chart/StorageSalesChart';
+import { useStorageSales } from '../../hooks/useStorageSales';
 
 const StorageSales = () => {
-    const [selectedPeriod, setSelectedPeriod] = useState('이번달');
-    const [selectedRegion, setSelectedRegion] = useState('전체');
-    const [sortBy, setSortBy] = useState('매출액');
+    const [selectedLockerType, setSelectedLockerType] = useState('전체');
+    const { storageSalesData, summaryData, loading, error, fetchStorageSales } = useStorageSales();
 
-    // 샘플 데이터
-    const paymentData = [
-        {
-            id: 1,
-            method: '개인 보관소',
-            sales: '28,450,000원',
-            transactions: 1458,
-            avgAmount: '19,520원',
-            fee: '112,890원',
-            refund: '235,430원',
-        },
-        {
-            id: 2,
-            method: '공공기관 보관소',
-            sales: '15,680,000원',
-            transactions: 642,
-            avgAmount: '24,440원',
-            fee: '108,560원',
-            refund: '127,430원'
-        },
-        {
-            id: 3,
-            method: '기업 보관소',
-            sales: '680,000원',
-            transactions: 520,
-            avgAmount: '13,440원',
-            fee: '95,240원',
-            refund: '65,550원'
+    // LockerType 매핑
+    const getLockerTypeValue = (displayValue) => {
+        switch (displayValue) {
+            case '개인':
+                return 'PERSONAL';
+            case '공공기관':
+                return 'PUBLIC';
+            case '기업':
+                return 'COMPANY';
+            case '전체':
+            default:
+                return null; // null이면 전체 조회
         }
-    ];
-
-    const summaryData = {
-        totalSales: '54,430,000원',
-        totalTransactions: 2652,
-        avgTransaction: '20,530원',
-        activePayments: 4
     };
 
-    const chartData = paymentData.map(payment => ({
-        name: payment.method,
-        sales: parseInt(payment.sales.replace(/[^\d]/g, '')),
-        transactions: payment.transactions,
-        //sales: parseFloat(payment.percentage.replace('%', '')),
-        avgAmount: parseInt(payment.avgAmount.replace(/[^\d]/g, ''))
+    // 날짜 범위 설정 (현재 월)
+    const getDateRange = () => {
+        const now = new Date();
+        const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+        // yyyy-MM-ddTHH:mm:ss 형식으로 포맷 (LocalDateTime 형식)
+        const formatDate = (date) => {
+            return date.toISOString().slice(0, 19);
+        };
+
+        return {
+            startDate: formatDate(startDate),
+            endDate: formatDate(endDate)
+        };
+    };
+
+    // 조회 버튼 클릭 핸들러
+    const handleSearch = async () => {
+        const lockerType = getLockerTypeValue(selectedLockerType);
+        const { startDate, endDate } = getDateRange();
+
+        console.log('🔍 조회 시작:', { lockerType, startDate, endDate });
+        await fetchStorageSales({ lockerType, startDate, endDate });
+    };
+
+    // 컴포넌트 마운트 시 초기 데이터 로드
+    useEffect(() => {
+        const { startDate, endDate } = getDateRange();
+        fetchStorageSales({
+            lockerType: null, // 전체 조회
+            startDate,
+            endDate
+        });
+    }, []);
+
+    // 차트용 데이터 변환
+    const chartData = storageSalesData.map(storage => ({
+        name: storage.method,
+        sales: parseInt(storage.sales.replace(/[^\d]/g, '')),
+        transactions: storage.transactions,
+        avgAmount: parseInt(storage.avgAmount.replace(/[^\d]/g, ''))
     }));
-
-    const handleSearch = () => {
-        console.log('검색:', { selectedPeriod, selectedRegion, sortBy });
-    };
-
-    // const getGrowthClass = (growth) => {
-    //     if (growth.startsWith('+')) return styles.growthPositive;
-    //     if (growth.startsWith('-')) return styles.growthNegative;
-    //     return styles.growthNeutral;
-    // };
 
     return (
         <div className={styles.container}>
@@ -77,47 +80,72 @@ const StorageSales = () => {
                             <label className={styles.filterLabel}>보관소</label>
                             <select
                                 className={styles.select}
-                                value={selectedPeriod}
-                                onChange={(e) => setSelectedPeriod(e.target.value)}
+                                value={selectedLockerType}
+                                onChange={(e) => setSelectedLockerType(e.target.value)}
+                                disabled={loading}
                             >
+                                <option value="전체">전체</option>
                                 <option value="개인">개인</option>
-                                <option value="공공">공공기관</option>
+                                <option value="공공기관">공공기관</option>
                                 <option value="기업">기업</option>
                             </select>
                         </div>
-                        <button className={styles.searchButton} onClick={handleSearch}>
-                            조회
+                        <button
+                            className={styles.searchButton}
+                            onClick={handleSearch}
+                            disabled={loading}
+                        >
+                            {loading ? '조회 중...' : '조회'}
                         </button>
                     </div>
 
+                    {/* 로딩 상태 */}
+                    {loading && (
+                        <div className={styles.loadingContainer}>
+                            <p>데이터를 불러오는 중...</p>
+                        </div>
+                    )}
+
+                    {/* 에러 상태 */}
+                    {error && (
+                        <div className={styles.errorContainer}>
+                            <p>데이터를 불러오는데 실패했습니다: {error}</p>
+                            <button onClick={handleSearch}>다시 시도</button>
+                        </div>
+                    )}
+
                     {/* 요약 카드 */}
-                    <div className={styles.summaryCards}>
-                        <div className={styles.summaryCard}>
-                            <div className={styles.cardTitle}>총 매출액</div>
-                            <div className={styles.cardValue}>{summaryData.totalSales}</div>
-                            <div className={styles.cardSubtext}>전월 대비 +12.8%</div>
+                    {!loading && !error && (
+                        <div className={styles.summaryCards}>
+                            <div className={styles.summaryCard}>
+                                <div className={styles.cardTitle}>총 매출액</div>
+                                <div className={styles.cardValue}>{summaryData.totalSales}</div>
+                                <div className={styles.cardSubtext}>이번 달 누적</div>
+                            </div>
+                            <div className={styles.summaryCard}>
+                                <div className={styles.cardTitle}>총 거래수</div>
+                                <div className={styles.cardValue}>{summaryData.totalTransactions}건</div>
+                                <div className={styles.cardSubtext}>이번 달 누적</div>
+                            </div>
+                            <div className={styles.summaryCard}>
+                                <div className={styles.cardTitle}>평균 거래금액</div>
+                                <div className={styles.cardValue}>{summaryData.avgTransaction}</div>
+                                <div className={styles.cardSubtext}>거래당 평균</div>
+                            </div>
+                            <div className={styles.summaryCard}>
+                                <div className={styles.cardTitle}>활성 보관소 수</div>
+                                <div className={styles.cardValue}>{summaryData.activeStorages}개</div>
+                                <div className={styles.cardSubtext}>매출 발생 보관소</div>
+                            </div>
                         </div>
-                        <div className={styles.summaryCard}>
-                            <div className={styles.cardTitle}>총 거래수</div>
-                            <div className={styles.cardValue}>{summaryData.totalTransactions}건</div>
-                            <div className={styles.cardSubtext}>전월 대비 +9.5%</div>
-                        </div>
-                        <div className={styles.summaryCard}>
-                            <div className={styles.cardTitle}>평균 거래금액</div>
-                            <div className={styles.cardValue}>{summaryData.avgTransaction}</div>
-                            <div className={styles.cardSubtext}>전월 대비 +2.8%</div>
-                        </div>
-                        <div className={styles.summaryCard}>
-                            <div className={styles.cardTitle}>현재 보관소 수</div>
-                            <div className={styles.cardValue}>{summaryData.activePayments}개</div>
-                            {/*<div className={styles.cardSubtext}>총 5개 중</div>*/}
-                        </div>
-                    </div>
+                    )}
 
                     {/* 차트 섹션 */}
-                    <div className={styles.chartSection}>
-                        <StorageSalesChart data={chartData} />
-                    </div>
+                    {!loading && !error && storageSalesData.length > 0 && (
+                        <div className={styles.chartSection}>
+                            <StorageSalesChart data={chartData} />
+                        </div>
+                    )}
 
                     {/* 보관소별 상세 목록 */}
                     <div className={styles.tableSection}>
@@ -129,66 +157,33 @@ const StorageSales = () => {
                                 <div className={styles.headerCell}>매출액</div>
                                 <div className={styles.headerCell}>거래수</div>
                                 <div className={styles.headerCell}>평균 거래금액</div>
-                                <div className={styles.headerCell}>환불액</div>
                                 <div className={styles.headerCell}>수수료</div>
-                                {/*<div className={styles.headerCell}>결제상태</div>*/}
+                                <div className={styles.headerCell}>환불액</div>
                             </div>
 
-                            {paymentData.map((payment) => (
-                                <div key={payment.id} className={styles.tableRow}>
-                                    <div className={styles.cell}>
-                                        <div className={styles.paymentInfo}>
-                                            <div className={styles.paymentMethod}>
-                                                {payment.method}
-                                                {/*<span className={`${styles.statusBadge} ${*/}
-                                                {/*    payment.status === 'active' ? styles.statusActive : styles.statusInactive*/}
-                                                {/*}`}>*/}
-                                                {/*    {payment.status === 'active' ? '사용중' : '중지'}*/}
-                                                {/*</span>*/}
+                            {!loading && !error && storageSalesData.length > 0 ? (
+                                storageSalesData.map((storage) => (
+                                    <div key={storage.id} className={styles.tableRow}>
+                                        <div className={styles.cell}>
+                                            <div className={styles.paymentInfo}>
+                                                <div className={styles.paymentMethod}>
+                                                    {storage.method}
+                                                </div>
                                             </div>
-                                            {/*<div className={styles.paymentDetails}>*/}
-                                            {/*    주요시간: {payment.popularTime} | 주요지역: {payment.topRegion}*/}
-                                            {/*</div>*/}
                                         </div>
+                                        <div className={styles.cell}>{storage.sales}</div>
+                                        <div className={styles.cell}>{storage.transactions}건</div>
+                                        <div className={styles.cell}>{storage.avgAmount}</div>
+                                        <div className={styles.cell}>{storage.fee}</div>
+                                        <div className={styles.cell}>{storage.refund}</div>
                                     </div>
-                                    <div className={styles.cell}>{payment.sales}</div>
-                                    <div className={styles.cell}>{payment.transactions}건</div>
-                                    <div className={styles.cell}>{payment.avgAmount}</div>
-                                    {/*<div className={styles.cell}>*/}
-                                        {/*<div className={styles.percentageBar}>*/}
-                                        {/*    <div*/}
-                                        {/*        className={styles.percentageFill}*/}
-                                        {/*        style={{width: payment.sales}}*/}
-                                        {/*    ></div>*/}
-                                        {/*    <span className={styles.percentageText}>{payment.sales}</span>*/}
-                                        {/*</div>*/}
-                                    {/*</div>*/}
-                                    <div className={styles.cell}>{payment.fee}</div>
-                                    <div className={styles.cell}>{payment.refund}</div>
-                                    {/*<div className={styles.cell}>*/}
-                                    {/*    <span className={getGrowthClass(payment.growth)}>*/}
-                                    {/*        {payment.growth}*/}
-                                    {/*    </span>*/}
-                                    {/*</div>*/}
-                                    {/*<div className={styles.cell}>*/}
-                                    {/*    <div className={styles.actionButtons}>*/}
-                                    {/*        <button className={styles.btnDetail}>상세</button>*/}
-                                    {/*        <button className={styles.btnAnalysis}>분석</button>*/}
-                                    {/*    </div>*/}
-                                    {/*</div>*/}
+                                ))
+                            ) : !loading && !error ? (
+                                <div className={styles.noData}>
+                                    <p>해당 조건에 매출 데이터가 없습니다.</p>
                                 </div>
-                            ))}
+                            ) : null}
                         </div>
-
-                        {/* 페이지네이션 */}
-                        {/*<div className={styles.pagination}>*/}
-                        {/*    <span className={styles.pageNumber}>1</span>*/}
-                        {/*    <span className={styles.pageNumber}>2</span>*/}
-                        {/*    <span className={styles.pageNumber}>3</span>*/}
-                        {/*    <span className={styles.pageNumber}>...</span>*/}
-                        {/*    <span className={styles.pageNumber}>7</span>*/}
-                        {/*    <span className={styles.pageNumber}>8</span>*/}
-                        {/*</div>*/}
                     </div>
                 </div>
             </div>

@@ -47,11 +47,18 @@ const StorageSalesChart = ({ data }) => {
     const PieTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const data = payload[0];
+            // 전체 매출 합계 계산
+            const totalSales = payload[0].payload.totalSales || 1;
+            // 현재 항목의 매출
+            const sales = data.value;
+            // 점유율 계산
+            const percentage = ((sales / totalSales) * 100).toFixed(1);
+
             return (
                 <div className={styles.customTooltip}>
                     <p className={styles.tooltipLabel}>{data.name}</p>
                     <p style={{ color: data.color }}>
-                        점유율: <span className={styles.tooltipValue}>{data.value}%</span>
+                        점유율: <span className={styles.tooltipValue}>{percentage}%</span>
                     </p>
                 </div>
             );
@@ -171,7 +178,7 @@ const StorageSalesChart = ({ data }) => {
                                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                                 ></div>
                                 <span className={styles.legendText}>
-                                    {item.name} ({item.percentage}%)
+                                    {item.name} ({((item.sales / data.reduce((sum, curr) => sum + curr.sales, 0)) * 100).toFixed(1)}%)
                                 </span>
                             </div>
                         ))}
