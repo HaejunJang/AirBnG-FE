@@ -100,7 +100,6 @@
 }
 
 .subMenuButton {
-    width: 100%;
     background: none;
     border: none;
     color: #666666;
@@ -123,8 +122,9 @@
 }
 
 .subMenuButtonActive {
-    background-color: #0056b3;
-    color: #ffffff;
+    background-color: white;
+    color: black;
+    border: 2px solid #0056b3;
 }
 
 .subMenuIcon {
