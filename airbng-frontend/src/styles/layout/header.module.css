@@ -2,12 +2,15 @@
 
 /* 헤더 컴포넌트 */
 .commonHeader {
-  position: fixed;
+  /* position: fixed; */
+  /* top: 0; */
+  /* left: 50%; */
+  /* transform: translateX(-50%); */
+  /* width: 100%; */
+  /* max-width: var(--app-max-width); */
+  position: sticky;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
   width: 100%;
-  max-width: var(--app-max-width);
   height: var(--header-height);
   background: var(--surface);
   display: grid;

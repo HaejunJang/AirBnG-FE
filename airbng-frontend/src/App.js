@@ -31,12 +31,15 @@ import AccountRegister from "./pages/AccountRegister";
 import MyWalletCharge from "./pages/MyWalletCharge";
 import MyWalletWithdraw from "./pages/MyWalletWithdraw";
 import MyWalletHistory from "./pages/MyWalletHistory";
+import SideBanner from "./components/home/SideBanner";
 
 function App() {
   useEffect(() => {
     const c = getStompClient();
-    if (!c.active) c.activate();          // ← 최초 1회 연결
-    return () => { c.deactivate(); };     // 앱 unload 시 정리
+    if (!c.active) c.activate(); // ← 최초 1회 연결
+    return () => {
+      c.deactivate();
+    }; // 앱 unload 시 정리
   }, []);
 
   function getActiveNav(pathname) {
@@ -57,7 +60,7 @@ function App() {
     const hideNavbarPaths = [
       "/page/reservations/detail",
       "/page/reservations/form",
-      "/page/lockers/manage", 
+      "/page/lockers/manage",
       "/page/lockers/register",
       "/page/chat/new",
       "/page/mypage/update",
@@ -136,7 +139,12 @@ function App() {
       <UnreadProvider>
         <WsPersonalBridge />
         <SSEProvider memberId={profile?.id || null}>
-            <MainContent />
+          <div className="app-layout">
+            <SideBanner />
+            <main className="main-wrapper">
+              <MainContent />
+            </main>
+          </div>
         </SSEProvider>
       </UnreadProvider>
     </BrowserRouter>
