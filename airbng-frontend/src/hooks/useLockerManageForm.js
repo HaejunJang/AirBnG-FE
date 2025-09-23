@@ -1,12 +1,14 @@
 // hooks/useLockerManageForm.js
 import { useCallback, useEffect, useState } from "react";
 import { deleteLocker, getLockerForUpdate, toggleLockerActivation, updateLocker } from "../api/lockerApi";
+import { useModal } from "../components/common/ModalUtil";
 
 export default function useLockerManageForm(lockerId, { keeperId }) {
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
   const [files, setFiles] = useState([]);        // 교체할 새 파일들
   const [replaceMode, setReplaceMode] = useState(false);
+  const modal = useModal();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -33,7 +35,7 @@ export default function useLockerManageForm(lockerId, { keeperId }) {
       .filter(j => j.enabled)
       .map(j => j.jimTypeId);
     if (selectedJimIds.length === 0) {
-      alert('최소 하나 이상의 짐 타입을 선택해주세요.');
+      modal.showError('선택 필요', '최소 하나 이상의 짐 타입을 선택해주세요.');
       return;
     }
 
@@ -54,7 +56,18 @@ export default function useLockerManageForm(lockerId, { keeperId }) {
     await updateLocker({ lockerId, locker, images: replaceMode ? files : [] });
   };
 
-  const remove = async () => { await deleteLocker(lockerId); };
+  const remove = async () => {
+    return new Promise((resolve) => {
+      modal.showConfirm(
+        '삭제 확인',
+        '정말 삭제하시겠습니까? 삭제된 정보는 복구할 수 없습니다.',
+        async () => {
+          await deleteLocker(lockerId);
+          resolve();
+        }
+      );
+    });
+  };
 
   return {
     loading,

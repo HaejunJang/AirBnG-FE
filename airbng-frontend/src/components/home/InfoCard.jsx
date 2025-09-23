@@ -4,18 +4,9 @@ import {useNavigate} from "react-router-dom";
 function InfoCard({ locationName }) {
     const navigate = useNavigate();
   const [location, setLocation] = useState("");
-  const [lockerName, setLockerName] = useState("");
   const [jimTypeId, setJimTypeId] = useState(0);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('18:00~20:00');
-  const [isLoggedIn] = useState(false);
-
-  const handleFindClick = () => {
-    // if (!isLoggedIn) {
-    //   alert("로그인이 필요합니다. 로그인 후 이용해주세요.");
-    //   return;
-    // }
-  };
 
     const handleSearch = () => {
         const params = new URLSearchParams();

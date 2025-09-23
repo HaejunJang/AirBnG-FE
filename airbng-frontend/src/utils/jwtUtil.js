@@ -1,3 +1,5 @@
+import { updateStompToken, getStompClient } from './stompClient';
+
 const ACCESS_KEY = 'accessToken';
 const PROFILE_KEY = 'userProfile';
 const REMEMBER_KEY = 'rememberMe';
@@ -18,18 +20,24 @@ export function getAccessToken() {
   return normalizeToken(raw);
 }
 
-export function setAccessToken(token) {
+export async function setAccessToken(token) {
   const norm = normalizeToken(token);
   if (norm) {
     sessionStorage.setItem(ACCESS_KEY, norm);
     sessionStorage.removeItem('jwtToken');
+    try { await updateStompToken(norm); } catch {}
   }
 }
 
-export function clearTokens() {
+export async function clearTokens() {
   sessionStorage.removeItem(ACCESS_KEY);
   sessionStorage.removeItem('jwtToken');
   sessionStorage.removeItem(PROFILE_KEY);
+  try {
+    await updateStompToken(null);
+    const c = getStompClient?.();
+    if (c?.active) await c.deactivate();
+  } catch {}
 }
 
 // ---- remember me ----
@@ -47,12 +55,14 @@ export function clearRememberMe() {
 export function setUserProfile(profile) {
   try { sessionStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch {}
 }
+
 export function getUserProfile() {
   try {
     const s = sessionStorage.getItem(PROFILE_KEY);
     return s ? JSON.parse(s) : null;
   } catch { return null; }
 }
+
 export function clearUserProfile() { sessionStorage.removeItem(PROFILE_KEY); }
 
 // ---- JWT helpers ----

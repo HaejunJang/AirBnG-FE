@@ -40,33 +40,30 @@
 }
 
 /* 카드: 애니메이션 유지 + 살짝 위로(센트럴 오프셋) */
-.airbng-locker .menu-section {
+.airbng-locker .menu-section{
   width: 100%;
-  max-width: 380px;
-  border: 1px solid #f0f0f0;
-  border-radius: 18px;
-  background: #fff;
-  margin: -10px auto 0;            /* 🔼 중앙 기준 살짝 위로 끌어올림 */
-  animation: fadeInUp 0.55s var(--ease) both;
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  transform: translate3d(0,0,0);
+  max-width: 420px;
+  margin: 18px auto 0;
+  background: transparent;
+  border: 0;
 }
 
 /* 카드 내부 간격을 살짝 컴팩트하게 */
-.airbng-locker .menu-item-card {
-  display: flex;
-  flex-direction: column;
-  background-color: #f9fafa;
+.airbng-locker .menu-item-card{
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #edf0f7;
   border-radius: 18px;
-  padding: 18px;                  
-  gap: 8px;                      
+  box-shadow: 0 8px 22px rgba(17, 23, 41, .06);
 }
 
-.airbng-locker .menu-item-content {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
+.airbng-locker .menu-item-content{
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  gap: 12px;
+  align-items: center;
 }
 
 .airbng-locker .menu-content h3 {
@@ -102,52 +99,23 @@
 }
 
 /* 애니메이션 */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(0, 16px, 0);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0, 0, 0);
-    }
+@keyframes fadeInUp{
+  from{ opacity:0; transform: translate3d(0,12px,0); }
+  to{ opacity:1; transform: translate3d(0,0,0); }
 }
 
-.airbng-locker .locker-thumbnail {
-    width: 60px;
-    height: 60px;
-    border-radius: 14px;
-    overflow: hidden;
-    background-color: #eee;
-    flex-shrink: 0;
+.airbng-locker .locker-thumbnail{
+  width: 68px; height: 68px;
+  border-radius: 12px; overflow: hidden;
+  background: #f1f3f9;
+  flex: 0 0 68px;     /* 이미지 수축 방지 */
 }
-
-.airbng-locker .locker-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* 보관소 상태 뱃지 */
-.airbng-locker .status-badge {
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: bold;
-    vertical-align: middle;
-}
-
-.airbng-locker .status-badge.active {
-    color: #2e7d32;
-    background-color: #e8f5e9;
-}
-
-.airbng-locker .status-badge.inactive {
-    color: #c62828;
-    background-color: #ffebee;
+.airbng-locker .locker-thumbnail img{
+  width: 100%; height: 100%; object-fit: cover; display: block;
 }
 
 .airbng-locker .locker-info {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -155,84 +123,78 @@
     gap: 4px;
 }
 
-.airbng-locker .locker-title-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
+.airbng-locker .locker-title-row{
+  display: grid;
+  grid-template-columns: 1fr auto auto; /* 제목 | 배지 | 톱니 */
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+.airbng-locker .locker-title{
+  margin: 0;
+  font-size: 18px; font-weight: 900; color: #1d2236;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.airbng-locker .locker-title {
-    font-size: 19px;
-    font-weight: bold;
-    color: #333;
-    margin: 0;
+/* 상태 배지 */
+.airbng-locker .status-badge{
+  padding: 4px 8px; border-radius: 999px;
+  font-size: 11px; font-weight: 800; line-height: 1;
+  border: 1px solid transparent;
 }
+.airbng-locker .status-badge.active{ color:#176b36; background:#e9f8ee; border-color:#cfeedd; }
+.airbng-locker .status-badge.inactive{ color:#a62424; background:#ffecec; border-color:#ffd7d7; }
 
-.airbng-locker .locker-jim-types {
-    margin-top: 8px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, auto));
-    gap: 6px 8px;
-    max-width: 100%;
+.airbng-locker .locker-jim-types{
+  margin-top: 6px;
+  display: flex; flex-wrap: wrap;
+  gap: 6px;
 }
-
-.airbng-locker .jim-type-badge {
-    background-color: #f1f3f5;
-    color: #333;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 5px 8px;
-    border-radius: 15px;
-    white-space: nowrap;
-    border: 1px solid #dee2e6;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    text-align: center;
+.airbng-locker .jim-type-badge{
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background:#f5f7ff; border:1px solid #e3e8fb;
+  font-size: 12px; font-weight: 700; color:#3b4262;
+  white-space: nowrap;
 }
 
 /* 버튼 그룹 */
-.airbng-locker .locker-action-buttons {
-    margin-top: -15px;
-    padding: 0 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.airbng-locker .locker-action-buttons{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.airbng-locker .manage-locker-btn,
+.airbng-locker .toggle-btn{
+  height: 44px;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 14px;
 }
 
 /* 상세 보기 버튼 */
-.airbng-locker .manage-locker-btn {
-    /*background-color: #4561DB;*/
-    /*color: white;*/
-
-    background-color: #BFD0FF;
-    color: #1E2F93;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px;
-    padding: 12px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
+.airbng-locker .manage-locker-btn{
+  background: #bfd0ff;
+  color: #1e2f93;
+  border: 1px solid #95afff;
 }
+.airbng-locker .manage-locker-btn:hover{ background:#87a3ff; }
 
-.airbng-locker .manage-locker-btn:hover {
-    background-color: #87A3FF;
+.airbng-locker .edit-locker-btn{
+  justify-self: end;               /* 자동 우측 정렬 */
+  margin-left: 0 !important;       /* 기존 margin-left 제거 */
+  width: 36px; height: 36px;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  background:#fff; border:1px solid #e6ebf5;
+  box-shadow: 0 1px 0 rgba(10,15,30,.04);
+  cursor: pointer;
+  filter: none;
 }
-
-.airbng-locker .edit-locker-btn {
-    border: none;
-    background: none;
-    /*padding: 12px;*/
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-left: 30px;
-    filter: invert(0.3);
-}
-
-.airbng-locker .edit-locker-btn:hover {
-    /*transform: scale(1.05);*/
-    transform: rotate(20deg);
-}
+.airbng-locker .edit-locker-btn:hover{ background:#f6f8ff; transform: none; }
 
 .airbng-locker .delete-locker-btn {
     background-color: #f44336;
@@ -261,23 +223,10 @@
     font-size: 14px;
 }
 
-.airbng-locker .btn-stop {
-    background-color: #ffe5e5;
-    color: #c62828;
-}
-
-.airbng-locker .btn-stop:hover {
-    background-color: #ffcccc;
-}
-
-.airbng-locker .btn-restart {
-    background-color: #e8fbe8;
-    color: #2e7d32;
-}
-
-.airbng-locker .btn-restart:hover {
-    background-color: #d0f0d0;
-}
+.airbng-locker .btn-stop{ background:#ffe5e5; color:#c62828; }
+.airbng-locker .btn-stop:hover{ background:#ffcccc; }
+.airbng-locker .btn-restart{ background:#e8fbe8; color:#2e7d32; }
+.airbng-locker .btn-restart:hover{ background:#d0f0d0; }
 
 .airbng-locker .empty-locker-section {
     display: flex;
