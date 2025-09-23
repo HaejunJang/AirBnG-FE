@@ -107,25 +107,40 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
         console.log('차트 데이터 변환 시작:', { rawData: rawData.length, tab }); // 디버깅용
 
         if (tab === 'daily') {
-            // Monday(월) ~ Sunday(일) 순으로 집계
-            const buckets = Array.from({ length: 7 }).map(() => ({ sales: 0, count: 0 }));
+            // 오늘 기준 최근 7일
+            const today = dayjs();
+            const startDate = today.subtract(6, 'day'); // 오늘 포함 7일 전부터 시작
+
+            // 날짜별 버킷 생성 (연속된 7일)
+            const buckets = Array.from({ length: 7 }).map((_, idx) => {
+                const d = startDate.add(idx, 'day');
+                return {
+                    date: d.format('YYYY-MM-DD'),
+                    sales: 0,
+                    count: 0,
+                };
+            });
+
             rawData.forEach((item, index) => {
                 const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
                 if (!d) {
                     console.warn(`날짜 파싱 실패 (${index}):`, item);
                     return;
                 }
-                const dayIndex = d.day(); // 0..6
-                const monFirstIndex = (dayIndex + 6) % 7; // Sunday(0) -> 6, Monday(1) -> 0, ...
+                if (d.isBefore(startDate, 'day') || d.isAfter(today, 'day')) {
+                    return; // 최근 7일 범위 밖이면 스킵
+                }
+
+                const idx = d.diff(startDate, 'day'); // 0 ~ 6 인덱스
                 const amt = parseAmount(item.amount);
-                buckets[monFirstIndex].sales += amt;
-                buckets[monFirstIndex].count += 1;
+                buckets[idx].sales += amt;
+                buckets[idx].count += 1;
             });
 
-            return buckets.map((b, idx) => ({
-                name: WEEKDAY_KOR[idx],
+            return buckets.map((b) => ({
+                name: b.date, // ex: 2025-09-17
                 sales: b.sales,
-                orders: Math.round(b.sales / 1000),
+                orders: b.count,
             }));
         }
 
@@ -148,12 +163,14 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
             return buckets.map((b, idx) => ({
                 name: `${idx + 1}월`,
                 sales: b.sales,
-                orders: Math.round(b.sales / 1000),
+                orders: b.count,
             }));
         }
 
         // yearly : 연도별 집계
         const yearMap = {};
+        const yearCountMap = {};
+
         rawData.forEach((item, index) => {
             const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
             if (!d) {
@@ -162,7 +179,9 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
             }
             const y = d.year();
             const amt = parseAmount(item.amount);
+
             yearMap[y] = (yearMap[y] || 0) + amt;
+            yearCountMap[y] = (yearCountMap[y] || 0) + 1;
             console.log(`연간 데이터 추가: ${y}년, 금액: ${amt}`); // 디버깅용
         });
 
@@ -173,7 +192,7 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
         return years.map((y) => ({
             name: `${y}년`,
             sales: yearMap[y],
-            orders: Math.round(yearMap[y] / 1000),
+            orders: yearCountMap[y],
         }));
     };
 
