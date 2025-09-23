@@ -8,7 +8,7 @@
   color: var(--text, #333);
   font-family: var(--font-sans, 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif);
   min-height: 100dvh;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .airbng-manage .manage-container {
@@ -16,8 +16,7 @@
   max-width: var(--app-max-width, 412px);
   margin-inline: auto;
   background: #fff;
-  padding: calc(var(--header-height, 60px) + 12px) 20px 
-           calc(var(--bottom-nav-height, 80px) + 12px);
+  padding: calc(var(--header-height, 60px) + 12px) 12px 20px 12px;
   border-radius: 0;
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,.06));
   position: relative;
