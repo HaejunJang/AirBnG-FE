@@ -11,38 +11,174 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import styles from '../../../styles/admin/chart/PeriodSalesChart.module.css';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 
-const PeriodSalesChart = ({ data, activeTab }) => {
-    // 차트용 데이터 변환
-    const convertDataForChart = (rawData, tab) => {
-        if (!rawData || rawData.length === 0) return [];
+dayjs.extend(customParseFormat);
 
-        return rawData.map((item, index) => {
-            // amount에서 숫자만 추출 (예: "125,000원" -> 125000)
-            const numericAmount = parseInt(item.amount.replace(/[^\d]/g, ''));
+// 요일 라벨 (월~일)
+const WEEKDAY_KOR = ['월', '화', '수', '목', '금', '토', '일'];
 
-            return {
-                name: item.time,
-                sales: numericAmount,
-                orders: Math.floor(numericAmount / 1000), // 예시로 매출의 1/1000을 주문수로 설정
-                region: item.region,
-                paymentMethod: item.paymentMethod
-            };
-        });
+const PeriodSalesChart = ({ data = [], activeTab }) => {
+    // 2자리 연도를 4자리로 변환하는 함수
+    const convertTwoDigitYear = (dateString) => {
+        // YY/MM/DD 형식인지 확인
+        const twoDigitYearPattern = /^(\d{2})\/(\d{2})\/(\d{2})/;
+        const match = dateString.match(twoDigitYearPattern);
+
+        if (match) {
+            const year = parseInt(match[1]);
+            // 50 이상이면 19xx, 50 미만이면 20xx로 처리 (일반적인 규칙)
+            const fullYear = year >= 50 ? 1900 + year : 2000 + year;
+            return dateString.replace(twoDigitYearPattern, `${fullYear}/$2/$3`);
+        }
+
+        return dateString;
     };
 
-    // 샘플 데이터 (데이터가 없을 때 사용)
-    const defaultData = [
-        { name: '1월', sales: 4000000, orders: 240 },
-        { name: '2월', sales: 3000000, orders: 198 },
-        { name: '3월', sales: 2000000, orders: 180 },
-        { name: '4월', sales: 2780000, orders: 308 },
-        { name: '5월', sales: 1890000, orders: 180 },
-        { name: '6월', sales: 2390000, orders: 280 },
-        { name: '7월', sales: 3490000, orders: 330 },
-    ];
+    // 문자열/Date 여러 포맷을 안전히 파싱해서 dayjs 객체 반환 (실패 시 null)
+    const parseDateSafe = (value) => {
+        if (!value) return null;
+        // 이미 dayjs/Date 인스턴스이면 처리
+        if (dayjs.isDayjs(value)) return value;
+        if (value instanceof Date) return dayjs(value);
 
-    const chartData = data ? convertDataForChart(data, activeTab) : defaultData;
+        let asString = String(value);
+
+        // 2자리 연도를 4자리로 변환
+        asString = convertTwoDigitYear(asString);
+
+        console.log('변환된 날짜 문자열:', asString); // 디버깅용
+
+        // 시도할 포맷 배열 (우선순위)
+        const tryFormats = [
+            'YYYY/MM/DD HH:mm:ss',
+            'YYYY-MM-DDTHH:mm:ss',
+            'YYYY-MM-DD HH:mm:ss',
+            'YYYY-MM-DDTHH:mm:ss.SSS',
+            'YYYY-MM-DD HH:mm:ss.SSSSSS',
+            'YYYY/MM/DD HH:mm',
+            'YYYY/MM/DD',
+            'YYYY-MM-DD',
+        ];
+
+        // 먼저 포맷별로 시도
+        for (const fmt of tryFormats) {
+            const d = dayjs(asString, fmt);
+            if (d.isValid()) {
+                console.log(`성공한 포맷: ${fmt}, 파싱된 날짜:`, d.format('YYYY-MM-DD HH:mm:ss')); // 디버깅용
+                return d;
+            }
+        }
+
+        // 마이크로초(.000000) 제거 + 공백->T 변환 후 시도
+        let cleaned = asString.replace(/\.\d+$/, '').replace(' ', 'T');
+        let d = dayjs(cleaned);
+        if (d.isValid()) {
+            console.log('정리된 문자열로 파싱 성공:', d.format('YYYY-MM-DD HH:mm:ss')); // 디버깅용
+            return d;
+        }
+
+        // 최종 fallback: 기본 파서
+        d = dayjs(asString);
+        if (d.isValid()) {
+            console.log('기본 파서로 파싱 성공:', d.format('YYYY-MM-DD HH:mm:ss')); // 디버깅용
+            return d;
+        }
+
+        console.warn('날짜 파싱 실패:', value); // 디버깅용
+        return null;
+    };
+
+    // amount가 숫자이든 "4,700원"이든 안전히 숫자 반환
+    const parseAmount = (amount) => {
+        if (amount == null) return 0;
+        if (typeof amount === 'number') return amount;
+        const n = parseInt(String(amount).replace(/[^\d]/g, ''), 10);
+        return Number.isNaN(n) ? 0 : n;
+    };
+
+    // 집계 함수: daily, monthly, yearly에 따라 결과 배열 반환
+    const convertDataForChart = (rawData, tab) => {
+        if (!rawData || rawData.length === 0) {
+            return [];
+        }
+
+        console.log('차트 데이터 변환 시작:', { rawData: rawData.length, tab }); // 디버깅용
+
+        if (tab === 'daily') {
+            // Monday(월) ~ Sunday(일) 순으로 집계
+            const buckets = Array.from({ length: 7 }).map(() => ({ sales: 0, count: 0 }));
+            rawData.forEach((item, index) => {
+                const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
+                if (!d) {
+                    console.warn(`날짜 파싱 실패 (${index}):`, item);
+                    return;
+                }
+                const dayIndex = d.day(); // 0..6
+                const monFirstIndex = (dayIndex + 6) % 7; // Sunday(0) -> 6, Monday(1) -> 0, ...
+                const amt = parseAmount(item.amount);
+                buckets[monFirstIndex].sales += amt;
+                buckets[monFirstIndex].count += 1;
+            });
+
+            return buckets.map((b, idx) => ({
+                name: WEEKDAY_KOR[idx],
+                sales: b.sales,
+                orders: Math.round(b.sales / 1000),
+            }));
+        }
+
+        if (tab === 'monthly') {
+            // 1월(0) ~ 12월(11)
+            const buckets = Array.from({ length: 12 }).map(() => ({ sales: 0, count: 0 }));
+            rawData.forEach((item, index) => {
+                const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
+                if (!d) {
+                    console.warn(`날짜 파싱 실패 (${index}):`, item);
+                    return;
+                }
+                const m = d.month(); // 0..11
+                const amt = parseAmount(item.amount);
+                buckets[m].sales += amt;
+                buckets[m].count += 1;
+                console.log(`월간 데이터 추가: ${d.format('YYYY-MM')} -> ${m}월, 금액: ${amt}`); // 디버깅용
+            });
+
+            return buckets.map((b, idx) => ({
+                name: `${idx + 1}월`,
+                sales: b.sales,
+                orders: Math.round(b.sales / 1000),
+            }));
+        }
+
+        // yearly : 연도별 집계
+        const yearMap = {};
+        rawData.forEach((item, index) => {
+            const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
+            if (!d) {
+                console.warn(`날짜 파싱 실패 (${index}):`, item);
+                return;
+            }
+            const y = d.year();
+            const amt = parseAmount(item.amount);
+            yearMap[y] = (yearMap[y] || 0) + amt;
+            console.log(`연간 데이터 추가: ${y}년, 금액: ${amt}`); // 디버깅용
+        });
+
+        // 정렬된 연도 배열
+        const years = Object.keys(yearMap).map(Number).sort((a, b) => a - b);
+        console.log('연간 집계 결과:', yearMap, '연도 목록:', years); // 디버깅용
+
+        return years.map((y) => ({
+            name: `${y}년`,
+            sales: yearMap[y],
+            orders: Math.round(yearMap[y] / 1000),
+        }));
+    };
+
+    const chartData = convertDataForChart(data, activeTab);
+    console.log('최종 차트 데이터:', chartData); // 디버깅용
 
     const getTitle = () => {
         if (activeTab === 'daily') return '주간 매출 추이';
@@ -50,12 +186,11 @@ const PeriodSalesChart = ({ data, activeTab }) => {
         return '연간 매출 추이';
     };
 
-    // 커스텀 툴팁
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
                 <div className={styles.customTooltip}>
-                    <p className={styles.tooltipLabel}>{`${label}${activeTab === 'daily' ? '시' : activeTab === 'monthly' ? '월' : '년'}`}</p>
+                    <p className={styles.tooltipLabel}>{label}</p>
                     {payload.map((entry, index) => (
                         <p key={index} style={{ color: entry.color }}>
                             {entry.dataKey === 'sales' ? '매출: ' : '주문수: '}
@@ -106,23 +241,21 @@ const PeriodSalesChart = ({ data, activeTab }) => {
                         <Tooltip content={<CustomTooltip />} />
                         <Legend />
 
-                        {/* 바 차트 - 매출 */}
                         <Bar
                             yAxisId="left"
                             dataKey="sales"
-                            name="주문"
+                            name="매출"
                             fill="#4561DB"
                             fillOpacity={0.6}
                             radius={[4, 4, 0, 0]}
                             barSize={60}
                         />
 
-                        {/* 라인 차트 - 주문수 */}
                         <Line
                             yAxisId="right"
                             type="monotone"
                             dataKey="orders"
-                            name="매출"
+                            name="주문수"
                             stroke="#28a745"
                             strokeWidth={3}
                             dot={{ fill: '#28a745', strokeWidth: 2, r: 4 }}

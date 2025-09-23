@@ -1,50 +1,134 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../../styles/admin/pages/PeriodSalesPage.module.css';
 import PeriodSalesChart from "./chart/PeriodSalesChart";
+import { usePeriodSales } from '../../hooks/usePeriodSales';
 
 const PeriodSales = () => {
     const [activeTab, setActiveTab] = useState('daily');
+    const { salesData, chartData, pagination, loading, error, fetchAllSalesData } = usePeriodSales();
 
-    // 샘플 데이터
-    const salesData = {
-        daily: [
-            { time: '25/01/05', amount: '89,500원', fee: '300', refund: '89,500원', paymentMethod: '짐페이' },
-            { time: '25/01/05', amount: '156,800원', fee: '300', refund: '', paymentMethod: '짐페이' },
-            { time: '25/01/04', amount: '75,200원', fee: '500', refund: '', paymentMethod: '짐페이' },
-            { time: '25/01/03', amount: '198,300원', fee: '1300', refund: '', paymentMethod: '짐페이' },
-            { time: '25/01/03', amount: '133,300원', fee: '200', refund: '133,300원', paymentMethod: '짐페이' },
-            { time: '25/01/03', amount: '177,300원', fee: '500', refund: '', paymentMethod: '짐페이' },
-            { time: '25/01/02', amount: '150,300원', fee: '1000', refund: '', paymentMethod: '짐페이' },
-            { time: '25/01/01', amount: '125,000원', fee: '1000', refund: '125,000원', paymentMethod: '짐페이' },
-        ]
-        // monthly: [
-        //     { time: '1', amount: '15,250,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '2', amount: '12,890,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '3', amount: '18,560,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '4', amount: '14,750,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '5', amount: '15,750,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '6', amount: '14,660,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '7', amount: '13,350,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '8', amount: '15,700,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '9', amount: '17,750,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '10', amount: '14,880,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '11', amount: '20,790,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '12', amount: '14,750,000원', region: '전국', paymentMethod: '종합' },
-        // ],
-        // yearly: [
-        //     { time: '2025', amount: '28,140,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '2024', amount: '184,560,000원', region: '전국', paymentMethod: '종합' },
-        //     { time: '2023', amount: '156,780,000원', region: '전국', paymentMethod: '종합' },
-        // ]
+    // 탭 변경 시 전체 데이터 가져오기
+    const handleTabChange = async (tabType) => {
+        setActiveTab(tabType);
+        console.log('탭 변경:', tabType);
+        // 전체 데이터를 가져옵니다 (날짜 범위 필터링 없이)
+        await fetchAllSalesData();
     };
 
-    const getCurrentData = () => {
-        return salesData.daily;
+    // 페이지 변경 처리 (매출 목록용)
+    const handlePageChange = async (newPage) => {
+        console.log('페이지 변경:', newPage);
+        // 전체 데이터에서 페이징만 변경
+        await fetchAllSalesData(newPage);
     };
+
+    // 페이지네이션 렌더링 함수
+    const renderPagination = () => {
+        const { currentPage, totalPages, hasNext, hasPrevious } = pagination;
+
+        if (totalPages <= 1) return null;
+
+        const pageNumbers = [];
+        const maxVisiblePages = 10;
+
+        // 시작 페이지와 끝 페이지 계산
+        let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+
+        // 끝에서부터 계산하여 시작 페이지 재조정
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(0, endPage - maxVisiblePages + 1);
+        }
+
+        // 이전 버튼
+        if (hasPrevious) {
+            pageNumbers.push(
+                <button
+                    key="prev"
+                    className={styles.pageButton}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={loading}
+                >
+                    이전
+                </button>
+            );
+        }
+
+        // 첫 페이지 (1)
+        if (startPage > 0) {
+            pageNumbers.push(
+                <button
+                    key={0}
+                    className={`${styles.pageNumber} ${currentPage === 0 ? styles.active : ''}`}
+                    onClick={() => handlePageChange(0)}
+                    disabled={loading}
+                >
+                    1
+                </button>
+            );
+
+            if (startPage > 1) {
+                pageNumbers.push(<span key="start-ellipsis" className={styles.ellipsis}>...</span>);
+            }
+        }
+
+        // 페이지 번호들
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(
+                <button
+                    key={i}
+                    className={`${styles.pageNumber} ${currentPage === i ? styles.active : ''}`}
+                    onClick={() => handlePageChange(i)}
+                    disabled={loading}
+                >
+                    {i + 1}
+                </button>
+            );
+        }
+
+        // 마지막 페이지
+        if (endPage < totalPages - 1) {
+            if (endPage < totalPages - 2) {
+                pageNumbers.push(<span key="end-ellipsis" className={styles.ellipsis}>...</span>);
+            }
+
+            pageNumbers.push(
+                <button
+                    key={totalPages - 1}
+                    className={`${styles.pageNumber} ${currentPage === totalPages - 1 ? styles.active : ''}`}
+                    onClick={() => handlePageChange(totalPages - 1)}
+                    disabled={loading}
+                >
+                    {totalPages}
+                </button>
+            );
+        }
+
+        // 다음 버튼
+        if (hasNext) {
+            pageNumbers.push(
+                <button
+                    key="next"
+                    className={styles.pageButton}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={loading}
+                >
+                    다음
+                </button>
+            );
+        }
+
+        return pageNumbers;
+    };
+
+    // 컴포넌트 마운트 시 초기 데이터 로드
+    useEffect(() => {
+        console.log('컴포넌트 마운트 - 전체 데이터 로드');
+        fetchAllSalesData();
+    }, []);
 
     return (
         <div className={styles.container}>
-            {/* 메인 컨텐츠 */}
             <div className={styles.main}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>기간별 매출 관리</h1>
@@ -55,74 +139,107 @@ const PeriodSales = () => {
                     <div className={styles.tabs}>
                         <button
                             className={`${styles.tab} ${activeTab === 'daily' ? styles.tabActive : ''}`}
-                            onClick={() => setActiveTab('daily')}
+                            onClick={() => handleTabChange('daily')}
+                            disabled={loading}
                         >
                             주간
                         </button>
                         <button
                             className={`${styles.tab} ${activeTab === 'monthly' ? styles.tabActive : ''}`}
-                            onClick={() => setActiveTab('monthly')}
+                            onClick={() => handleTabChange('monthly')}
+                            disabled={loading}
                         >
                             월간
                         </button>
                         <button
                             className={`${styles.tab} ${activeTab === 'yearly' ? styles.tabActive : ''}`}
-                            onClick={() => setActiveTab('yearly')}
+                            onClick={() => handleTabChange('yearly')}
+                            disabled={loading}
                         >
                             연간
                         </button>
                     </div>
 
-                    <PeriodSalesChart
-                        data={salesData[activeTab]}
-                        activeTab={activeTab}
-                    />
+                    {/* 로딩 상태 */}
+                    {loading && (
+                        <div className={styles.loadingContainer}>
+                            <p>데이터를 불러오는 중...</p>
+                        </div>
+                    )}
+
+                    {/* 에러 상태 */}
+                    {error && (
+                        <div className={styles.errorContainer}>
+                            <p>데이터를 불러오는데 실패했습니다: {error}</p>
+                            <button onClick={() => handleTabChange(activeTab)}>다시 시도</button>
+                        </div>
+                    )}
+
+                    {/* 차트 */}
+                    {!loading && !error && (
+                        <PeriodSalesChart
+                            data={chartData}
+                            activeTab={activeTab}
+                        />
+                    )}
 
                     {/* 매출 목록 */}
                     <div className={styles.listSection}>
                         <h3 className={styles.sectionTitle}>
-                            {activeTab === 'daily' && '최근 거래 내역'}
-                            {activeTab === 'monthly' && '최근 거래 내역'}
-                            {activeTab === 'yearly' && '최근 거래 내역'}
+                            최근 거래 내역
+                            {pagination.totalElements > 0 && (
+                                <span className={styles.totalCount}>
+                                    (총 {pagination.totalElements.toLocaleString()}건)
+                                </span>
+                            )}
                         </h3>
 
                         <div className={styles.tableContainer}>
                             <div className={styles.tableHeader}>
                                 <div className={styles.headerCell}>날짜</div>
                                 <div className={styles.headerCell}>금액</div>
-                                <div className={styles.headerCell}>환불금액</div>
                                 <div className={styles.headerCell}>수수료</div>
-                                {/*<div className={styles.headerCell}>지역</div>*/}
                                 <div className={styles.headerCell}>결제수단</div>
                                 <div className={styles.headerCell}>결제상태</div>
                             </div>
 
-                            {getCurrentData().map((item, index) => (
-                                <div key={index} className={styles.tableRow}>
-                                    <div className={styles.cell}>{item.time}</div>
-                                    <div className={styles.cell}>{item.amount}</div>
-                                    <div className={styles.cell}>{item.refund}</div>
-                                    <div className={styles.cell}>{item.fee}</div>
-                                    <div className={styles.cell}>{item.paymentMethod}</div>
-                                    <div className={styles.cell}>
-                                        <div className={styles.actionButtons}>
-                                            <button className={styles.btnDetail}>완료</button>
-                                            {/*<button className={styles.btnReport}>환불</button>*/}
+                            {!loading && !error && salesData.length > 0 ? (
+                                salesData.map((item, index) => (
+                                    <div key={index} className={styles.tableRow}>
+                                        <div className={styles.cell}>{item.time}</div>
+                                        <div className={styles.cell}>{item.amount}</div>
+                                        <div className={styles.cell}>{item.fee}</div>
+                                        <div className={styles.cell}>{item.paymentMethod}</div>
+                                        <div className={styles.cell}>
+                                            <div className={styles.actionButtons}>
+                                                <button className={styles.btnDetail}>완료</button>
+                                            </div>
                                         </div>
                                     </div>
+                                ))
+                            ) : !loading && !error ? (
+                                <div className={styles.noData}>
+                                    <p>매출 데이터가 없습니다.</p>
                                 </div>
-                            ))}
+                            ) : null}
                         </div>
 
                         {/* 페이지네이션 */}
-                        <div className={styles.pagination}>
-                            <span className={styles.pageNumber}>1</span>
-                            <span className={styles.pageNumber}>2</span>
-                            <span className={styles.pageNumber}>3</span>
-                            <span className={styles.pageNumber}>...</span>
-                            <span className={styles.pageNumber}>9</span>
-                            <span className={styles.pageNumber}>10</span>
-                        </div>
+                        {!loading && !error && pagination.totalPages > 1 && (
+                            <div className={styles.pagination}>
+                                {renderPagination()}
+                            </div>
+                        )}
+
+                        {/* 페이지 정보 표시 */}
+                        {!loading && !error && pagination.totalElements > 0 && (
+                            <div className={styles.pageInfo}>
+                                <span>
+                                    페이지 {pagination.currentPage + 1} / {pagination.totalPages}
+                                    (총 {pagination.totalElements}건 중 {pagination.currentPage * pagination.size + 1}-{Math.min((pagination.currentPage + 1) * pagination.size, pagination.totalElements)}건 표시)
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

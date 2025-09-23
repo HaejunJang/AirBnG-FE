@@ -375,3 +375,104 @@
         text-align: left;
     }
 }
+
+
+/* PeriodSalesPage.module.css에 추가할 스타일 */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding: 16px 0;
+}
+
+.pageNumber {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #e1e5e9;
+    background-color: #fff;
+    color: #4a5568;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pageNumber:hover {
+    background-color: #f7fafc;
+    border-color: #cbd5e0;
+}
+
+.pageNumber.active {
+    background-color: #4561DB;
+    border-color: #4561DB;
+    color: white;
+}
+
+.pageNumber.active:hover {
+    background-color: #3c51c7;
+    border-color: #3c51c7;
+}
+
+.pageButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 8px 16px;
+    border: 1px solid #e1e5e9;
+    background-color: #fff;
+    color: #4a5568;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pageButton:hover {
+    background-color: #f7fafc;
+    border-color: #cbd5e0;
+}
+
+.pageButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pageButton:disabled:hover {
+    background-color: #fff;
+    border-color: #e1e5e9;
+}
+
+.ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    color: #a0aec0;
+    font-size: 14px;
+}
+
+.pageInfo {
+    text-align: center;
+    margin-top: 16px;
+    color: #718096;
+    font-size: 14px;
+}
+
+.totalCount {
+    color: #718096;
+    font-weight: normal;
+    font-size: 14px;
+}
