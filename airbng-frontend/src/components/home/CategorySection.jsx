@@ -1,6 +1,7 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useModal, Modal } from "../common/ModalUtil";
 import backpackImg from "../../assets/backpack_img.svg";
 import carrierImg from "../../assets/carrier_img.svg";
 import boxImg from "../../assets/box_img.svg";
@@ -18,37 +19,47 @@ const NORMAL_JIM_MAP = { 0: 1, 2: 4, 3: 5 }; // 인덱스 → jimTypeId (캐리�
 function CategorySection({ onCategoryClick, className = "" }) {
   const navigate = useNavigate();
   const { isLoggedIn, ready } = useAuth();
-
-  const [showCarrierModal, setShowCarrierModal] = useState(false);
+  const modal = useModal();
 
   const goToJimType = useCallback(
     (jimTypeId) => {
       const target = `/page/lockerSearch?jimTypeId=${jimTypeId}`;
-      if (!ready) return; // AuthContext 준비 전 클릭 무시
-
-      // if (!isLoggedIn) {
-      //   alert("로그인이 필요합니다. 로그인 후 이용해주세요.");
-      //   navigate(`/page/login?redirect=${encodeURIComponent(target)}`);
-      //   return;
-      // }
+      if (!ready) return;
       navigate(target);
     }, [ready, navigate]
   );
 
   const handleCardActivate = useCallback(
     (idx) => {
-      // 외부 콜백(있다면)도 호출 — 분석/트래킹용
       if (onCategoryClick) onCategoryClick(idx);
 
       if (idx === 1) {
-        // 캐리어: 소/대 선택 모달
-        setShowCarrierModal(true);
+        modal.showConfirm(
+          "캐리어 크기 선택",
+          "보관하실 캐리어의 크기를 골라주세요.",
+          () => { // 확인 버튼 → 캐리어 대형
+            goToJimType(3);
+            modal.hideModal();
+          },
+          () => { // 취소 버튼 → 캐리어 소형
+            goToJimType(2);
+            modal.hideModal();
+          }
+        );
+        // 버튼 텍스트 변경 (캐리어 소형/캐리어 대형)
+        setTimeout(() => {
+          const btns = document.querySelectorAll('.modal-util-btn');
+          if (btns.length === 2) {
+            btns[0].textContent = "캐리어 소형";
+            btns[1].textContent = "캐리어 대형";
+          }
+        }, 10);
         return;
       }
       const jimTypeId = NORMAL_JIM_MAP[idx];
       if (jimTypeId) goToJimType(jimTypeId);
     },
-    [onCategoryClick, goToJimType]
+    [onCategoryClick, goToJimType, modal]
   );
 
   const handleKeyDown = (e, idx) => {
@@ -58,16 +69,9 @@ function CategorySection({ onCategoryClick, className = "" }) {
     }
   };
 
-  const chooseCarrier = (size /* 'small'|'large' */) => {
-    const id = size === "small" ? 2 : 3; // 캐리어 소형=2, 대형=3
-    setShowCarrierModal(false);
-    goToJimType(id);
-  };
-
   return (
     <section className={`category-section ${className}`}>
       <h3>어떤 짐을 보관하시나요?</h3>
-
       <div className="category-grid">
         {categories.map((cat, idx) => (
           <div
@@ -88,50 +92,7 @@ function CategorySection({ onCategoryClick, className = "" }) {
           </div>
         ))}
       </div>
-
-      {/* 캐리어 선택 모달 */}
-      {showCarrierModal && (
-        <div
-          className="modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setShowCarrierModal(false)}
-        >
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: 360 }}
-          >
-            <div className="modal-header">
-              <h3>캐리어 크기를 선택하세요</h3>
-            </div>
-            <div className="modal-body">
-              <p>보관하실 캐리어의 크기를 골라주세요.</p>
-              <div className="carrier-size-actions" style={{ display: "grid", gap: 12, marginTop: 12 }}>
-                <button
-                  className="btn btn--primary"
-                  type="button"
-                  onClick={() => chooseCarrier("small")}
-                >
-                  캐리어 소형
-                </button>
-                <button
-                  className="btn btn--outline"
-                  type="button"
-                  onClick={() => chooseCarrier("large")}
-                >
-                  캐리어 대형
-                </button>
-              </div>
-            </div>
-            <div className="modal-footer" style={{ marginTop: 14 }}>
-              <button className="btn btn--ghost" type="button" onClick={() => setShowCarrierModal(false)}>
-                취소
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal {...modal.modalState} onClose={modal.hideModal} />
     </section>
   );
 }

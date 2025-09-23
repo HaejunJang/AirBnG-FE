@@ -7,17 +7,18 @@ import plusIcon from "../assets/plusIcon.svg";
 import minusIcon from "../assets/minusIcon.svg";
 import historyIcon from "../assets/historyIcon.svg";
 import cardIcon from "../assets/cardIcon.svg";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 export default function MyWallet() {
   const { user, isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const modal = useModal();
 
-  // 상태 관리
   const [walletData, setWalletData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  // 은행 아이콘 매핑 함수
   const getBankIcon = (bankCode) => {
     switch (bankCode) {
       case 6: // 국민
@@ -36,15 +37,11 @@ export default function MyWallet() {
         return require("../assets/bank-default.svg").default;
     }
   };
-  // 상태 관리 부분에 추가
-  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  // 드롭다운 토글 함수
   const toggleDropdown = (accountId) => {
     setActiveDropdown(activeDropdown === accountId ? null : accountId);
   };
 
-  // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     const handleClickOutside = () => {
       setActiveDropdown(null);
@@ -54,7 +51,6 @@ export default function MyWallet() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // 메뉴 액션 함수들
   const handleSetPrimary = (accountId) => {
     console.log("주계좌 변경:", accountId);
     setActiveDropdown(null);
@@ -67,7 +63,6 @@ export default function MyWallet() {
     // TODO: API 연동
   };
 
-  // 금액 포맷터
   const formatWon = (amount) => {
     if (amount == null) return "0원";
     const num = typeof amount === "number" ? amount : Number(amount);
@@ -75,7 +70,6 @@ export default function MyWallet() {
     return new Intl.NumberFormat("ko-KR").format(num) + "원";
   };
 
-  // 계좌번호 마스킹
   const maskAccountNumber = (accountNumber) => {
     if (!accountNumber) return "";
     if (accountNumber.length <= 4) return accountNumber;
@@ -84,7 +78,6 @@ export default function MyWallet() {
     return maskedPart + visiblePart;
   };
 
-  // 지갑 정보 조회
   const fetchWalletData = useCallback(async () => {
     try {
       setLoading(true);
@@ -105,7 +98,6 @@ export default function MyWallet() {
     }
   }, []);
 
-  // 컴포넌트 마운트 시 데이터 로드
   useEffect(() => {
     if (isLoggedIn) {
       fetchWalletData();
@@ -114,36 +106,30 @@ export default function MyWallet() {
     }
   }, [isLoggedIn, fetchWalletData, navigate]);
 
-  // 뒤로가기
   const handleBack = () => {
     navigate(-1);
   };
 
-  // 충전 페이지로 이동
   const goToCharge = () => {
     navigate("/page/mypage/wallet/charge");
   };
 
-  // 출금 페이지로 이동
   const goToWithdraw = () => {
     if (!walletData?.accounts?.length) {
-      alert("출금을 위해서는 먼저 계좌를 등록해주세요.");
+      modal.showError("출금 불가", "출금을 위해서는 먼저 계좌를 등록해주세요.");
       return;
     }
     navigate("/page/mypage/wallet/withdraw");
   };
 
-  // 사용내역 페이지로 이동
   const goToHistory = () => {
     navigate("/page/mypage/wallet/history");
   };
 
-  // 계좌 등록 페이지로 이동
   const goToAddAccount = () => {
     navigate("/page/mypage/account/add");
   };
 
-  // 로딩 상태
   if (loading) {
     return (
       <div className={styles.container}>
@@ -164,7 +150,6 @@ export default function MyWallet() {
     );
   }
 
-  // 에러 상태
   if (error) {
     return (
       <div className={styles.container}>
@@ -204,7 +189,6 @@ export default function MyWallet() {
       </header>
 
       <main className={styles.mainContent}>
-        {/* 지갑 카드 */}
         <div className={styles.walletCard}>
           <div className={styles.walletHeader}>
             <img src={cardIcon} alt="충전" className={styles.walletIcon} />
@@ -216,7 +200,6 @@ export default function MyWallet() {
               {formatWon(walletData?.balance)}
             </h1>
           </div>
-          {/* 지갑 카드 내부 액션 버튼들 */}
           <div className={styles.walletActionButtons}>
             <button className={styles.walletActionBtn} onClick={goToCharge}>
               <img
@@ -245,7 +228,6 @@ export default function MyWallet() {
           </div>
         </div>
 
-        {/* 연동 계좌 섹션 */}
         <div className={styles.accountSection}>
           <div className={styles.sectionTitle}>
             <span>연동 계좌</span>
@@ -262,7 +244,6 @@ export default function MyWallet() {
 
           {hasAccounts ? (
             <div>
-              {/* 주계좌 */}
               {primaryAccount && (
                 <div className={styles.accountCard}>
                   <div className={styles.accountHeader}>
@@ -320,7 +301,6 @@ export default function MyWallet() {
                 </div>
               )}
 
-              {/* 나머지 계좌들 */}
               {walletData.accounts
                 .filter((account) => !account.primary)
                 .map((account) => (
@@ -397,6 +377,7 @@ export default function MyWallet() {
             </div>
           )}
         </div>
+        <Modal {...modal.modalState} onClose={modal.hideModal} />
       </main>
     </div>
   );

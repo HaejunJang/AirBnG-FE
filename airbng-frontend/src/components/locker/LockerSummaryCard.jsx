@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import SettingsIcon from "../../assets/settings.svg";
+import "../../styles/pages/manage.css";
 
 function LockerSummaryCard({
   locker,
