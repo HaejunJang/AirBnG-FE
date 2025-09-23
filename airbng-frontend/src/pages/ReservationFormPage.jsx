@@ -935,20 +935,24 @@ function ReservationFormPage() {
                   </div>
                   {method.id === "jimpay" &&
                     selectedPaymentMethod?.id === method.id && (
-                      <div className="payment-method-actions">
+                      <div 
+                        className="payment-method-actions"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateToCharge();
+                        }}
+                      >
                         <span className="balance-simple">
                           {walletBalance === null
                             ? ""
                             : `${Math.floor(walletBalance).toLocaleString()}원`}
                         </span>
-                        <button
-                          className="charge-button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigateToCharge();
-                          }}
-                        >
-                          ›
+                        <button className="charge-button">
+                          <svg 
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"/>
+                          </svg>
                         </button>
                       </div>
                     )}
