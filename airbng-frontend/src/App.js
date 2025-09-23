@@ -45,6 +45,7 @@ function App() {
     if (pathname.startsWith("/page/reservations")) return "calendar";
     if (pathname.startsWith("/page/mypage")) return "mypage";
     if (pathname.startsWith("/page/login")) return "mypage";
+    if (pathname.startsWith("/page/signup")) return "mypage";
     return "home";
   }
 
