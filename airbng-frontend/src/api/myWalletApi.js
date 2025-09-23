@@ -37,4 +37,7 @@ export const walletApi = {
   // 주계좌 설정
   setPrimaryAccount: (accountId) =>
     httpAuth.put(`/wallet/account/${accountId}/primary`),
+
+  // 계좌 삭제
+  deleteAccount: (accountId) => httpAuth.delete(`/account/${accountId}`),
 };
