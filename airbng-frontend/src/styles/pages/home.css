@@ -140,7 +140,7 @@
 .category-card:nth-child(4){ animation-delay:.4s }
 
 /* ---------- 4) 인기 보관소 ---------- */
-.popular-section{ padding:24px 20px 20px; margin-top:10px }
+.popular-section{ padding:24px 20px 100px; margin-top:10px }
 .popular-section h3{
   font-size:var(--fs-22); font-weight:700; line-height:22px; margin-bottom:12px;
   color:var(--text); animation: headingPulse 4s ease-in-out infinite; pointer-events:none;
