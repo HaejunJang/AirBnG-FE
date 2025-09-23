@@ -6,7 +6,9 @@ import { FiTrendingUp } from "react-icons/fi";
 import { CiCalendar } from "react-icons/ci";
 import { LuBuilding } from "react-icons/lu";
 import { BiMoneyWithdraw } from "react-icons/bi";
+import { Modal, useModal } from "../../common/ModalUtil";
 import styles from '../../../styles/admin/layout/AdminSidebar.module.css';
+import {useAuth} from "../../../context/AuthContext";
 
 const AdminSidebar = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -14,6 +16,9 @@ const AdminSidebar = () => {
     const [activeSubMenu, setActiveSubMenu] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
+    const { logout } = useAuth();
+
+    const { modalState, hideModal, showConfirm } = useModal();
 
     const menuItems = [
         {
@@ -85,6 +90,20 @@ const AdminSidebar = () => {
         navigate(subItem.path);
     };
 
+    const onLogout = () => {
+        showConfirm(
+            "로그아웃",
+            "정말로 로그아웃하시겠습니까?",
+            async () => {
+                try {
+                    if (logout) await logout(); // 상위 컴포넌트에서 전달받은 logout 함수 실행
+                } catch (e) {
+                    console.error("로그아웃 실패:", e);
+                }
+            }
+        );
+    };
+
     return (
         <div className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : styles.sidebarClosed}`}>
             {/* 헤더 */}
@@ -132,6 +151,28 @@ const AdminSidebar = () => {
                     </div>
                 ))}
             </nav>
+            {/* ---------------- 로그아웃 버튼 맨 아래 ---------------- */}
+            <div className={styles.logoutContainer}>
+                <button onClick={onLogout} className={`${styles.menuButton} ${styles.logoutButton}`}>
+                    {sidebarOpen ? "로그아웃" : "⎋"}
+                </button>
+            </div>
+
+            {/* 모달 */}
+            <Modal
+                show={modalState.show}
+                type={modalState.type}
+                title={modalState.title}
+                message={modalState.message}
+                confirmText={modalState.confirmText}
+                cancelText={modalState.cancelText}
+                showCancel={modalState.showCancel}
+                onConfirm={modalState.onConfirm}
+                onCancel={modalState.onCancel}
+                onClose={hideModal}
+            />
+
+
         </div>
     );
 };

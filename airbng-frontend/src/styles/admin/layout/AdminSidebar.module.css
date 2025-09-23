@@ -137,3 +137,19 @@
 .subMenuText {
     font-size: 0.9rem;
 }
+
+.logoutContainer {
+    margin-top: auto;
+    padding: 10px 0;
+}
+
+.logoutButton {
+    background-color: #fff;      /* 흰색 배경 */
+    color: #000;                 /* 검은 글씨 */
+    border: 2px solid #dc3545;   /* 빨간색 테두리 */
+}
+
+.logoutButton:hover {
+    background-color: #dc3545;   /* hover 시 배경 빨강 */
+    color: #fff;                 /* 글씨 흰색 */
+}
