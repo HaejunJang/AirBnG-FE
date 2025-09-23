@@ -8,7 +8,6 @@
 /* ---------- App Shell ---------- */
 .airbng-chat {
   background: #f8f9fa;
-  min-height: 100vh;
   display: flex;
   justify-content: center;
 }
@@ -18,7 +17,14 @@
   border-left: 1px solid #e6e9ef;
   border-right: 1px solid #e6e9ef;
   box-shadow: 0 0 20px rgba(0,0,0,.06);
-  padding-bottom: var(--bottom-nav-height);
+  padding-bottom: 0;
+}
+.airbng-chat,
+.airbng-chat .container {
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
 }
 .airbng-chat .page-header {
   position: sticky; top: 0; z-index: 5;
@@ -274,7 +280,9 @@
    Chat Room
    ============================================================= */
 .chat-room {
-  height: calc(100dvh - var(--bottom-nav-height));
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
   display: grid;
   grid-template-rows: var(--header-height) 1fr auto;
   background: #EFF2FF !important;
@@ -294,9 +302,10 @@
 .chat-room__back:hover, .chat-room__more:hover { background: color-mix(in oklab, var(--primary) 8%, #eef2ff); }
 
 .chat-room__list {
-  position: relative;
   padding: 14px;
-  overflow: auto;
+  overflow-y: auto;
+  height: 100%;
+  max-height: 100%;
   background: #EFF2FF !important;
   scrollbar-width: none;
 }
@@ -567,14 +576,17 @@
    Chat Input
    ============================================================= */
 .chat-input {
+  width: 100%;
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: 1fr 44px 54px;            /* 입력창이 남은 영역 꽉, 버튼 2개 고정폭 */
-  grid-template-areas: "field attach send";        /* 원하는 순서 고정 */
+  grid-template-columns: 1fr 44px 54px;
+  grid-template-areas: "field attach send";
   gap: 10px;
   align-items: center;
   padding: 10px 12px;
-  background:#EFF2FF !important;
+  background: #EFF2FF !important;
   border-top: 1px solid var(--border);
+  margin: 0 auto;
 }
 .chat-input__field {
   width: 100%; padding: 12px 14px; border-radius: 14px;
