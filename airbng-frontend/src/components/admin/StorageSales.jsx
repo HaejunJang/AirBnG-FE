@@ -64,6 +64,11 @@ const StorageSales = () => {
     const chartData = getChartData();
     const chartType = searchLockerType === '전체' ? 'pie' : 'composed';
 
+    useEffect(() => {
+        handleSearch();
+    }, []);
+
+
     return (
         <div className={styles.container}>
             <div className={styles.main}>
@@ -175,7 +180,7 @@ const StorageSales = () => {
                                 <div className={styles.headerCell}>거래수</div>
                                 <div className={styles.headerCell}>평균 거래금액</div>
                                 <div className={styles.headerCell}>수수료</div>
-                                <div className={styles.headerCell}>환불액</div>
+                                {/*<div className={styles.headerCell}>환불액</div>*/}
                             </div>
 
                             {!loading && !error && (
@@ -194,7 +199,7 @@ const StorageSales = () => {
                                             <div className={styles.cell}>{storage.transactions}건</div>
                                             <div className={styles.cell}>{storage.avgAmount}</div>
                                             <div className={styles.cell}>{storage.fee}</div>
-                                            <div className={styles.cell}>{storage.refund}</div>
+                                            {/*<div className={styles.cell}>{storage.refund}</div>*/}
                                         </div>
                                     ))
                                 ) : searchLockerType !== '전체' && chartData.length > 0 ? (
@@ -212,7 +217,7 @@ const StorageSales = () => {
                                             <div className={styles.cell}>{period.transactions}건</div>
                                             <div className={styles.cell}>{period.avgAmount.toLocaleString()}원</div>
                                             <div className={styles.cell}>{Math.round(period.sales * 0.05).toLocaleString()}원</div>
-                                            <div className={styles.cell}>0원</div>
+                                            {/*<div className={styles.cell}>0원</div>*/}
                                         </div>
                                     ))
                                 ) : (
