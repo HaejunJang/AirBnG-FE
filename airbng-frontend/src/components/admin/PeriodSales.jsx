@@ -230,16 +230,6 @@ const PeriodSales = () => {
                                 {renderPagination()}
                             </div>
                         )}
-
-                        {/* 페이지 정보 표시 */}
-                        {!loading && !error && pagination.totalElements > 0 && (
-                            <div className={styles.pageInfo}>
-                                <span>
-                                    페이지 {pagination.currentPage + 1} / {pagination.totalPages}
-                                    (총 {pagination.totalElements}건 중 {pagination.currentPage * pagination.size + 1}-{Math.min((pagination.currentPage + 1) * pagination.size, pagination.totalElements)}건 표시)
-                                </span>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
