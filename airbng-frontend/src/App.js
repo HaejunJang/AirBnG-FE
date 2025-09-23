@@ -55,12 +55,16 @@ function App() {
     const hideNavbarPaths = [
       "/page/reservations/detail",
       "/page/reservations/form",
+      "/page/lockers/manage", 
+      "/page/lockers/register",
+      "/page/chat/new",
+      "/page/mypage/update",
     ];
 
-    // 현재 경로가 네비바를 숨겨야 하는 경로인지 확인
-    const shouldHideNavbar = hideNavbarPaths.some((path) =>
-      location.pathname.startsWith(path)
-    );
+    // 채팅방 상세 경로는 별도 처리
+    const shouldHideNavbar =
+      hideNavbarPaths.some((path) => location.pathname.startsWith(path)) ||
+      /^\/page\/chat\/\d+/.test(location.pathname);
 
     return (
       <div className="airbng-home">
@@ -98,8 +102,6 @@ function App() {
           <Route path="/page/chat/:convId" element={<ChatRoomPage />} />
           <Route path="/page/mypage/update" element={<MyInfoPage />} />
           <Route path="/page/notification" element={<Notification />} />
-
-          <Route path="/page/mypage/update" element={<MyInfoPage />} />
 
           <Route path="/page/mypage/wallet" element={<MyWallet />} />
           <Route
