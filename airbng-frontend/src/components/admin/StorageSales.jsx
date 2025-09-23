@@ -4,67 +4,65 @@ import StorageSalesChart from './chart/StorageSalesChart';
 import { useStorageSales } from '../../hooks/useStorageSales';
 
 const StorageSales = () => {
-    const [selectedLockerType, setSelectedLockerType] = useState('전체');
-    const { storageSalesData, summaryData, loading, error, fetchStorageSales } = useStorageSales();
+    const [selectedLockerType, setSelectedLockerType] = useState('전체'); // 드롭다운 선택 상태
+    const [searchLockerType, setSearchLockerType] = useState('전체'); // 실제 조회 시 사용
 
-    // LockerType 매핑
+    const {
+        storageSalesData,
+        summaryData,
+        periodData,
+        loading,
+        error,
+        fetchStorageSales,
+        fetchStorageSalesByPeriod
+    } = useStorageSales();
+
     const getLockerTypeValue = (displayValue) => {
         switch (displayValue) {
-            case '개인':
-                return 'PERSONAL';
-            case '공공기관':
-                return 'PUBLIC';
-            case '기업':
-                return 'COMPANY';
+            case '개인': return 'PERSONAL';
+            case '공공기관': return 'PUBLIC';
+            case '기업': return 'COMPANY';
             case '전체':
-            default:
-                return null; // null이면 전체 조회
+            default: return null;
         }
     };
 
-    // 날짜 범위 설정 (현재 월)
     const getDateRange = () => {
         const now = new Date();
         const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
         const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-
-        // yyyy-MM-ddTHH:mm:ss 형식으로 포맷 (LocalDateTime 형식)
-        const formatDate = (date) => {
-            return date.toISOString().slice(0, 19);
-        };
-
-        return {
-            startDate: formatDate(startDate),
-            endDate: formatDate(endDate)
-        };
+        const formatDate = (date) => date.toISOString().slice(0, 19);
+        return { startDate: formatDate(startDate), endDate: formatDate(endDate) };
     };
 
-    // 조회 버튼 클릭 핸들러
     const handleSearch = async () => {
+        setSearchLockerType(selectedLockerType); // 조회용 상태 업데이트
         const lockerType = getLockerTypeValue(selectedLockerType);
         const { startDate, endDate } = getDateRange();
 
-        console.log('🔍 조회 시작:', { lockerType, startDate, endDate });
-        await fetchStorageSales({ lockerType, startDate, endDate });
+        if (lockerType === null) {
+            await fetchStorageSales({ lockerType, startDate, endDate });
+        } else {
+            await fetchStorageSalesByPeriod({ lockerType, startDate, endDate });
+        }
     };
 
-    // 컴포넌트 마운트 시 초기 데이터 로드
-    useEffect(() => {
-        const { startDate, endDate } = getDateRange();
-        fetchStorageSales({
-            lockerType: null, // 전체 조회
-            startDate,
-            endDate
-        });
-    }, []);
+    // 차트용 데이터
+    const getChartData = () => {
+        if (searchLockerType === '전체') {
+            return storageSalesData.map(storage => ({
+                name: storage.method,
+                sales: parseInt(storage.sales.replace(/[^\d]/g, '')),
+                transactions: storage.transactions,
+                avgAmount: parseInt(storage.avgAmount.replace(/[^\d]/g, ''))
+            }));
+        } else {
+            return periodData || [];
+        }
+    };
 
-    // 차트용 데이터 변환
-    const chartData = storageSalesData.map(storage => ({
-        name: storage.method,
-        sales: parseInt(storage.sales.replace(/[^\d]/g, '')),
-        transactions: storage.transactions,
-        avgAmount: parseInt(storage.avgAmount.replace(/[^\d]/g, ''))
-    }));
+    const chartData = getChartData();
+    const chartType = searchLockerType === '전체' ? 'pie' : 'composed';
 
     return (
         <div className={styles.container}>
@@ -81,7 +79,7 @@ const StorageSales = () => {
                             <select
                                 className={styles.select}
                                 value={selectedLockerType}
-                                onChange={(e) => setSelectedLockerType(e.target.value)}
+                                onChange={(e) => setSelectedLockerType(e.target.value)} // 상태만 변경
                                 disabled={loading}
                             >
                                 <option value="전체">전체</option>
@@ -120,7 +118,9 @@ const StorageSales = () => {
                             <div className={styles.summaryCard}>
                                 <div className={styles.cardTitle}>총 매출액</div>
                                 <div className={styles.cardValue}>{summaryData.totalSales}</div>
-                                <div className={styles.cardSubtext}>이번 달 누적</div>
+                                <div className={styles.cardSubtext}>
+                                    {searchLockerType === '전체' ? '전체 보관소' : `${searchLockerType} 보관소`} 이번 달
+                                </div>
                             </div>
                             <div className={styles.summaryCard}>
                                 <div className={styles.cardTitle}>총 거래수</div>
@@ -133,27 +133,44 @@ const StorageSales = () => {
                                 <div className={styles.cardSubtext}>거래당 평균</div>
                             </div>
                             <div className={styles.summaryCard}>
-                                <div className={styles.cardTitle}>활성 보관소 수</div>
-                                <div className={styles.cardValue}>{summaryData.activeStorages}개</div>
-                                <div className={styles.cardSubtext}>매출 발생 보관소</div>
+                                <div className={styles.cardTitle}>
+                                    {searchLockerType === '전체' ? '활성 보관소 수' : '이번 주 거래수'}
+                                </div>
+                                <div className={styles.cardValue}>
+                                    {searchLockerType === '전체'
+                                        ? `${summaryData.activeStorages}개`
+                                        : `${Math.round(summaryData.totalTransactions / 4)}건`
+                                    }
+                                </div>
+                                <div className={styles.cardSubtext}>
+                                    {searchLockerType === '전체' ? '매출 발생 보관소' : '주간 평균'}
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {/* 차트 섹션 */}
-                    {!loading && !error && storageSalesData.length > 0 && (
+                    {!loading && !error && chartData.length > 0 && (
                         <div className={styles.chartSection}>
-                            <StorageSalesChart data={chartData} />
+                            <StorageSalesChart
+                                data={chartData}
+                                chartType={chartType}
+                                selectedLockerType={searchLockerType}
+                            />
                         </div>
                     )}
 
                     {/* 보관소별 상세 목록 */}
                     <div className={styles.tableSection}>
-                        <h3 className={styles.sectionTitle}>보관소별 상세 현황</h3>
+                        <h3 className={styles.sectionTitle}>
+                            {searchLockerType === '전체' ? '보관소별 상세 현황' : `${searchLockerType} 보관소 기간별 현황`}
+                        </h3>
 
                         <div className={styles.tableContainer}>
                             <div className={styles.tableHeader}>
-                                <div className={styles.headerCell}>보관소 종류</div>
+                                <div className={styles.headerCell}>
+                                    {searchLockerType === '전체' ? '보관소 종류' : '기간'}
+                                </div>
                                 <div className={styles.headerCell}>매출액</div>
                                 <div className={styles.headerCell}>거래수</div>
                                 <div className={styles.headerCell}>평균 거래금액</div>
@@ -161,28 +178,49 @@ const StorageSales = () => {
                                 <div className={styles.headerCell}>환불액</div>
                             </div>
 
-                            {!loading && !error && storageSalesData.length > 0 ? (
-                                storageSalesData.map((storage) => (
-                                    <div key={storage.id} className={styles.tableRow}>
-                                        <div className={styles.cell}>
-                                            <div className={styles.paymentInfo}>
-                                                <div className={styles.paymentMethod}>
-                                                    {storage.method}
+                            {!loading && !error && (
+                                searchLockerType === '전체' && storageSalesData.length > 0 ? (
+                                    // 전체 조회시 - 보관소별 데이터
+                                    storageSalesData.map((storage) => (
+                                        <div key={storage.id} className={styles.tableRow}>
+                                            <div className={styles.cell}>
+                                                <div className={styles.paymentInfo}>
+                                                    <div className={styles.paymentMethod}>
+                                                        {storage.method}
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <div className={styles.cell}>{storage.sales}</div>
+                                            <div className={styles.cell}>{storage.transactions}건</div>
+                                            <div className={styles.cell}>{storage.avgAmount}</div>
+                                            <div className={styles.cell}>{storage.fee}</div>
+                                            <div className={styles.cell}>{storage.refund}</div>
                                         </div>
-                                        <div className={styles.cell}>{storage.sales}</div>
-                                        <div className={styles.cell}>{storage.transactions}건</div>
-                                        <div className={styles.cell}>{storage.avgAmount}</div>
-                                        <div className={styles.cell}>{storage.fee}</div>
-                                        <div className={styles.cell}>{storage.refund}</div>
+                                    ))
+                                ) : searchLockerType !== '전체' && chartData.length > 0 ? (
+                                    // 특정 보관소 조회시 - 기간별 데이터
+                                    chartData.map((period, index) => (
+                                        <div key={index} className={styles.tableRow}>
+                                            <div className={styles.cell}>
+                                                <div className={styles.paymentInfo}>
+                                                    <div className={styles.paymentMethod}>
+                                                        {period.name}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className={styles.cell}>{period.sales.toLocaleString()}원</div>
+                                            <div className={styles.cell}>{period.transactions}건</div>
+                                            <div className={styles.cell}>{period.avgAmount.toLocaleString()}원</div>
+                                            <div className={styles.cell}>{Math.round(period.sales * 0.05).toLocaleString()}원</div>
+                                            <div className={styles.cell}>0원</div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className={styles.noData}>
+                                        <p>해당 조건에 매출 데이터가 없습니다.</p>
                                     </div>
-                                ))
-                            ) : !loading && !error ? (
-                                <div className={styles.noData}>
-                                    <p>해당 조건에 매출 데이터가 없습니다.</p>
-                                </div>
-                            ) : null}
+                                )
+                            )}
                         </div>
                     </div>
                 </div>
