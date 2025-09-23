@@ -114,6 +114,10 @@ export default function WalletCharge() {
       navigate("/page/mypage/wallet");
     }
   };
+  // 계좌 등록 페이지로 이동하는 함수 추가
+  const goToAddAccount = () => {
+    navigate("/page/mypage/account/add");
+  };
 
   // 충전 금액 입력
   const handleAmountChange = (e) => {
@@ -354,8 +358,17 @@ export default function WalletCharge() {
               ))}
             </div>
           ) : (
+            // noAccount 부분 수정
             <div className={styles.noAccount}>
-              <p>등록된 계좌가 없습니다.</p>
+              <h3 className={styles.noAccountTitle}>연동된 계좌가 없습니다</h3>
+              <p className={styles.noAccountDesc}>
+                계좌를 등록하면 쉽게 충전하고
+                <br />
+                출금할 수 있어요
+              </p>
+              <button className={styles.addAccountBtn} onClick={goToAddAccount}>
+                계좌 등록하기
+              </button>
             </div>
           )}
         </div>

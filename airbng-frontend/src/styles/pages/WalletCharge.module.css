@@ -285,9 +285,36 @@
 .noAccount {
   text-align: center;
   padding: 40px 20px;
-  background: #f8f9fa;
+  background: #f8f9ff;
   border-radius: 12px;
   color: #666;
+  border: 2px dashed #e8ebff;
+}
+
+.noAccountTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.noAccountDesc {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+.addAccountBtn {
+  background-color: #4561db;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 /* 충전 버튼 */
@@ -317,9 +344,10 @@
 }
 /* 이용 안내 섹션 */
 .infoSection {
-  background: #f8f9fa;
+  background: #f8f9ff;
   border-radius: 12px;
   padding: 20px;
+  border: 2px dashed #e8ebff;
 }
 
 .infoTitle {
