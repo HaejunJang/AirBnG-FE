@@ -15,6 +15,8 @@ import CalendarIcon from "../assets/calendar copy.svg";
 import ClockIcon from "../assets/clock copy.svg";
 import { Modal, useModal } from "../components/common/ModalUtil";
 import CheckIcon from "../components/reservation/CheckIcon";
+import { getConversationByPeer, getOrCreateConversation } from "../api/chatApi";
+import chatIcon from "../assets/messages.svg";
 
 const ReservationDetail = () => {
   const navigate = useNavigate();
@@ -186,6 +188,26 @@ const ReservationDetail = () => {
   };
 
   const pricing = calculateTotal();
+
+  const handleChatGo = async () => {
+    if (!data?.keeperId || userRole !== "dropper") return;
+    try {
+      let convId;
+      const res = await getConversationByPeer(data.keeperId);
+      convId = res?.id || res?.convId || res?.data?.result?.convId;
+      if (!convId) {
+        const createRes = await getOrCreateConversation(data.keeperId);
+        convId = createRes?.id || createRes?.convId || createRes?.data?.result?.convId;
+      }
+      if (convId) {
+        navigate(`/page/chat/${convId}`);
+      } else {
+        showError("채팅 오류", "대화방을 찾거나 생성할 수 없습니다.");
+      }
+    } catch (e) {
+      showError("채팅 오류", "대화방을 찾거나 생성할 수 없습니다.");
+    }
+  };
 
   const handleCancel = async () => {
     try {
@@ -388,13 +410,24 @@ const ReservationDetail = () => {
                     </button>
                   </>
                 ) : userRole === "dropper" ? (
-                  <button
-                    className={styles.btnCancel}
-                    onClick={handleCancel}
-                    style={{ width: "100%" }}
-                  >
-                    취소
-                  </button>
+                  <>
+                    <button
+                      className={styles.btnCancel}
+                      onClick={handleCancel}
+                      style={{ width: "100%" }}
+                    >
+                      취소
+                    </button>
+                    <button
+                      className={styles.chatGoBtn}
+                      onClick={handleChatGo}
+                      aria-label="채팅 바로가기"
+                    >
+                      <svg className={styles.chatIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
+                    </button>
+                  </>
                 ) : null}
               </div>
             );
