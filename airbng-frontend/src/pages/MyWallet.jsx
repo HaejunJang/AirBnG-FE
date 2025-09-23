@@ -7,6 +7,7 @@ import plusIcon from "../assets/plusIcon.svg";
 import minusIcon from "../assets/minusIcon.svg";
 import historyIcon from "../assets/historyIcon.svg";
 import cardIcon from "../assets/cardIcon.svg";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 export default function MyWallet() {
   const { user, isLoggedIn } = useAuth();
@@ -16,6 +17,16 @@ export default function MyWallet() {
   const [walletData, setWalletData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  //모달
+  const {
+    modalState,
+    hideModal,
+    showSuccess,
+    showError,
+    showConfirm,
+    showLoading,
+  } = useModal();
 
   // 은행 아이콘 매핑 함수
   const getBankIcon = (bankCode) => {
@@ -127,7 +138,8 @@ export default function MyWallet() {
   // 출금 페이지로 이동
   const goToWithdraw = () => {
     if (!walletData?.accounts?.length) {
-      alert("출금을 위해서는 먼저 계좌를 등록해주세요.");
+      // alert("출금을 위해서는 먼저 계좌를 등록해주세요.");
+      showError("출금 오류", "먼저 계좌를 등록해주세요.");
       return;
     }
     navigate("/page/mypage/wallet/withdraw");
@@ -397,6 +409,16 @@ export default function MyWallet() {
             </div>
           )}
         </div>
+        {/* 모달 컴포넌트 */}
+        <Modal
+          show={modalState.show}
+          type={modalState.type}
+          title={modalState.title}
+          message={modalState.message}
+          confirmText={modalState.confirmText}
+          onConfirm={modalState.onConfirm}
+          onClose={hideModal}
+        />
       </main>
     </div>
   );
