@@ -59,7 +59,7 @@ const AdminSidebar = () => {
                 setActiveSubMenu('기간별 매출 추이');
             // } else if (currentPath.includes('/admin/sales/storage')) {
             //     setActiveSubMenu('보관소 매출 현황');
-            } else if (currentPath.includes('/admin/sales/payment')) {
+            } else if (currentPath.includes('/admin/sales/storage')) {
                 setActiveSubMenu('보관소 매출 현황');
             } else {
                 setActiveSubMenu('');
