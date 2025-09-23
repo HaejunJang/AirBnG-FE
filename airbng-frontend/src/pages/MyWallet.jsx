@@ -129,7 +129,7 @@ export default function MyWallet() {
   const goToWithdraw = () => {
     if (!walletData?.accounts?.length) {
       // alert("출금을 위해서는 먼저 계좌를 등록해주세요.");
-      modal.showError("출금 불가", "출금을 위해서는 먼저 계좌를 등록해주세요.");
+      showError("출금 불가", "출금을 위해서는 먼저 계좌를 등록해주세요.");
 
       return;
     }
@@ -392,6 +392,19 @@ export default function MyWallet() {
           )}
         </div>
       </main>
+      {/* ModalUtil Modal */}
+      <Modal
+        show={modalState.show}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+        onClose={hideModal}
+      />
     </div>
   );
 }
