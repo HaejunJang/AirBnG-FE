@@ -1,147 +1,125 @@
-/* 페이지 스크롤 컨테이너 */
 .airbng-register {
-  min-height: 100dvh;
-  overflow-y: auto;                 /* ⬅︎ hidden 금지 */
-  background: #fff;
+    min-height: 100dvh;
+    background: #fff;
 }
 
-/* 본문 컨테이너: 고정 헤더/바텀네비 공간 확보 */
 .airbng-register .register-container {
-  width: 100%;
-  max-width: 412px;
-  margin: 0 auto;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-
-  /* 헤더 아래로 시작 */
-  padding-top: calc(var(--header-height) + 12px);
-
-  /* 바텀 네비 공간 + 살짝 여백 */
-  padding-bottom: calc(var(--bottom-nav-height) + 24px);
-
-  /* 좌우 기본 패딩 */
-  padding-left: 20px;
-  padding-right: 20px;
+    width: 100%;
+    max-width: 412px;
+    margin: 0 auto;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding-top: calc(var(--header-height) + 12px);
+    padding-bottom: calc(var(--bottom-nav-height) + 24px);
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
-/* ------------------------------
-   Step Indicator
------------------------------- */
 .airbng-register .step-indicator {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin: 8px 0 16px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 16px;
 }
 .airbng-register .step-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 .airbng-register .step-icon {
-  width: 30px;
-  height: 30px;
-  flex: 0 0 auto;
-  display: block;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    display: block;
 }
 .airbng-register .step-line {
-  width: 67px;
-  height: 4px;                /* 이미지 비율에 맞춰 조정 */
-  flex: 0 0 auto;
-  display: block;
+    width: 67px;
+    height: 4px;
+    flex: 0 0 auto;
+    display: block;
 }
 
-/* ------------------------------
-   공통 form
------------------------------- */
 .airbng-register .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
 .airbng-register .form-group label {
-  color: #333;
-  font-family: 'Pretendard', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 12px;
+    color: #333;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
 }
+
 .airbng-register .form-group input[type="text"],
-.airbng-register input[type="text"] {
-  height: 44px;
-  border: 1px solid #D5D5D5;
-  border-radius: 10px;
-  padding: 10px 14px;
-  background: #fff;
-  font-size: 16px;
-  font-weight: 500;
+.airbng-register input[type="text"],
+.airbng-register #hostName,
+.airbng-register #lockerName,
+.airbng-register #detailAddress,
+.airbng-register .detail-address {
+    height: 44px;
+    border: 1px solid #D5D5D5;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 0;
 }
 
-/* ------------------------------
-   스텝 블록 + 하단 버튼
------------------------------- */
 .airbng-register .step {
-  min-height: 420px;     /* 내용이 적어도 버튼이 내려가 보이게 */
+    min-height: 420px;
 }
 
-/* 버튼은 sticky: 바텀네비 위에 딱 붙음 */
 .airbng-register .next-btn,
 .airbng-register .submit-btn {
-  position: sticky;
-  bottom: calc(var(--bottom-nav-height) + 12px);
-  width: 100%;
-  padding: 14px 0;
-  font-size: 16px;
-  font-weight: 700;
-  background: #3b57ef;
-  color: #fff;
-  border: 0;
-  border-radius: 10px;
-  margin-top: 24px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.10);
+    position: sticky;
+    bottom: calc(var(--bottom-nav-height) + 12px);
+    width: 100%;
+    padding: 14px 0;
+    font-size: 16px;
+    font-weight: 700;
+    background: #3b57ef;
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    margin-top: 24px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.10);
 }
 .airbng-register .next-btn:disabled,
 .airbng-register .submit-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  box-shadow: none;
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 /* ------------------------------
    주소 입력(아이콘 포함)
 ------------------------------ */
 .airbng-register .input-with-icon {
-  display: flex; align-items: center; gap: 8px;
-  height: 54px; border: 1px solid #D5D5D5; border-radius: 10px;
-  padding: 0 14px; background: #fff; cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    height: 54px; border: 1px solid #D5D5D5; border-radius: 10px;
+    padding: 0 14px; background: #fff; cursor: pointer;
 }
 
 .airbng-register .input-with-icon input.address-field {
-  flex: 1;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  padding: 0;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  color: #333;
+    flex: 1;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #333;
 }
 
-/* 상세주소 input 여백 (아래로 띄우기) */
 .airbng-register #detailAddress,
 .airbng-register .detail-address {
-  margin-top: 10px;
-  margin-bottom: 24px; 
-  height: 44px;
-  border: 1px solid #D5D5D5;
-  border-radius: 10px;
-  padding: 10px 14px;
-  background: #fff;
-  font-size: 16px;
-  font-weight: 500;
+    margin-top: 10px;
+    margin-bottom: 24px;
 }
 
-/* '사진 업로드' 섹션도 살짝 위 여백 */
 .airbng-register .image-upload-area { margin-top: 8px; }
 
 /* ------------------------------
@@ -149,18 +127,18 @@
 ------------------------------ */
 .airbng-register .image-upload-area { display: flex; align-items: center; gap: 8px; overflow-x: auto; }
 .airbng-register .image-upload-box img {
-  width: 100px; height: 100px; border: 1px solid #D5D5D5; border-radius: 6px; background: #fff; cursor: pointer;
+    width: 100px; height: 100px; border: 1px solid #D5D5D5; border-radius: 6px; background: #fff; cursor: pointer;
 }
 .airbng-register .preview-list { display: flex; gap: 8px; }
 .airbng-register .preview-item {
-  position: relative; width: 70px; height: 70px; flex: 0 0 auto;
-  border: 1px solid #ddd; border-radius: 6px; overflow: hidden; background: #fff;
+    position: relative; width: 70px; height: 70px; flex: 0 0 auto;
+    border: 1px solid #ddd; border-radius: 6px; overflow: hidden; background: #fff;
 }
 .airbng-register .preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .airbng-register .preview-item button {
-  position: absolute; top: 2px; right: 2px;
-  width: 18px; height: 18px; border-radius: 50%;
-  border: 0; background: #ff4d4f; color: #fff; font-size: 12px; font-weight: 700;
+    position: absolute; top: 2px; right: 2px;
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 0; background: #ff4d4f; color: #fff; font-size: 12px; font-weight: 700;
 }
 
 /* ------------------------------
@@ -170,30 +148,30 @@
 .airbng-register .time-select-box { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 .airbng-register .time-label { font-size: 13px; color: #666; font-weight: 500; }
 .airbng-register select {
-  width: 100%;
-  height: 44px;
-  border: 1px solid #D5D5D5;
-  border-radius: 10px;
-  background: #fff;
-  font-size: 16px;
-  padding: 0 12px;
+    width: 100%;
+    height: 44px;
+    border: 1px solid #D5D5D5;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 16px;
+    padding: 0 12px;
 }
 
 /* ------------------------------
    짐 조건
 ------------------------------ */
 .airbng-register .condition-row {
-  display: flex; align-items: center; gap: 10px;
-  height: 66px; padding: 0 14px;
-  border: 1.5px solid #E5E5E5; border-radius: 6px;
-  background: #fff; margin-bottom: 10px;
-  transition: border-color .2s ease, background .2s ease;
+    display: flex; align-items: center; gap: 10px;
+    height: 66px; padding: 0 14px;
+    border: 1.5px solid #E5E5E5; border-radius: 6px;
+    background: #fff; margin-bottom: 10px;
+    transition: border-color .2s ease, background .2s ease;
 }
 .airbng-register .condition-row.selected { border-color: #4561DB; background: rgba(69, 97, 219, .10); }
 .airbng-register .condition-row > span { min-width: 100px; margin-right: auto; font-size: 16px; font-weight: 500; color: #333; }
 .airbng-register .input-wrapper {
-  width: 88px; height: 37px; display: grid; place-items: center;
-  border: 1px solid #E5E5E5; border-radius: 6px; background: #fff;
+    width: 88px; height: 37px; display: grid; place-items: center;
+    border: 1px solid #E5E5E5; border-radius: 6px; background: #fff;
 }
 .airbng-register .price-display { font-family: 'Pretendard', sans-serif; font-size: 17px; color: #E5E5E5; transition: color .2s ease; }
 .airbng-register .condition-row.selected .input-wrapper { border-color: #4561DB; }
