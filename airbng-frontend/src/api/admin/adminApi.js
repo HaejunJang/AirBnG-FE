@@ -22,6 +22,7 @@ export const getStorageSales = ({ lockerType, startDate, endDate, page = 0, size
             size
         },
     });
+}
 
 // 보관소 리뷰 목록 조회 (상태별 + 페이징)
 export const getLockerReviewsByStatus = (status, page = 1) =>
