@@ -180,7 +180,6 @@
     display: flex;
     gap: 12px;
     position: relative;
-    border-left: 4px solid #4561DB;
 }
 
 .notification-content {
