@@ -47,35 +47,33 @@ export default function Header({
         hideBorder ? styles.noBorder : ""
       }`}
     >
-      <div className={styles.headerContainer}>
-        {showBackButton ? (
-          <button
-            type="button"
-            className={styles.backIcon}
-            aria-label="뒤로가기"
-            onClick={handleBack}
-          >
-            <img src={arrowLeftIcon} alt="" aria-hidden="true" />
-          </button>
-        ) : (
-          <div className={styles.backSpacer} aria-hidden="true" />
-        )}
+      {showBackButton ? (
+        <button
+          type="button"
+          className={styles.backIcon}
+          aria-label="뒤로가기"
+          onClick={handleBack}
+        >
+          <img src={arrowLeftIcon} alt="" aria-hidden="true" />
+        </button>
+      ) : (
+        <div className={styles.backSpacer} aria-hidden="true" />
+      )}
 
-        <div className={styles.headerTitle}>{headerTitle}</div>
+      <div className={styles.headerTitle}>{headerTitle}</div>
 
-        {showHomeButton ? (
-          <button
-            type="button"
-            className={styles.homeIcon}
-            aria-label="홈으로"
-            onClick={handleHome}
-          >
-            <img src={homeIcon} alt="" aria-hidden="true" />
-          </button>
-        ) : (
-          <div className={styles.headerSpacer} aria-hidden="true" />
-        )}
-      </div>
+      {showHomeButton ? (
+        <button
+          type="button"
+          className={styles.homeIcon}
+          aria-label="홈으로"
+          onClick={handleHome}
+        >
+          <img src={homeIcon} alt="" aria-hidden="true" />
+        </button>
+      ) : (
+        <div className={styles.headerSpacer} aria-hidden="true" />
+      )}
     </header>
   );
 }
