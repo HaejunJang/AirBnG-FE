@@ -612,7 +612,7 @@ body.app-loading {
     }
 
     /* 기존 .airbng-home 스타일은 제거하거나 특정 스타일만 유지 */
-    .main-wrapper > .airbng-home {
-        background: transparent;
-    }
+    /*.main-wrapper > .airbng-home {*/
+    /*    background: transparent;*/
+    /*}*/
 }
