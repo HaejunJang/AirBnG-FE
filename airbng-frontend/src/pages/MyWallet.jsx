@@ -19,6 +19,18 @@ export default function MyWallet() {
   const [error, setError] = useState("");
   const [activeDropdown, setActiveDropdown] = useState(null);
 
+  //모달
+  const {
+    modalState,
+    hideModal,
+    showSuccess,
+    showError,
+    showConfirm,
+    showLoading,
+  } = useModal();
+
+  // 은행 아이콘 매핑 함수
+
   const getBankIcon = (bankCode) => {
     switch (bankCode) {
       case 6: // 국민
@@ -54,13 +66,33 @@ export default function MyWallet() {
   const handleSetPrimary = (accountId) => {
     console.log("주계좌 변경:", accountId);
     setActiveDropdown(null);
-    // TODO: API 연동
+    walletApi.setPrimaryAccount(accountId).then((response) => {
+      if (response.status === 200 && response.data.code === 1000) {
+        showSuccess("변경 완료", "주계좌가 성공적으로 변경되었습니다.", fetchWalletData);
+      } else {
+        showError(
+          "변경 실패",
+          response.data?.message || "주계좌 변경에 실패했습니다."
+        );
+      }
+    });
   };
 
   const handleDeleteAccount = (accountId) => {
     console.log("계좌 삭제:", accountId);
     setActiveDropdown(null);
-    // TODO: API 연동
+    showConfirm("계좌 삭제", "정말로 이 계좌를 삭제하시겠습니까?", async () => {
+      walletApi.deleteAccount(accountId).then((response) => {
+        if (response.status === 200 && response.data.code === 1000) {
+          showSuccess("삭제 완료", "계좌가 성공적으로 삭제되었습니다.", fetchWalletData);
+        } else {
+          showError(
+            "삭제 실패",
+            response.data?.message || "계좌 삭제에 실패했습니다."
+          );
+        }
+      });
+    });
   };
 
   const formatWon = (amount) => {
@@ -116,7 +148,9 @@ export default function MyWallet() {
 
   const goToWithdraw = () => {
     if (!walletData?.accounts?.length) {
-      modal.showError("출금 불가", "출금을 위해서는 먼저 계좌를 등록해주세요.");
+      // alert("출금을 위해서는 먼저 계좌를 등록해주세요.");
+      showError("출금 불가", "출금을 위해서는 먼저 계좌를 등록해주세요.");
+
       return;
     }
     navigate("/page/mypage/wallet/withdraw");
@@ -377,8 +411,20 @@ export default function MyWallet() {
             </div>
           )}
         </div>
-        <Modal {...modal.modalState} onClose={modal.hideModal} />
       </main>
+      {/* ModalUtil Modal */}
+      <Modal
+        show={modalState.show}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+        onClose={hideModal}
+      />
     </div>
   );
 }

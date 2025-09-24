@@ -5,7 +5,6 @@ import {
   getReservationDetail,
   confirmReservationApi,
   cancelReservationApi,
-  completeReservationApi,
 } from "../api/reservationApi";
 import Header from "../components/Header/Header";
 import { useAuth } from "../context/AuthContext";
@@ -33,7 +32,7 @@ const ReservationDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { showError, showSuccess } = useModal();
+  const { showError, showSuccess, showConfirm, modalState, hideModal } = useModal();
 
   // 스크롤 최상단으로 이동
   useEffect(() => {
@@ -209,6 +208,39 @@ const ReservationDetail = () => {
     }
   };
 
+  // 수수료 안내와 함께 취소 확인
+  const handleCancelWithFeeConfirm = () => {
+    const reservationState = data.state || data.result?.state;
+    
+    if (reservationState === "CONFIRMED") {
+      // CONFIRMED 상태에서는 수수료 안내 포함
+      const cancelMessage = `⚠️ 취소 수수료 안내
+
+예약 확정 후 취소 시 수수료가 발생할 수 있어요!
+• 당일 취소: 20%
+• 하루 전 취소: 10%  
+• 그 외: 수수료 없음
+
+결제 금액: ${pricing.total.toLocaleString()}원
+(*정확한 수수료는 취소 처리 후 안내됩니다)`;
+
+      showConfirm(
+        "예약 취소",
+        cancelMessage,
+        handleCancel,
+        () => {}
+      );
+    } else {
+      // 다른 상태에서는 바로 취소
+      showConfirm(
+        "예약 취소",
+        "정말로 예약을 취소하시겠습니까?",
+        handleCancel,
+        () => {}
+      );
+    }
+  };
+
   const handleCancel = async () => {
     try {
       const response = await cancelReservationApi(reservationId);
@@ -219,7 +251,20 @@ const ReservationDetail = () => {
           ...prevData,
           state: data.result.state,
         }));
-        showSuccess("예약이 취소되었습니다.", "");
+        const result = data.result;
+        const totalAmount = result ? result.amount + result.fee : 0;
+        const refundAmount = totalAmount - (result ? result.chargeFee : 0);
+        const refundMessage = result.chargeFee !== 0 
+          ? `💰 환불 정보
+
+          결제 금액: ${totalAmount.toLocaleString()}원
+          취소 수수료: ${result.chargeFee.toLocaleString()}원
+          환불 금액: ${refundAmount.toLocaleString()}원
+(*1일내 환불 처리)`
+          : `전액 환불 처리됩니다.
+(*1일내 환불 처리)`;
+      
+        showSuccess("취소 완료", refundMessage);
       } else {
         showError("예약 취소 실패", data.message);
       }
@@ -413,7 +458,7 @@ const ReservationDetail = () => {
                   <>
                     <button
                       className={styles.btnCancel}
-                      onClick={handleCancel}
+                      onClick={handleCancelWithFeeConfirm}
                       style={{ width: "100%" }}
                     >
                       취소
@@ -446,19 +491,38 @@ const ReservationDetail = () => {
               </div>
             );
           } else if (reservationState === "CONFIRMED") {
-            // CONFIRMED 상태: keeper는 예약승인완료, dropper는 예약이 승인됐어요
+            // CONFIRMED 상태: keeper는 예약승인완료, dropper는 예약이 승인됐어요 + 취소 버튼
             return (
               <div
                 className={styles.actionButtons}
-                style={{ justifyContent: "center" }}
+                style={userRole === "keeper" ? { justifyContent: "center" } : {}}
               >
-                <button
-                  className={styles.btnDisabled}
-                  disabled
-                  style={{ width: "100%" }}
-                >
-                  {userRole === "keeper" ? "예약승인완료" : "예약이 승인됐어요"}
-                </button>
+                {userRole === "keeper" ? (
+                  <button
+                    className={styles.btnDisabled}
+                    disabled
+                    style={{ width: "100%" }}
+                  >
+                    예약승인완료
+                  </button>
+                ) : userRole === "dropper" ? (
+                  <>
+                    <button
+                      className={styles.btnDisabled}
+                      disabled
+                      style={{ flex: 2 }}
+                    >
+                      예약이 승인됐어요
+                    </button>
+                    <button
+                      className={styles.btnCancel}
+                      onClick={handleCancelWithFeeConfirm}
+                      style={{ flex: 1 }}
+                    >
+                      취소
+                    </button>
+                  </>
+                ) : null}
               </div>
             );
           } else if (reservationState === "REJECTED") {
@@ -483,6 +547,20 @@ const ReservationDetail = () => {
           return null;
         })()}
       </div>
+
+      {/* Modal 컴포넌트 추가 */}
+      <Modal
+        show={modalState.show}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+        onClose={hideModal}
+      />
     </div>
   );
 };

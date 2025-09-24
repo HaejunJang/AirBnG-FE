@@ -325,9 +325,10 @@
 
 /* 이용 안내 섹션 */
 .infoSection {
-  background: #f8f9fa;
+  background: #f8f9ff;
   border-radius: 12px;
   padding: 20px;
+  border: 2px dashed #e8ebff;
 }
 
 .infoTitle {

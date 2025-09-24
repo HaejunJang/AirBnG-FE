@@ -21,7 +21,7 @@ function SignUpPage() {
 
   const [profileImage, setProfileImage] = useState(null);
   const [profilePreview, setProfilePreview] = useState(
-    "https://airbngbucket.s3.ap-northeast-2.amazonaws.com/profiles/8e99db50-0a6c-413e-a42c-c5213dc9d64a_default.jpg"
+    "https://airbngbucket.s3.ap-northeast-2.amazonaws.com/profiles/default.png"
   );
 
   const [validationStates, setValidationStates] = useState({

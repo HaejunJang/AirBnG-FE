@@ -71,3 +71,9 @@ export const getReservationDetail = async (reservationId, memberId) => {
   );
   return response.data;
 };
+
+// 포인트 잔액 조회
+export const getWalletBalance = async () => {
+  const response = await httpAuth.get("/wallet/me/balance");
+  return response.data;
+};

@@ -1,6 +1,10 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
-import { getReservationForm, postReservation } from "../api/reservationApi";
+import {
+  getReservationForm,
+  postReservation,
+  getWalletBalance,
+} from "../api/reservationApi";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/pages/reservationForm.css";
 import Header from "../components/Header/Header";
@@ -50,7 +54,7 @@ function ReservationFormPage() {
   });
   const [startTimeOptions, setStartTimeOptions] = useState([]);
   const [endTimeOptions, setEndTimeOptions] = useState([]);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(""); // 결제 수단 상태 추가
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
 
   const paymentMethods = [
     { id: "jimpay", name: "짐페이머니", icon: airbngIcon, method: "WALLET" },
@@ -58,6 +62,26 @@ function ReservationFormPage() {
   ];
 
   const { user } = useAuth();
+  const [walletBalance, setWalletBalance] = useState(null);
+
+  // 기존 useEffect들 사이에 새로운 useEffect 추가
+  useEffect(() => {
+    // 페이지 진입 시 바로 잔액 조회
+    const initializeWalletBalance = async () => {
+      if (!user) return;
+
+      try {
+        const data = await getWalletBalance();
+        if (data.code === 1000) {
+          setWalletBalance(data.result.balance);
+        }
+      } catch (error) {
+        console.error("초기 잔액 조회 실패:", error);
+      }
+    };
+
+    initializeWalletBalance();
+  }, [user]); // user가 변경될 때만 실행
   const {
     modalState,
     showSuccess,
@@ -68,28 +92,88 @@ function ReservationFormPage() {
   } = useModal();
   const memberId = user?.id;
 
-  // 최근 제출 시도의 스코프/시도 여부 기억
-  const lastScopeRef = useRef(null); // TODO
-  const attemptedRef = useRef(false); // TODO
+  const lastScopeRef = useRef(null);
+  const attemptedRef = useRef(false);
+
+  // 포인트 잔액 조회 함수
+  const fetchWalletBalance = async () => {
+    if (!user) return;
+
+    try {
+      const data = await getWalletBalance();
+      if (data.code === 1000) {
+        setWalletBalance(data.result.balance);
+      } else {
+        console.error("포인트 잔액 조회 실패:", data.message);
+      }
+    } catch (error) {
+      console.error("포인트 잔액 조회 실패:", error);
+    }
+  };
+
+  // 충전 페이지로 이동
+  const navigateToCharge = () => {
+    // 현재 상태 저장
+    const reservationState = {
+      selectedDateRange,
+      selectedStartTime,
+      selectedEndTime,
+      jimTypeCounts,
+      selectedPaymentMethod: selectedPaymentMethod?.id,
+      lockerId,
+    };
+    sessionStorage.setItem(
+      "reservationState",
+      JSON.stringify(reservationState)
+    );
+    navigate("/page/mypage/wallet/charge");
+  };
+
+  // 상태 복원을 위한 ref
+  const restoredTimesRef = useRef(null);
+
+  // useEffect 추가 (기존 useEffect들과 함께)
+  useEffect(() => {
+    // 저장된 상태 복원
+    const savedState = sessionStorage.getItem("reservationState");
+    if (savedState) {
+      const parsedState = JSON.parse(savedState);
+      
+      // 시간 정보를 ref에 저장
+      restoredTimesRef.current = {
+        startTime: parsedState.selectedStartTime,
+        endTime: parsedState.selectedEndTime,
+      };
+      
+      setSelectedDateRange(parsedState.selectedDateRange);
+      setJimTypeCounts(parsedState.jimTypeCounts);
+      if (parsedState.selectedPaymentMethod) {
+        const method = paymentMethods.find(
+          (m) => m.id === parsedState.selectedPaymentMethod
+        );
+        setSelectedPaymentMethod(method || null);
+      }
+      
+      // 상태 복원 후 삭제
+      sessionStorage.removeItem("reservationState");
+    }
+  }, []);
 
   // 사용자가 결과에 영향을 주는 값들을 수정 -> 직전 스코프 키 폐기
   useEffect(() => {
-    // 제출 시도 없으면 무시
     if (!attemptedRef.current) return;
     if (!lastScopeRef.current) return;
-    // 제출 시도 후, 값 변경 시 -> 멱등키 폐기
     clearIdemKey(lastScopeRef.current);
-    // 다음 제출에서 새 키 발급되도록 제출 시도 내역 삭제
     attemptedRef.current = false;
     lastScopeRef.current = null;
   }, [
-    selectedDateRange.startDate, // TODO: 금액/검증에 영향 주는 필드들
+    selectedDateRange.startDate,
     selectedDateRange.endDate,
     selectedStartTime,
     selectedEndTime,
-    jimTypeCounts, // 객체 레퍼런스가 바뀌므로 트리거됨
+    jimTypeCounts,
     lockerId,
-    selectedPaymentMethod?.method, // 결제수단 변경도 트리거
+    selectedPaymentMethod?.method,
   ]);
 
   // 스코프 생성
@@ -137,24 +221,9 @@ function ReservationFormPage() {
           });
           console.log("result: ", result);
           setCurrentJimTypes(result.lockerJimTypes);
-          // generateJimTypes(result.lockerJimTypes);
         } else if (data.code === 3005) {
-          // ModalUtils.showWarning(
-          //   "보관소가 비활성화 되었습니다.",
-          //   "이용 불가",
-          //   () => {
-          //     window.history.back();
-          //   }
-          // );
           console.log("보관소가 비활성화 되었습니다." + data);
         } else {
-          // ModalUtils.showError(
-          //   "보관소 정보를 불러올 수 없습니다.",
-          //   "정보 없음",
-          //   () => {
-          //     window.history.back();
-          //   }
-          // );
           console.log("보관소 정보를 불러올 수 없습니다", data);
         }
       })
@@ -176,15 +245,6 @@ function ReservationFormPage() {
     }
 
     setDateArray(dates);
-  };
-
-  // 짐 타입 생성
-  const generateJimTypes = (jimTypes) => {
-    const counts = {};
-    jimTypes.forEach((jimType) => {
-      counts[jimType.jimTypeId] = 0;
-    });
-    setJimTypeCounts(counts);
   };
 
   // 드래그 시작
@@ -266,8 +326,11 @@ function ReservationFormPage() {
 
     setStartTimeOptions(options);
 
-    // 기존 선택된 시간이 새 옵션에 없다면 첫 번째로 설정
-    if (options.length > 0 && !options.includes(selectedStartTime)) {
+    // 복원된 시간이 있는 경우 우선 설정
+    if (restoredTimesRef.current?.startTime && options.includes(restoredTimesRef.current.startTime)) {
+      setSelectedStartTime(restoredTimesRef.current.startTime);
+      restoredTimesRef.current.startTime = null; // 한번 사용 후 초기화
+    } else if (options.length > 0 && !options.includes(selectedStartTime)) {
       setSelectedStartTime(options[0]);
     }
   };
@@ -312,8 +375,11 @@ function ReservationFormPage() {
 
     setEndTimeOptions(options);
 
-    // 기존 선택된 시간이 새 옵션에 없다면 첫 번째로 설정
-    if (options.length > 0 && !options.includes(selectedEndTime)) {
+    // 복원된 시간이 있는 경우 우선 설정
+    if (restoredTimesRef.current?.endTime && options.includes(restoredTimesRef.current.endTime)) {
+      setSelectedEndTime(restoredTimesRef.current.endTime);
+      restoredTimesRef.current.endTime = null; // 한번 사용 후 초기화
+    } else if (options.length > 0 && !options.includes(selectedEndTime)) {
       setSelectedEndTime(options[0]);
     }
   };
@@ -387,10 +453,15 @@ function ReservationFormPage() {
     return { totalItemPrice, serviceFee, totalPrice, items };
   };
 
-  // 결제
+  // 결제 수단 선택
   const selectPaymentMethod = (methodId) => {
     const found = paymentMethods.find((pm) => pm.id === methodId) || null;
     setSelectedPaymentMethod(found);
+
+    // 짐페이머니 선택 시 포인트 조회
+    if (methodId === "jimpay") {
+      fetchWalletBalance();
+    }
   };
 
   // 계산 결과
@@ -398,13 +469,11 @@ function ReservationFormPage() {
 
   // 하이라이팅 관련 함수들
   const clearHighlight = () => {
-    // 날짜 섹션 타이틀 하이라이팅 제거
     const dateTitle = document.querySelector("#dateSection h3");
     if (dateTitle) {
       dateTitle.classList.remove("title-highlight");
     }
 
-    // jim 섹션 타이틀/아이템 하이라이팅 제거
     const jimTitle = document.querySelector("#jimSection h3");
     const jimItems = document.querySelectorAll("#jimTypes > div");
 
@@ -416,7 +485,6 @@ function ReservationFormPage() {
       item.classList.remove("jim-item-highlight");
     });
 
-    // 결제수단 섹션 하이라이팅 제거
     const paymentTitle = document.querySelector("#paymentSection h3");
     const paymentItems = document.querySelectorAll(
       "#paymentMethods .payment-method"
@@ -442,21 +510,19 @@ function ReservationFormPage() {
         dateTitle.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     } else if (sectionType === "jim") {
-      const jimTitle = document.querySelector("#jimSection h3"); // h3로 변경
-      const jimItems = document.querySelectorAll("#jimTypes > div"); // 실제 짐 타입 박스들
+      const jimTitle = document.querySelector("#jimSection h3");
+      const jimItems = document.querySelectorAll("#jimTypes > div");
 
       if (jimTitle) {
         jimTitle.classList.add("title-highlight");
       }
 
-      // 각 짐 타입 박스에 하이라이팅 효과 (순차적으로)
       jimItems.forEach((item, index) => {
         setTimeout(() => {
           item.classList.add("jim-item-highlight");
-        }, index * 150); // 0.15초씩 차이나게 순차 적용
+        }, index * 150);
       });
 
-      // 짐 섹션으로 스크롤
       const jimSection = document.querySelector(".jim-types");
       if (jimSection) {
         jimSection.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -483,7 +549,6 @@ function ReservationFormPage() {
       }
     }
 
-    // 3초 후 하이라이팅 제거
     setTimeout(() => {
       clearHighlight();
     }, 3000);
@@ -491,35 +556,24 @@ function ReservationFormPage() {
 
   // 유효성 검사 함수
   const validateForm = () => {
-    // 날짜 선택 확인
     if (selectedDateRange.startDate < 0 || selectedDateRange.endDate < 0) {
-      //   ModalUtils.showWarning("보관 날짜를 선택해주세요.", "날짜 미선택");
       highlightSection("date");
       return false;
     }
 
-    console.log("날짜 선택 통과");
-
-    // 짐 종류 선택 확인
     const hasSelectedItems = Object.values(jimTypeCounts).some(
       (count) => count > 0
     );
 
     if (!hasSelectedItems) {
-      //   ModalUtils.showWarning("보관할 짐을 선택해주세요.", "짐 종류 미선택");
       highlightSection("jim");
       return false;
     }
 
-    console.log("짐 종류 선택 통과");
-
-    // 결제 수단 선택 확인
     if (!selectedPaymentMethod) {
       highlightSection("payment");
       return false;
     }
-
-    console.log("결제 수단 선택 통과");
 
     return true;
   };
@@ -537,7 +591,6 @@ function ReservationFormPage() {
 
     if (!validateForm()) return;
 
-    // 로딩 모달 표시
     await showLoading("결제 처리 중입니다...", "잠시만 기다려주세요", 500);
 
     const startDateStr = dateArray[selectedDateRange.startDate];
@@ -562,14 +615,12 @@ function ReservationFormPage() {
       requestData.paymentMethod,
       requestData.lockerId
     );
-    lastScopeRef.current = idemScope; // 최근 스코프 기억
-    attemptedRef.current = true; // 제출 시도됨
+    lastScopeRef.current = idemScope;
+    attemptedRef.current = true;
 
-    // 1초 대기 후 API 호출
     postReservation(requestData, getOrCreateIdemKey(idemScope))
       .then((data) => {
         if (data.code === 4000) {
-          // 로딩 모달 숨기고 바로 성공 모달 표시
           showSuccess("예약이 완료되었습니다!", "", () => {
             done(idemScope);
             const reservationId = data.result?.reservationId || 0;
@@ -594,7 +645,6 @@ function ReservationFormPage() {
             "예약 실패",
             "세션이 존재하지 않습니다.\n다시 로그인해주세요.",
             () => {
-              // TODO : 로그인 후 돌아왔을 때, 선택 내역 남겨두기
               done(idemScope);
               navigate("/page/login");
             }
@@ -602,9 +652,6 @@ function ReservationFormPage() {
         } else {
           showError("예약 실패", data.message, () => {
             console.log(data);
-            // TODO: 실패 시 멱등키 유지 → 사용자가 다시 시도하면 같은 키로 재전송
-
-            // navigate(-1);
           });
         }
       })
@@ -683,13 +730,7 @@ function ReservationFormPage() {
 
   return (
     <div className="reservation-container">
-      {/* 헤더 */}
-      <Header
-        headerTitle="예약하기"
-        showBackButton
-        // backUrl={window.history.back()}
-        showHomeButton
-      />
+      <Header headerTitle="예약하기" showBackButton showHomeButton />
 
       <div className="content">
         {/* 보관소 정보 */}
@@ -722,7 +763,6 @@ function ReservationFormPage() {
         <div id="timeSection">
           <h3 className="section-title">보관 시간</h3>
           <div className="time-selectors">
-            {/* 시작 시간 드롭다운 */}
             <div className="time-selector">
               <label className="time-label">시작 시간</label>
               <div className="dropdown-wrapper">
@@ -771,7 +811,6 @@ function ReservationFormPage() {
               </div>
             </div>
 
-            {/* 종료 시간 드롭다운 */}
             <div className="time-selector">
               <label className="time-label">종료 시간</label>
               <div className="dropdown-wrapper">
@@ -885,28 +924,55 @@ function ReservationFormPage() {
               <div
                 key={method.id}
                 className={`payment-method ${
-                  selectedPaymentMethod.id === method.id ? "selected" : ""
+                  selectedPaymentMethod?.id === method.id ? "selected" : ""
                 }`}
                 onClick={() => selectPaymentMethod(method.id)}
               >
                 <div className="payment-method-content">
+                  <div className="payment-method-radio">
+                    <div
+                      className={`radio-circle ${
+                        selectedPaymentMethod?.id === method.id
+                          ? "selected"
+                          : ""
+                      }`}
+                    >
+                      {selectedPaymentMethod?.id === method.id && (
+                        <div className="radio-inner"></div>
+                      )}
+                    </div>
+                  </div>
                   <img
                     className="payment-method-icon"
                     src={method.icon}
                     alt={method.name}
                   />
-                  <div className="payment-method-name">{method.name}</div>
-                  <div className="payment-method-radio">
-                    <div
-                      className={`radio-circle ${
-                        selectedPaymentMethod.id === method.id ? "selected" : ""
-                      }`}
-                    >
-                      {selectedPaymentMethod.id === method.id && (
-                        <div className="radio-inner"></div>
-                      )}
-                    </div>
+                  <div className="payment-method-info">
+                    <div className="payment-method-name">{method.name}</div>
                   </div>
+                  {method.id === "jimpay" &&
+                    selectedPaymentMethod?.id === method.id && (
+                      <div 
+                        className="payment-method-actions"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateToCharge();
+                        }}
+                      >
+                        <span className="balance-simple">
+                          {walletBalance === null
+                            ? ""
+                            : `${Math.floor(walletBalance).toLocaleString()}원`}
+                        </span>
+                        <button className="charge-button">
+                          <svg 
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"/>
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
             ))}

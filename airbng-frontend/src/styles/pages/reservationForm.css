@@ -545,8 +545,12 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* 반응형 디자인 */
@@ -752,11 +756,62 @@ body {
   flex-shrink: 0;
 }
 
+.payment-method-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .payment-method-name {
   flex: 1;
   font-size: 16px;
   font-weight: 500;
   color: #374151;
+}
+
+.balance-loading {
+  color: #9ca3af;
+}
+
+.balance-simple {
+  user-select: none;
+  pointer-events: none;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.payment-method-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  /* gap: 8px; */
+}
+
+/* 충전 버튼 스타일 */
+.charge-button {
+  height: 32px;
+  /* border: 1px solid #d1d5db; */
+  border-radius: 50%;
+  /* background-color: none; */
+  cursor: pointer;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding-left: 5px;
+}
+
+.charge-button:hover {
+  background-color: #f3f4f6;
+  border-color: #4561db;
+}
+
+/* 짐페이머니 선택 시 추가 스타일 */
+.payment-method.selected .payment-method-info {
+  padding-right: 8px;
 }
 
 .payment-method-radio {

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { walletApi } from "../api/myWalletApi";
 import styles from "../styles/pages/AccountRegister.module.css";
+import { Modal, useModal } from "../components/common/ModalUtil";
 
 // 지원하는 은행 목록
 const SUPPORTED_BANKS = [
@@ -36,6 +37,7 @@ const SUPPORTED_BANKS = [
     icon: require("../assets/bank-toss.svg").default,
   },
 ];
+const hasReservationState = sessionStorage.getItem("reservationState");
 
 export default function AccountRegister() {
   const navigate = useNavigate();
@@ -48,9 +50,23 @@ export default function AccountRegister() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
+  //모달
+  const {
+    modalState,
+    hideModal,
+    showSuccess,
+    showError,
+    showConfirm,
+    showLoading,
+  } = useModal();
+
   // 뒤로가기
   const handleBack = () => {
-    navigate(-1);
+    if (hasReservationState) {
+      navigate(-1);
+    } else {
+      navigate("/page/mypage/wallet");
+    }
   };
 
   // 은행 선택
@@ -124,7 +140,7 @@ export default function AccountRegister() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // 계좌 등록 제출
+  //계좌 등록
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -140,25 +156,41 @@ export default function AccountRegister() {
       const response = await walletApi.registerAccount(requestData);
 
       if (response.status === 200 && response.data.code === 1000) {
-        // 성공 시 지갑 페이지로 이동
-        navigate("/page/mypage/wallet", {
-          state: { message: "계좌가 성공적으로 등록되었습니다." },
-        });
+        // 성공 시 모달 표시
+        showSuccess(
+          "계좌 등록 완료",
+          "계좌가 성공적으로 등록되었습니다.",
+          () => {
+            // 세션 스토리지 확인
+            const hasReservationState =
+              sessionStorage.getItem("reservationState");
+
+            if (hasReservationState) {
+              navigate(-1); // 예약 페이지로 돌아가기 (2단계 뒤로)
+            } else {
+              navigate("/page/mypage/wallet"); // 지갑 페이지로 이동
+            }
+          }
+        );
       } else {
-        setErrors({
-          submit: response.data?.message || "계좌 등록에 실패했습니다.",
-        });
+        // API 에러 시 에러 모달 표시
+        showError(
+          "계좌 등록 실패",
+          response.data?.message || "계좌 등록에 실패했습니다."
+        );
       }
     } catch (error) {
       console.error("계좌 등록 실패:", error);
       if (error.response?.status === 400) {
-        setErrors({
-          submit: "잘못된 계좌 정보입니다. 다시 확인해주세요.",
-        });
+        showError(
+          "계좌 등록 실패",
+          "잘못된 계좌 정보입니다. 다시 확인해주세요."
+        );
       } else {
-        setErrors({
-          submit: "네트워크 오류가 발생했습니다. 다시 시도해주세요.",
-        });
+        showError(
+          "계좌 등록 실패",
+          "네트워크 오류가 발생했습니다. 다시 시도해주세요."
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -312,6 +344,16 @@ export default function AccountRegister() {
             {isSubmitting ? "등록 중..." : "등록"}
           </button>
         </div>
+        {/* 모달 컴포넌트 */}
+        <Modal
+          show={modalState.show}
+          type={modalState.type}
+          title={modalState.title}
+          message={modalState.message}
+          confirmText={modalState.confirmText}
+          onConfirm={modalState.onConfirm}
+          onClose={hideModal}
+        />
       </main>
     </div>
   );

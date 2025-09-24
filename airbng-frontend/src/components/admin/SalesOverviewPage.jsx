@@ -20,12 +20,6 @@ const SalesOverviewPage = () => {
             icon: <LuBuilding size={18} />,
             path: '/admin/sales/storage',
             description: '각 보관소의 매출을 비교하세요'
-        },
-        {
-            name: '순매출',
-            icon: <BiMoneyWithdraw size={18} />,
-            path: '/admin/sales/net',
-            description: '순매출 및 수익률을 분석하세요'
         }
     ];
 
