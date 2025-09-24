@@ -1,0 +1,116 @@
+.contentCard {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.subTitle {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 20px;
+}
+
+.textOrange {
+    color: hsl(231, 55%, 56%); /* 따뜻한 주황색 - 대기 */
+}
+
+.textGreen {
+    color: hsl(231, 55%, 56%); /* 메인 서비스 색 - 승인 */
+}
+
+.textRed {
+    color: hsl(231, 55%, 56%); /* 부드러운 빨간색 - 반려 */
+}
+
+.summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.summarySection {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #fafafa;
+}
+
+.summaryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.summaryTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.summaryCount {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.summaryList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.summaryItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.clickableItem {
+    cursor: pointer;
+}
+
+.clickableItem:hover {
+    transform: translateX(0px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.summaryPending {
+    background-color: hsla(231, 55%, 56%, 0.2);
+    /*border-left: 3px solid hsl(45, 85%, 55%);*/
+}
+
+.summaryApproved {
+    background-color: hsla(231, 55%, 56%, 0.2);
+    /*border-left: 3px solid hsl(231, 55%, 56%);*/
+}
+
+.summaryRejected {
+    background-color: hsla(231, 55%, 56%, 0.2);
+    /*border-left: 3px solid hsl(350, 70%, 60%);*/
+}
+
+.summaryStorageName {
+    font-weight: 500;
+    color: #343a40;
+}
+
+.summaryOwnerName {
+    color: #495057;
+}
+
+.emptyMessage {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 16px;
+    font-size: 0.9rem;
+}

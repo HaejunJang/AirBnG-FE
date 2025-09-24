@@ -129,15 +129,23 @@ function ReservationFormPage() {
     navigate("/page/mypage/wallet/charge");
   };
 
+  // 상태 복원을 위한 ref
+  const restoredTimesRef = useRef(null);
+
   // useEffect 추가 (기존 useEffect들과 함께)
   useEffect(() => {
     // 저장된 상태 복원
     const savedState = sessionStorage.getItem("reservationState");
     if (savedState) {
       const parsedState = JSON.parse(savedState);
+      
+      // 시간 정보를 ref에 저장
+      restoredTimesRef.current = {
+        startTime: parsedState.selectedStartTime,
+        endTime: parsedState.selectedEndTime,
+      };
+      
       setSelectedDateRange(parsedState.selectedDateRange);
-      setSelectedStartTime(parsedState.selectedStartTime);
-      setSelectedEndTime(parsedState.selectedEndTime);
       setJimTypeCounts(parsedState.jimTypeCounts);
       if (parsedState.selectedPaymentMethod) {
         const method = paymentMethods.find(
@@ -145,6 +153,7 @@ function ReservationFormPage() {
         );
         setSelectedPaymentMethod(method || null);
       }
+      
       // 상태 복원 후 삭제
       sessionStorage.removeItem("reservationState");
     }
@@ -317,7 +326,11 @@ function ReservationFormPage() {
 
     setStartTimeOptions(options);
 
-    if (options.length > 0 && !options.includes(selectedStartTime)) {
+    // 복원된 시간이 있는 경우 우선 설정
+    if (restoredTimesRef.current?.startTime && options.includes(restoredTimesRef.current.startTime)) {
+      setSelectedStartTime(restoredTimesRef.current.startTime);
+      restoredTimesRef.current.startTime = null; // 한번 사용 후 초기화
+    } else if (options.length > 0 && !options.includes(selectedStartTime)) {
       setSelectedStartTime(options[0]);
     }
   };
@@ -362,7 +375,11 @@ function ReservationFormPage() {
 
     setEndTimeOptions(options);
 
-    if (options.length > 0 && !options.includes(selectedEndTime)) {
+    // 복원된 시간이 있는 경우 우선 설정
+    if (restoredTimesRef.current?.endTime && options.includes(restoredTimesRef.current.endTime)) {
+      setSelectedEndTime(restoredTimesRef.current.endTime);
+      restoredTimesRef.current.endTime = null; // 한번 사용 후 초기화
+    } else if (options.length > 0 && !options.includes(selectedEndTime)) {
       setSelectedEndTime(options[0]);
     }
   };
