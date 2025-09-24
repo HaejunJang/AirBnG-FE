@@ -157,7 +157,8 @@
   border-radius: 0;
   box-shadow: none;
   margin-top: 0 !important;
-  margin-inline: calc(var(--page-pad, 16px) * -1);
+  margin-inline: 0;
+  /* margin-inline: calc(var(--page-pad, 16px) * -1); */
   border-top: 1px solid #f0f0f0;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -183,6 +184,7 @@
   box-shadow: none;
   margin-top: 0 !important;
   overflow: hidden;
+  padding: 0;
 }
 .chat-item {
   display: grid;
@@ -1379,10 +1381,8 @@
 @media (min-width: 1024px) {
   .fab {
     left: calc(
-      (100vw - (var(--banner-w) + var(--col-gap) + var(--app-max-width))) / 2
-      + var(--banner-w)
-      + var(--col-gap)
-      + (var(--app-max-width) / 2)
+      (100vw - (var(--banner-w) + var(--col-gap) + var(--app-max-width))) / 2 +
+        var(--banner-w) + var(--col-gap) + (var(--app-max-width) / 2)
     );
   }
 }
