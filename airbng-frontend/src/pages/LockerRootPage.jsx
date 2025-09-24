@@ -102,7 +102,7 @@ export default function LockerRootPage() {
 
   if (!ready) return null;
   if (!isLoggedIn) return <LockerWelcome />;
-  if (loading) return <div className="manage-container">불러오는 중…</div>;
+  // if (loading) return <div className="manage-container">불러오는 중…</div>;
 
   return (
     <div className="airbng-locker">

@@ -185,15 +185,21 @@ button {
    2) App shell (layout only)
 ------------------------------ */
 body {
-  margin: 0 auto;
-  width: 100%;
-  max-width: var(--app-max-width);
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-sans);
-  /* padding-bottom: var(--bottom-nav-height); */
-  min-height: 100vh;
-  overflow-y: auto;
+    margin: 0 auto;
+    width: 100%;
+    max-width: var(--app-max-width);
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    /* padding-bottom: var(--bottom-nav-height); */
+    min-height: 100vh;
+    overflow-y: auto;
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
+}
+
+body.app-loading {
+    opacity: 0.95;
 }
 
 .app-shell {
@@ -209,6 +215,68 @@ body {
   padding: var(--sp-20);
   /* padding-top: calc(var(--header-height) + var(--sp-12)); */
   padding-bottom: calc(var(--bottom-nav-height) + var(--sp-12));
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bg);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 🔥 네비바 컨테이너 - 고정 높이로 레이아웃 시프트 방지 */
+.navbar-container {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: var(--app-max-width);
+    height: var(--bottom-nav-height);
+    z-index: 1000;
+    background-color: var(--surface);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+    border-radius: var(--radius-24) var(--radius-24) 0 0;
+}
+
+.navbar-container.navbar-hidden {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 🔥 메인 컨텐츠에 네비바 공간 확보 */
+.airbng-home {
+    padding-bottom: var(--bottom-nav-height);
+    min-height: 100vh;
+    transition: padding-bottom 0.3s var(--ease);
+}
+
+.navbar-hidden + .airbng-home,
+.airbng-home.no-navbar {
+    padding-bottom: 0;
 }
 
 /* ------------------------------
@@ -403,15 +471,31 @@ body {
 
 /* 모바일(기본): 배너 숨김, 기존 412px 앱만 보임 */
 .app-layout {
-  display: block;
-  width: 100%;
-  min-height: 100vh;
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
 }
+
 .side-banner {
-  display: none;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+
+    /* 숨겨진 상태에서도 최소 공간 확보 */
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* 사이드 배너 컨테이너 - 로딩 중에도 공간 확보 */
+.side-banner-container {
+    width: 0;
+    flex-shrink: 0;
+    min-height: 100vh;
+    background-color: transparent;
+    transition: width 0.3s var(--ease);
 }
 
 /* 데스크탑부터 좌우 분할 */
@@ -431,48 +515,55 @@ body {
     min-height: 100vh;
   }
 
-  /* 왼쪽 배너 */
-  .side-banner {
-    display: block;
-    flex: 0 0 var(--banner-w); /* 배너는 고정 폭 */
-    position: sticky;
-    top: 0;
-    height: 100dvh;
-    color: #fff;
-    /* background: radial-gradient(120% 100% at 50% 0%, #6e64fa 0%, #4561db 70%),
-      #1f2a44; */
-    overflow: hidden;
-    visibility: visible;
-    opacity: 1;
-    pointer-events: auto;
-  }
+    /* 사이드 배너 컨테이너 - 데스크탑에서 공간 확보 */
+    .side-banner-container {
+        width: var(--banner-w);
+        background-color: var(--bg);
+    }
 
-  /* padding값을 조절해서 글자 위치 조정 */
-  .side-banner__inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    padding: 100px 28px 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  .side-banner__logo {
-    font-family: var(--font-brand);
-    color: #4561db;
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: 0.2px;
-    margin: 0 0 8px 0;
-    text-align: center;
-  }
-  .side-banner__tag {
-    margin: 0;
-    line-height: 1.6;
-    opacity: 0.95;
-    color: #4561db;
-    text-align: center;
-  }
+    .side-banner {
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: sticky;
+        top: 0;
+        height: 100dvh;
+        color: #fff;
+        overflow: hidden;
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        /* 로딩 중에도 고정 크기 유지 */
+        min-height: 100vh;
+        background: var(--bg); /* 로딩 중 배경 */
+    }
+
+    .side-banner__inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding: 100px 28px 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100vh;
+    }
+    .side-banner__logo {
+        font-family: var(--font-brand);
+        color: #4561db;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        margin: 0 0 8px 0;
+        text-align: center;
+    }
+    .side-banner__tag {
+        margin: 0;
+        line-height: 1.6;
+        opacity: 0.95;
+        color: #4561db;
+        text-align: center;
+    }
 
   .side-banner__image {
     position: relative;
@@ -484,17 +575,19 @@ body {
     margin: 20px 0;
   }
 
-  .side-banner__art {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(92%, 380px);
-    height: auto;
-    object-fit: contain;
-    pointer-events: none;
-    user-select: none;
-  }
+    .side-banner__art {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(92%, 380px);
+        height: auto;
+        object-fit: contain;
+        pointer-events: none;
+        user-select: none;
+        min-height: 200px;
+        border-radius: var(--radius-12);
+    }
 
   .side-banner__footer {
     display: flex;
@@ -506,13 +599,14 @@ body {
     text-align: center;
   }
 
-  .side-banner__link {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    color: inherit;
-    text-decoration: none;
-  }
+    .side-banner__link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: inherit;
+        text-decoration: none;
+        transition: color var(--fast);
+    }
 
   .side-banner__link:hover {
     color: #2a3fba;
@@ -538,42 +632,36 @@ body {
     opacity: 0.95;
   }
 
-  /* 오른쪽: 기존 모바일 화면을 412px로 유지하며 가운데 */
-  /* .main-wrapper {
-    flex: 1;
-    display: grid;
-    place-items: start center;
-    background: var(--bg);
-    padding: 24px 32px;
-  } */
-
-  /* 데스크탑: 왼쪽 배너를 뺀 나머지 폭에서 '조금 오른쪽' 위치로 이동 */
-  @media (min-width: 1024px) {
-    .main-wrapper > * {
-      width: 100%;
-      max-width: var(--app-max-width);
-      min-height: 100dvh;
-      display: flex;
-      justify-content: center;
-      flex: 0 0 var(--app-max-width);
-      flex-direction: column;
-      margin-right: auto;
-      /* margin-left: calc(
-        ((100vw - var(--banner-w) - var(--app-max-width)) / 2) + var(--nudge-x)
-      ); */
-      box-shadow: var(--shadow-md);
-      border-radius: var(--radius-24);
-      background: var(--surface);
-      overflow: hidden;
+    /* 데스크탑에서 네비바 위치 조정 */
+    .navbar-container {
+        left: 50%;
+        transform: translateX(-50%);
+        /* 사이드 배너가 있을 때 앱 중앙에 맞춤 */
+        margin-left: calc((var(--banner-w) + var(--col-gap)) / 2);
     }
-  }
-  .main-wrapper {
-    /* display: flex; */
-    flex: 0 0 auto;
-    /* align-content: start; 위에서부터 쌓이되 수평은 중앙 */
-    justify-content: center;
-    /* padding: 24px 32px; 우측 칼럼 안 여백 */
-  }
+
+    /* 데스크탑: 왼쪽 배너를 뺀 나머지 폭에서 '조금 오른쪽' 위치로 이동 */
+    .main-wrapper > * {
+        width: 100%;
+        max-width: var(--app-max-width);
+        min-height: 100dvh;
+        display: flex;
+        justify-content: center;
+        flex: 0 0 var(--app-max-width);
+        flex-direction: column;
+        margin-right: auto;
+        box-shadow: var(--shadow-md);
+        border-radius: var(--radius-24);
+        background: var(--surface);
+        overflow: hidden;
+        /* 로딩 중에도 고정 크기 유지 */
+        position: relative;
+    }
+
+    .main-wrapper {
+        flex: 0 0 auto;
+        justify-content: center;
+    }
 
   .main-wrapper > * {
     max-width: var(--app-max-width);
@@ -589,4 +677,45 @@ body {
   .main-wrapper > .airbng-home {
     background: transparent;
   }
+}
+
+/* 페이지 전환 애니메이션 (선택사항) */
+.page-transition-enter {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.page-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+}
+
+.page-transition-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.page-transition-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+}
+
+/* 이미지 로딩 최적화 */
+img {
+    /* 이미지 로딩 중 레이아웃 시프트 방지 */
+    height: auto;
+    max-width: 100%;
+}
+
+/* 폰트 로딩 최적화 */
+@font-face {
+    font-family: 'Pretendard';
+    font-display: swap; /* 폰트 로딩 중에도 텍스트 표시 */
+}
+
+@font-face {
+    font-family: 'BMJUA';
+    font-display: swap;
 }
