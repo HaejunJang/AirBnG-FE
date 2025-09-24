@@ -14,12 +14,12 @@
 /*}*/
 
 /* 전체 컨테이너 */
-/*.reservation-container {*/
-/*  max-width: 412px;*/
-/*  margin: 0 auto;*/
-/*  background-color: white;*/
-/*  min-height: 100vh;*/
-/*}*/
+.reservation-container {
+  max-width: 412px;
+  margin: 0 auto;
+  background-color: white;
+  min-height: 100vh;
+}
 
 /* 컨텐츠 */
 .content {
