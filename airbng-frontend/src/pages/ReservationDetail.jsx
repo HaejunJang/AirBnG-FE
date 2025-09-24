@@ -16,7 +16,7 @@ import ClockIcon from "../assets/clock copy.svg";
 import { Modal, useModal } from "../components/common/ModalUtil";
 import CheckIcon from "../components/reservation/CheckIcon";
 import { getConversationByPeer, getOrCreateConversation } from "../api/chatApi";
-import chatIcon from "../assets/messages.svg";
+import BsChat from "../assets/messages.svg";
 
 const ReservationDetail = () => {
   const navigate = useNavigate();
@@ -423,9 +423,7 @@ const ReservationDetail = () => {
                       onClick={handleChatGo}
                       aria-label="채팅 바로가기"
                     >
-                      <svg className={styles.chatIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
+                    <img src={BsChat} className={styles.chatIcon} alt="채팅" width={22} height={22} />
                     </button>
                   </>
                 ) : null}
