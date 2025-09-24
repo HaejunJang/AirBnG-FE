@@ -5,6 +5,7 @@ import {
   deleteReservationApi,
   cancelReservationApi,
   confirmReservationApi,
+  completeReservationApi
 } from "../api/reservationApi";
 import { useAuth } from "../context/AuthContext";
 import { Modal, useModal } from "../components/common/ModalUtil";
@@ -363,9 +364,26 @@ const ReservationListNew = () => {
   };
 
   // 완료 확인 처리
-  const handleCompleteConfirm = (reservationId) => {
-    // TODO: 완료 확인 API 호출
-    showSuccess("완료 확인", "예약이 완료 처리되었습니다.");
+  const handleCompleteConfirm = async (reservationId) => {
+    try{
+      const response = await completeReservationApi(reservationId);
+      const data = response.data;
+
+      if (data.code === 1000) {
+        showSuccess("완료 확인", "예약이 완료 처리되었습니다.");
+        // 목록 새로고침
+        setReservations([]);
+        setNextCursorId(null);
+        setHasNextPage(true);
+        await fetchReservations(true);
+      } else {
+        showError("완료 실패", data.message);
+      }
+    } catch (error) {
+      console.error("예약 완료 실패:", error);
+      showError("완료 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
+    }
+
   };
 
   // 승인/거절 처리 (호스트용)
@@ -454,13 +472,13 @@ const ReservationListNew = () => {
         };
       case "CANCELLED":
         return {
-          text: "취소됨",
+          text: userRole === "customer" ? "취소함" : "취소됨",
           color: `${styles.textRed600} ${styles.bgRed50}`,
           icon: <XCircle className={styles.w4} />,
         };
       case "REJECTED":
         return {
-          text: "거절됨",
+          text: userRole === "customer" ? "거절됨" : "거절함",
           color: `${styles.textRed600} ${styles.bgRed50}`,
           icon: <XCircle className={styles.w4} />,
         };
@@ -603,60 +621,60 @@ const ReservationListNew = () => {
           </div>
         )}
 
-        {/* 완료대기 탭 추가 정보 */}
+        {/* 완료대기 탭 추가 정보 (완료 확인을 이미 한 경우만) */}
         {activeTab === "finishing" && (
           <div className={styles.finishingInfo}>
-            {reservation.state === "FINISHED_WAIT" && (
-              <div className={`${styles.infoBox} ${styles.warning}`}>
+            {reservation.state === "COMPLETING_DROPPER_ONLY" && userRole === "customer" && (
+              <div className={`${styles.infoBox} ${styles.purple}`}>
                 <p className={styles.infoTitle}>
-                  양쪽 모두 완료 확인이 필요합니다
+                  상대방의 완료 확인을 기다리고 있습니다
                 </p>
-                <p className={styles.infoDesc}>
-                  이용이 완료되면 완료 확인을 눌러주세요.
+              </div>
+            )}
+            {reservation.state === "COMPLETING_KEEPER_ONLY" && userRole === "host" && (
+              <div className={`${styles.infoBox} ${styles.purple}`}>
+                <p className={styles.infoTitle}>
+                  상대방의 완료 확인을 기다리고 있습니다
                 </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 완료대기 탭 완료 확인 버튼 */}
+        {activeTab === "finishing" && (
+          <>
+            {reservation.state === "FINISHED_WAIT" && (
+              <div className={`${styles.cardActions} ${styles.single}`}>
                 <button
-                  className={styles.completeBtn}
+                  className={`${styles.completeBtn} ${styles.fullWidth}`}
                   onClick={() => handleCompleteConfirm(reservation.reservationId)}
                 >
                   완료 확인
                 </button>
               </div>
             )}
-            {reservation.state === "COMPLETING_DROPPER_ONLY" && (
-              <div className={`${styles.infoBox} ${styles.purple}`}>
-                <p className={styles.infoTitle}>
-                  {userRole === "customer"
-                    ? "상대방의 완료 확인을 기다리고 있습니다"
-                    : "완료 확인이 필요합니다"}
-                </p>
-                {userRole === "host" && (
-                  <button
-                    className={styles.completeBtn}
-                    onClick={() => handleCompleteConfirm(reservation.reservationId)}
-                  >
-                    완료 확인
-                  </button>
-                )}
+            {reservation.state === "COMPLETING_DROPPER_ONLY" && userRole === "host" && (
+              <div className={`${styles.cardActions} ${styles.single}`}>
+                <button
+                  className={`${styles.completeBtn} ${styles.fullWidth}`}
+                  onClick={() => handleCompleteConfirm(reservation.reservationId)}
+                >
+                  완료 확인
+                </button>
               </div>
             )}
-            {reservation.state === "COMPLETING_KEEPER_ONLY" && (
-              <div className={`${styles.infoBox} ${styles.purple}`}>
-                <p className={styles.infoTitle}>
-                  {userRole === "customer"
-                    ? "완료 확인이 필요합니다"
-                    : "상대방의 완료 확인을 기다리고 있습니다"}
-                </p>
-                {userRole === "customer" && (
-                  <button
-                    className={styles.completeBtn}
-                    onClick={() => handleCompleteConfirm(reservation.reservationId)}
-                  >
-                    완료 확인
-                  </button>
-                )}
+            {reservation.state === "COMPLETING_KEEPER_ONLY" && userRole === "customer" && (
+              <div className={`${styles.cardActions} ${styles.single}`}>
+                <button
+                  className={`${styles.completeBtn} ${styles.fullWidth}`}
+                  onClick={() => handleCompleteConfirm(reservation.reservationId)}
+                >
+                  완료 확인
+                </button>
               </div>
             )}
-          </div>
+          </>
         )}
 
         {/* 액션 버튼들 */}
@@ -701,18 +719,22 @@ const ReservationListNew = () => {
             </div>
           )}
 
-        {/* 완료된 예약의 더보기 메뉴 */}
-        {(reservation.state === "COMPLETED" ||
-          reservation.state === "CANCELLED") && (
-          <div className={`${styles.cardActions} ${styles.withMenu}`}>
-            {reservation.state === "COMPLETED" && userRole === "customer" && (
-              <button
-                className={styles.rebookBtn}
-                onClick={() => reBooking(navigate, reservation.lockerId)}
-              >
-                다시 예약
-              </button>
-            )}
+        {/* 완료된 예약의 다시 예약 버튼 */}
+        {reservation.state === "COMPLETED" && userRole === "customer" && (
+          <div className={`${styles.cardActions} ${styles.single}`}>
+            <button
+              className={`${styles.rebookBtn} ${styles.fullWidth}`}
+              onClick={() => {
+                const lockerId = reservation.lockerId || reservation.lockerNo;
+                if (!lockerId) {
+                  showError("예약 불가", "보관소 정보가 없어 다시 예약할 수 없습니다.");
+                  return;
+                }
+                reBooking(navigate, lockerId);
+              }}
+            >
+              다시 예약
+            </button>
           </div>
         )}
 

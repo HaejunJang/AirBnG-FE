@@ -658,6 +658,14 @@ ReservationListNew CSS Module .reservationListNew {
   border-color: #d1d5db;
 }
 
+.rebookBtn.fullWidth {
+  flex: 1;
+}
+
+.completeBtn.fullWidth {
+  flex: 1;
+}
+
 .rebookBtn:hover {
   background: #e5e7eb;
   border-color: #9ca3af;
@@ -674,10 +682,10 @@ ReservationListNew CSS Module .reservationListNew {
 }
 
 .moreBtn {
-  width: 36px;
-  height: 36px;
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #dbeafe;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
@@ -687,14 +695,13 @@ ReservationListNew CSS Module .reservationListNew {
 }
 
 .moreBtn:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
+  background: #bfdbfe;
 }
 
 .moreBtn svg {
   width: 16px;
   height: 16px;
-  color: #6b7280;
+  color: #2563eb;
 }
 
 .moreMenu {
@@ -717,15 +724,17 @@ ReservationListNew CSS Module .reservationListNew {
   font-size: 14px;
   font-weight: 500;
   color: #dc2626;
-  background: none;
-  border: none;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s;
-  text-align: left;
+  transition: all 0.2s;
+  text-align: center;
 }
 
 .moreMenuItem:hover {
-  background: #f9fafb;
+  background: #fecaca;
+  border-color: #f87171;
 }
 
 /* 예약 상세 버튼 */

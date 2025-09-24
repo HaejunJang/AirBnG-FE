@@ -40,9 +40,7 @@ export const goToReservationDetail = (navigate, reservationId, memberId, returnS
 
 //다시 예약
 export const reBooking = (navigate, lockerId) => {
-    navigate(`/reservations/form?lockerId=${lockerId}`,{
-        state: { lockerId }
-    });
+    navigate(`/page/lockers/${lockerId}`);
 };
 
 //예약 취소하기
