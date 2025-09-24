@@ -8,7 +8,7 @@ function EmptyLockerCTA({ onRegister }) {
       </div>
       <h2 className="empty-locker-title">보관소 등록</h2>
       <p className="empty-locker-subtext">
-        보관소가 아직 등록되지 않았습니다!
+
         <br />
         보관소 등록하러 가시겠습니까?
       </p>
