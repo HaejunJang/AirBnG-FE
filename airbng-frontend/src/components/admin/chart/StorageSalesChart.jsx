@@ -44,21 +44,21 @@ const StorageSalesChart = ({ data, chartType = 'pie', selectedLockerType = '전�
     };
 
     // 파이차트 툴팁
-    const PieTooltip = ({ active, payload }) => {
-        if (active && payload && payload.length) {
-            const data = payload[0];
-            const totalSales = payload[0].payload.totalSales ||
-                payload[0].payload.data?.reduce((sum, curr) => sum + curr.sales, 0) || 1;
-            const sales = data.value;
+    const PieTooltip = ({ active, payload, data }) => {
+        if (active && payload && payload.length && data) {
+            const item = payload[0]; // 현재 조각 데이터
+            const totalSales = data.reduce((sum, curr) => sum + curr.sales, 0) || 1;
+
+            const sales = item.value;
             const percentage = ((sales / totalSales) * 100).toFixed(1);
 
             return (
                 <div className={styles.customTooltip}>
-                    <p className={styles.tooltipLabel}>{data.name}</p>
-                    <p style={{ color: data.color }}>
+                    <p className={styles.tooltipLabel}>{item.name}</p>
+                    <p style={{ color: item.color }}>
                         매출: <span className={styles.tooltipValue}>{sales.toLocaleString()}원</span>
                     </p>
-                    <p style={{ color: data.color }}>
+                    <p style={{ color: item.color }}>
                         점유율: <span className={styles.tooltipValue}>{percentage}%</span>
                     </p>
                 </div>
@@ -66,6 +66,7 @@ const StorageSalesChart = ({ data, chartType = 'pie', selectedLockerType = '전�
         }
         return null;
     };
+
 
     // 파이차트 렌더링
     const renderPieChart = () => (
@@ -91,7 +92,7 @@ const StorageSalesChart = ({ data, chartType = 'pie', selectedLockerType = '전�
                                     />
                                 ))}
                             </Pie>
-                            <Tooltip content={<PieTooltip />} />
+                            <Tooltip content={(props) => <PieTooltip {...props} data={data} />} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
