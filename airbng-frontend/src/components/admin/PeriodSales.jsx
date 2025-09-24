@@ -10,14 +10,12 @@ const PeriodSales = () => {
     // 탭 변경 시 전체 데이터 가져오기
     const handleTabChange = async (tabType) => {
         setActiveTab(tabType);
-        console.log('탭 변경:', tabType);
         // 전체 데이터를 가져옵니다 (날짜 범위 필터링 없이)
         await fetchAllSalesData();
     };
 
     // 페이지 변경 처리 (매출 목록용)
     const handlePageChange = async (newPage) => {
-        console.log('페이지 변경:', newPage);
         // 전체 데이터에서 페이징만 변경
         await fetchAllSalesData(newPage);
     };
@@ -123,7 +121,6 @@ const PeriodSales = () => {
 
     // 컴포넌트 마운트 시 초기 데이터 로드
     useEffect(() => {
-        console.log('컴포넌트 마운트 - 전체 데이터 로드');
         fetchAllSalesData();
     }, []);
 

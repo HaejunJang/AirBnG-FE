@@ -48,8 +48,6 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
         // 2자리 연도를 4자리로 변환
         asString = convertTwoDigitYear(asString);
 
-        console.log('변환된 날짜 문자열:', asString); // 디버깅용
-
         // 시도할 포맷 배열 (우선순위)
         const tryFormats = [
             'YYYY/MM/DD HH:mm:ss',
@@ -66,7 +64,6 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
         for (const fmt of tryFormats) {
             const d = dayjs(asString, fmt);
             if (d.isValid()) {
-                console.log(`성공한 포맷: ${fmt}, 파싱된 날짜:`, d.format('YYYY-MM-DD HH:mm:ss')); // 디버깅용
                 return d;
             }
         }
@@ -75,18 +72,15 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
         let cleaned = asString.replace(/\.\d+$/, '').replace(' ', 'T');
         let d = dayjs(cleaned);
         if (d.isValid()) {
-            console.log('정리된 문자열로 파싱 성공:', d.format('YYYY-MM-DD HH:mm:ss')); // 디버깅용
             return d;
         }
 
         // 최종 fallback: 기본 파서
         d = dayjs(asString);
         if (d.isValid()) {
-            console.log('기본 파서로 파싱 성공:', d.format('YYYY-MM-DD HH:mm:ss')); // 디버깅용
             return d;
         }
 
-        console.warn('날짜 파싱 실패:', value); // 디버깅용
         return null;
     };
 
@@ -104,14 +98,10 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
             return [];
         }
 
-        console.log('차트 데이터 변환 시작:', { rawData: rawData.length, tab });
-
         if (tab === 'daily') {
             // 오늘 기준 최근 7일 (월화수목금토일)
             const today = dayjs();
             const startDate = today.subtract(6, 'day'); // 오늘 포함 7일 전부터
-
-            console.log('주간 차트 날짜 범위:', startDate.format('YYYY-MM-DD'), '~', today.format('YYYY-MM-DD'));
 
             // 최근 7일 버킷 생성
             const buckets = Array.from({ length: 7 }).map((_, idx) => {
@@ -129,7 +119,6 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
             rawData.forEach((item, index) => {
                 const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
                 if (!d) {
-                    console.warn(`날짜 파싱 실패 (${index}):`, item);
                     return;
                 }
 
@@ -145,7 +134,6 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
                     const amt = parseAmount(item.amount);
                     buckets[bucketIndex].sales += amt;
                     buckets[bucketIndex].count += 1;
-                    console.log(`일별 데이터 추가: ${dateStr}, 금액: ${amt}`);
                 }
             });
 
@@ -175,7 +163,6 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
             rawData.forEach((item, index) => {
                 const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
                 if (!d) {
-                    console.warn(`날짜 파싱 실패 (${index}):`, item);
                     return;
                 }
 
@@ -190,7 +177,6 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
                 monthlyBuckets[monthIndex].sales += amt;
                 monthlyBuckets[monthIndex].count += 1;
 
-                console.log(`월간 데이터 추가: ${currentYear}년 ${monthIndex + 1}월, 금액: ${amt}`);
             });
 
             // 데이터가 있는 월만 반환 (매출이나 거래가 있는 월)
@@ -210,7 +196,6 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
         rawData.forEach((item, index) => {
             const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
             if (!d) {
-                console.warn(`날짜 파싱 실패 (${index}):`, item);
                 return;
             }
 
@@ -219,12 +204,10 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
 
             yearMap[y] = (yearMap[y] || 0) + amt;
             yearCountMap[y] = (yearCountMap[y] || 0) + 1;
-            console.log(`연간 데이터 추가: ${y}년, 금액: ${amt}`);
         });
 
         // 실제 데이터가 있는 연도들만 정렬하여 반환
         const years = Object.keys(yearMap).map(Number).sort((a, b) => a - b);
-        console.log('연간 집계 결과:', yearMap, '연도 목록:', years);
 
         return years.map((y) => ({
             name: `${y}년`,
@@ -234,7 +217,6 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
     };
 
     const chartData = convertDataForChart(data, activeTab);
-    console.log('최종 차트 데이터:', chartData); // 디버깅용
 
     const getTitle = () => {
         if (activeTab === 'daily') return '주간 매출 추이';

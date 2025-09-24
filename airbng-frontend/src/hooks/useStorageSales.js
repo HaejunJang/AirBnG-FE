@@ -14,8 +14,6 @@ export const useStorageSales = () => {
     const [error, setError] = useState(null);
 
     const fetchStorageSales = async ({ lockerType, startDate, endDate }) => {
-        console.log('🔍 fetchStorageSales 호출됨:', { lockerType, startDate, endDate });
-
         setLoading(true);
         setError(null);
 
@@ -25,7 +23,6 @@ export const useStorageSales = () => {
 
             if (lockerType === null) {
                 // 전체 조회: 3가지 타입을 병렬로 조회
-                console.log('📡 전체 조회 - 3개 타입 병렬 조회 시작...');
                 const lockerTypes = ['PERSONAL', 'PUBLIC', 'COMPANY'];
 
                 const promises = lockerTypes.map(type =>
@@ -33,12 +30,10 @@ export const useStorageSales = () => {
                 );
 
                 const responses = await Promise.all(promises);
-                console.log('✅ 병렬 조회 완료:', responses);
 
                 // 각 응답에서 결과 추출
                 responses.forEach((response, index) => {
                     const currentType = lockerTypes[index];
-                    console.log(`📊 ${currentType} 응답:`, response.data);
 
                     if (response.status === 500) {
                         throw new Error(`서버 에러 (500) - ${currentType}: ${response.data.error || 'Internal Server Error'}`);
@@ -75,11 +70,8 @@ export const useStorageSales = () => {
 
             } else {
                 // 특정 타입 조회
-                console.log('📡 특정 타입 조회 시작...', lockerType);
                 const response = await getStorageSales({ lockerType, startDate, endDate, page: 0, size: 100 });
                 const { data } = response;
-
-                console.log('✅ 특정 타입 응답 받음:', response);
 
                 if (response.status === 500) {
                     throw new Error(`서버 에러 (500): ${data.error || 'Internal Server Error'}`);
@@ -111,7 +103,6 @@ export const useStorageSales = () => {
 
             // 데이터가 없는 경우
             if (!allResults.length) {
-                console.log('⚠️ 조회된 데이터 없음');
                 setStorageSalesData([]);
                 setPeriodData([]);
                 setSummaryData({
@@ -122,8 +113,6 @@ export const useStorageSales = () => {
                 });
                 return;
             }
-
-            console.log('🔄 데이터 매핑 시작... 총', allResults.length, '개 타입');
 
             // 화면 표시용 데이터 변환
             const mappedData = allResults.map((aggregated, index) => {
@@ -142,7 +131,6 @@ export const useStorageSales = () => {
                     lockerCount: aggregated.uniqueLockers
                 };
 
-                console.log(`✅ 매핑 완료 ${aggregated.lockerType}:`, mapped);
                 return mapped;
             });
 
@@ -159,14 +147,10 @@ export const useStorageSales = () => {
                 activeStorages: totalLockers
             };
 
-            console.log('🎉 최종 매핑된 데이터:', mappedData);
-            console.log('📊 계산된 요약 데이터:', calculatedSummary);
-
             setStorageSalesData(mappedData);
             setSummaryData(calculatedSummary);
 
         } catch (err) {
-            console.error('❌ API 호출 에러:', err);
             setError(err.message);
             setStorageSalesData([]);
             setPeriodData([]);
@@ -178,14 +162,11 @@ export const useStorageSales = () => {
             });
         } finally {
             setLoading(false);
-            console.log('🔚 fetchStorageSales 완료');
         }
     };
 
     // 특정 보관소의 기간별 매출 데이터 조회
     const fetchStorageSalesByPeriod = async ({ lockerType, startDate, endDate }) => {
-        console.log('🔍 fetchStorageSalesByPeriod 호출됨:', { lockerType, startDate, endDate });
-
         setLoading(true);
         setError(null);
 
@@ -200,7 +181,6 @@ export const useStorageSales = () => {
             const salesData = data.result?.content || [];
 
             if (!salesData.length) {
-                console.log('⚠️ 조회된 기간별 데이터 없음');
                 setPeriodData([]);
                 setStorageSalesData([]);
                 setSummaryData({
@@ -212,21 +192,12 @@ export const useStorageSales = () => {
                 return;
             }
 
-            console.log('📊 원본 기간별 데이터:', salesData);
-
-            // 백엔드 응답 데이터 상세 분석
-            console.log('🔍 백엔드 응답 상세 분석:');
-            salesData.forEach((item, index) => {
-                console.log(`${index + 1}. 날짜: ${item.aggregatedDate}, 타입: ${item.lockerType}, 보관소ID: ${item.lockerId}, 거래수: ${item.totalCount}, 매출: ${item.totalSales}`);
-            });
-
             // 날짜별로 데이터 그룹핑 (해당 보관소 타입의 데이터만 집계)
             const dateGroups = {};
 
             salesData.forEach(item => {
                 // 보관소 타입 확인 - 요청한 타입과 일치하지 않으면 제외
                 if (item.lockerType !== lockerType) {
-                    console.log(`타입 불일치로 제외: 요청=${lockerType}, 실제=${item.lockerType}`);
                     return;
                 }
 
@@ -247,7 +218,6 @@ export const useStorageSales = () => {
                 }
 
                 if (!dateValue || isNaN(dateValue.getTime())) {
-                    console.warn('⚠️ 유효한 날짜를 파싱할 수 없음:', item);
                     dateValue = new Date();
                 }
 
@@ -287,8 +257,6 @@ export const useStorageSales = () => {
                 })
                 .sort((a, b) => new Date(b.date) - new Date(a.date)); // 내림차순 정렬 (최신 날짜가 위로)
 
-            console.log('📊 최종 기간별 데이터:', periodicalData);
-
             // 요약 데이터 계산
             const totalSales = periodicalData.reduce((sum, item) => sum + item.sales, 0);
             const totalCount = periodicalData.reduce((sum, item) => sum + item.transactions, 0);
@@ -303,15 +271,11 @@ export const useStorageSales = () => {
                 activeStorages: uniqueLockers
             };
 
-            console.log('🎉 기간별 데이터 생성 완료:', periodicalData);
-            console.log('📊 기간별 요약 데이터:', calculatedSummary);
-
             setPeriodData(periodicalData);
             setStorageSalesData([]);
             setSummaryData(calculatedSummary);
 
         } catch (err) {
-            console.error('❌ 기간별 API 호출 에러:', err);
             setError(err.message);
             setPeriodData([]);
             setStorageSalesData([]);
@@ -323,7 +287,6 @@ export const useStorageSales = () => {
             });
         } finally {
             setLoading(false);
-            console.log('🔚 fetchStorageSalesByPeriod 완료');
         }
     };
 
