@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   getReservationList,
   deleteReservationApi,
@@ -13,25 +13,20 @@ import {
   getJimTypesText,
 } from "../utils/reservation/reservationUtils";
 import {
-  formatDate,
   formatDateTime,
   formatDuration,
 } from "../utils/reservation/dateUtils";
 import styles from "../styles/pages/ReservationListNew.module.css";
+import Header from "../components/Header/Header";
 
-// Lucide 아이콘을 SVG로 대체
-const ChevronLeft = ({ className, onClick }) => (
-  <svg
-    className={className}
-    onClick={onClick}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <polyline points="15,18 9,12 15,6"></polyline>
-  </svg>
-);
+const PERIOD_OPTIONS = [
+  { value: "ALL", label: "전체" },
+  { value: "1W", label: "1주" },
+  { value: "1M", label: "1개월" },
+  { value: "3M", label: "3개월" },
+  { value: "6M", label: "6개월" },
+  { value: "1Y", label: "1년" },
+];
 
 const Clock = ({ className }) => (
   <svg
@@ -89,6 +84,7 @@ const AlertCircle = ({ className }) => (
 
 const ReservationListNew = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const memberId = user?.id;
 
@@ -100,6 +96,47 @@ const ReservationListNew = () => {
   const [hasNextPage, setHasNextPage] = useState(true);
   const [activeMoreMenu, setActiveMoreMenu] = useState(null);
   const [backendMessage, setBackendMessage] = useState("");
+
+  const [period, setPeriod] = useState("ALL");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => setDropdownOpen((v) => !v);
+  const closeDropdown = () => setDropdownOpen(false);
+  const selectPeriod = (value) => {
+    setPeriod(value);
+    closeDropdown();
+  };
+
+  const filterByPeriod = (reservations) => {
+    if (period === "ALL") return reservations;
+    const now = new Date();
+    const periodStart = new Date();
+    switch (period) {
+      case "1W":
+        periodStart.setDate(now.getDate() - 7);
+        break;
+      case "1M":
+        periodStart.setMonth(now.getMonth() - 1);
+        break;
+      case "3M":
+        periodStart.setMonth(now.getMonth() - 3);
+        break;
+      case "6M":
+        periodStart.setMonth(now.getMonth() - 6);
+        break;
+      case "1Y":
+        periodStart.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        periodStart.setFullYear(1970);
+    }
+    return reservations.filter((reservation) => {
+      const resDate = new Date(reservation.startTime || reservation.dateOnly);
+      return resDate >= periodStart && resDate <= now;
+    });
+  };
+
+  const showPeriodFilter = ["current", "completed", "cancelled"].includes(activeTab);
 
   const { modalState, showConfirm, showSuccess, showError, hideModal } =
     useModal();
@@ -162,9 +199,7 @@ const ReservationListNew = () => {
           setHasNextPage(result.hasNextPage ?? false);
         }
 
-        setReservations((prev) =>
-          isFirst ? newReservations : [...prev, ...newReservations]
-        );
+        setReservations(newReservations);
         setBackendMessage(backendMsg);
       } catch (error) {
         console.error("예약 조회 오류:", error);
@@ -178,6 +213,24 @@ const ReservationListNew = () => {
     [memberId, activeTab, userRole, nextCursorId, loading]
   );
 
+  const redirectParam = encodeURIComponent(location.pathname);
+
+  const showLoading = () => setLoading(true);
+
+  const goToLogin = () => {
+    showLoading();
+    setTimeout(() => {
+      navigate(`/page/login?redirect=${redirectParam}`, { replace: true });
+    }, 300);
+  };
+
+  const goToSignup = () => {
+    showLoading();
+    setTimeout(() => {
+      navigate(`/page/signup?redirect=${redirectParam}`, { replace: true });
+    }, 300);
+  };
+
   // 탭 변경
   const handleTabChange = (tabId) => {
     if (loading) return;
@@ -186,6 +239,8 @@ const ReservationListNew = () => {
     setNextCursorId(null);
     setHasNextPage(true);
     setBackendMessage("");
+    // 스크롤 맨 위로
+    document.querySelector(`.${styles.contentNew}`)?.scrollTo(0, 0);
   };
 
   // 역할 변경
@@ -356,6 +411,9 @@ const ReservationListNew = () => {
     const jimTypes = getJimTypesText(reservation.jimTypeResults);
     const isCurrentUse = isCurrentlyInUse(reservation);
 
+    const showDeleteMenu = activeTab === "cancelled" &&
+      (reservation.state === "CANCELLED" || reservation.state === "REJECTED");
+
     return (
       <div className={styles.reservationCardNew}>
         <div className={styles.cardHeader}>
@@ -363,6 +421,39 @@ const ReservationListNew = () => {
             {statusInfo.icon}
             <span>{statusInfo.text}</span>
           </div>
+
+          {/* 오른쪽 상단 ... 버튼 (취소/거절 탭에서만) */}
+          {showDeleteMenu && (
+            <div className={styles.moreMenuContainer}>
+              <button
+                className={styles.moreBtn}
+                onClick={e => {
+                  e.stopPropagation();
+                  toggleMoreMenu(reservation.reservationId);
+                }}
+                aria-label="삭제 메뉴"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="19" cy="12" r="1"></circle>
+                  <circle cx="5" cy="12" r="1"></circle>
+                </svg>
+              </button>
+              {activeMoreMenu === reservation.reservationId && (
+                <div 
+                  className={styles.moreMenu}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <button
+                    className={styles.moreMenuItem}
+                    onClick={() => showDeleteConfirm(reservation.reservationId)}
+                  >
+                    삭제
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 액션 버튼들 */}
           {reservation.state === "PENDING" && userRole === "host" && (
@@ -496,18 +587,6 @@ const ReservationListNew = () => {
           userRole === "customer" && (
             <div className={`${styles.cardActions} ${styles.double}`}>
               <button
-                className={styles.changeBtn}
-                onClick={() =>
-                  goToReservationDetail(
-                    navigate,
-                    reservation.reservationId,
-                    memberId
-                  )
-                }
-              >
-                예약 변경
-              </button>
-              <button
                 className={styles.cancelBtn}
                 onClick={() => showCancelConfirm(reservation.reservationId)}
               >
@@ -528,28 +607,6 @@ const ReservationListNew = () => {
                 다시 예약
               </button>
             )}
-            <div className={styles.moreMenuContainer}>
-              <button
-                className={styles.moreBtn}
-                onClick={() => toggleMoreMenu(reservation.reservationId)}
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="12" r="1"></circle>
-                  <circle cx="19" cy="12" r="1"></circle>
-                  <circle cx="5" cy="12" r="1"></circle>
-                </svg>
-              </button>
-              {activeMoreMenu === reservation.reservationId && (
-                <div className={styles.moreMenu}>
-                  <button
-                    className={styles.moreMenuItem}
-                    onClick={() => showDeleteConfirm(reservation.reservationId)}
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         )}
 
@@ -606,27 +663,11 @@ const ReservationListNew = () => {
     return filtered;
   };
 
-  // 각 탭별 카운트 계산
-  const getTabCount = (tabId) => {
-    const states = getStatesForTab(tabId);
-    let count = reservations.filter((r) => states.includes(r.state)).length;
-
-    if (tabId === "current") {
-      const now = new Date();
-      count = reservations.filter((r) => {
-        const startTime = new Date(r.startTime);
-        const endTime = new Date(r.endTime);
-        return r.state === "CONFIRMED" && now >= startTime && now <= endTime;
-      }).length;
-    }
-
-    return count;
-  };
-
   // 초기 로딩
   useEffect(() => {
     if (memberId) {
       fetchReservations(true);
+      document.querySelector(`.${styles.contentNew}`)?.scrollTo(0, 0);
     }
   }, [activeTab, userRole, memberId]);
 
@@ -639,26 +680,43 @@ const ReservationListNew = () => {
 
   if (!memberId) {
     return (
-      <div className={styles.reservationListNew}>
-        <div className={styles.loginRequired}>로그인 후 확인 가능합니다.</div>
+      <div className={styles.container}>
+
+        <Header 
+          headerTitle="예약 내역"
+          showBackButton={true}
+          onBack={() => navigate(-1)}
+        />
+        <div className={styles.welcomeSection}>
+          <div className={styles.welcomeContent}>
+            <h1 className={styles.welcomeTitle}>환영합니다!</h1>
+            <p className={styles.welcomeSubtitle}>
+              예약 내역을 확인하려면{"\n"}로그인 또는 회원가입이 필요합니다.
+            </p>
+            <div className={styles.welcomeButtons}>
+              <button className={styles.btnPrimary} onClick={goToLogin}>
+                로그인
+              </button>
+              <button className={styles.btnSecondary} onClick={goToSignup}>
+                회원가입
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const currentReservations = getCurrentReservations();
+  const currentReservations = filterByPeriod(getCurrentReservations());
 
   return (
     <div className={styles.reservationListNew}>
       {/* 헤더 */}
-      <div className={styles.headerNew}>
-        <div className={styles.headerContent}>
-          <ChevronLeft
-            className={styles.backIcon}
-            onClick={() => navigate(-1)}
-          />
-          <h1 className={styles.headerTitle}>예약 내역</h1>
-        </div>
-      </div>
+      <Header 
+        headerTitle="예약 내역"
+        showBackButton={true}
+        onBack={() => navigate(-1)}
+      />
 
       {/* 역할 선택 */}
       <div className={styles.roleSelector}>
@@ -687,26 +745,50 @@ const ReservationListNew = () => {
       {/* 탭 메뉴 */}
       <div className={styles.tabsNew}>
         <div className={styles.tabsContainer}>
-          {tabs.map((tab) => {
-            const count = getTabCount(tab.id);
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`${styles.tabNew} ${
-                  activeTab === tab.id ? styles.active : ""
-                }`}
-              >
-                <span className={styles.tabLabel}>{tab.label}</span>
-                {count > 0 && <span className={styles.tabCount}>{count}</span>}
-              </button>
-            );
-          })}
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className={`${styles.tabNew} ${activeTab === tab.id ? styles.active : ""}`}
+            >
+              <span className={styles.tabLabel}>{tab.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 
       {/* 컨텐츠 */}
       <div className={styles.contentNew}>
+        {/* 기간 필터 드롭다운 */}
+        {showPeriodFilter && (
+          <div className={styles.periodDropdown}>
+            <button
+              className={`${styles.dropdownBtn} ${dropdownOpen ? styles.open : ""}`}
+              onClick={toggleDropdown}
+              type="button"
+            >
+              <span>
+                {PERIOD_OPTIONS.find((p) => p.value === period)?.label || "전체"}
+              </span>
+              <svg className={styles.dropdownArrow} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </button>
+            {dropdownOpen && (
+              <div className={styles.dropdownMenu}>
+                {PERIOD_OPTIONS.map((option) => (
+                  <div
+                    key={option.value}
+                    className={styles.dropdownItem}
+                    onClick={() => selectPeriod(option.value)}
+                  >
+                    {option.label}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         {loading && currentReservations.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.loadingSpinner}></div>

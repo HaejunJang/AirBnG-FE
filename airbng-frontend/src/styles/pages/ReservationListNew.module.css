@@ -1,10 +1,145 @@
 ReservationListNew CSS Module .reservationListNew {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background-color: #ffffff;
+  min-height: 100dvh; 
+  background-color: #fff;
   max-width: 412px;
   margin: 0 auto;
+}
+
+/* 로그인/회원가입 웰컴 섹션 */
+.container {
+  width: 100%;
+  max-width: 412px;
+  min-height: 100dvh;
+  background: #fff;
+  margin: 0 auto;
+  box-shadow: 0 0 20px rgba(0,0,0,0.08);
+  position: relative;
+  padding-bottom: 0;
+  padding-top: 60px;   
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.welcomeSection {
+  text-align: center;
+  padding: 100px 20px 40px 20px; /* 아래로 더 내림 */
+  margin-bottom: 30px;
+  width: 100%;
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+  animation-delay: 0.1s;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcomeContent {
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.welcomeTitle {
+  font-size: 28px;    
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.welcomeSubtitle {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.6;
+  white-space: pre-line; /* 줄바꿈 적용 */
+  word-break: keep-all;
+}
+
+.welcomeButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btnPrimary,
+.btnSecondary {
+  padding: 8px 0;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  min-width: 0;
+  flex: 1 1 0;
+  width: 100%;
+  max-width: 160px;
+  box-sizing: border-box;
+}
+
+.btnPrimary {
+  border: none;
+  cursor: pointer;
+  background: #4561db;
+  color: white;
+  transition: all 0.2s;
+}
+
+.btnPrimary:hover {
+  background: #3651cb;
+  transform: translateY(-1px);
+}
+
+.btnSecondary {
+  border: 1px solid #e8ebff;
+  background: #f8f9fa;
+  color: #4561db;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnSecondary:hover {
+  background: #f8f9ff;
+  transform: translateY(-1px);
+}
+
+/* 반응형 */
+@media (max-width: 414px) {
+  .reservationListNew,
+  .container {
+    width: 100%;
+    box-shadow: none;
+    padding-top: 60px;
+    min-height: 100dvh;
+    max-width: 100vw;
+  }
+  .contentNew {
+    padding: 12px 8px;
+  }
+  .welcomeSection {
+    padding: 50px 10px 30px 10px;
+  }
+  .welcomeButtons {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .btnPrimary, .btnSecondary {
+    width: 100%;
+    max-width: none;
+  }
+  .tabsContainer {
+    gap: 18px;
+    padding: 0 4px;
+  }
+  .tabNew {
+    font-size: 14px;
+    padding: 10px 0;
+  }
 }
 
 /* 헤더 */
@@ -111,14 +246,22 @@ ReservationListNew CSS Module .reservationListNew {
   position: sticky;
   top: 131px;
   z-index: 95;
-  /* background-color: yellow; */
+  min-height: 48px;
+  box-sizing: border-box;
+  margin-bottom: 2px; /* 탭 아래 여백 추가 */
 }
 
 .tabsContainer {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  padding: 0 6px;
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
 .tabsContainer::-webkit-scrollbar {
@@ -129,8 +272,8 @@ ReservationListNew CSS Module .reservationListNew {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  padding: 16px 12px;
-  font-size: 14px;
+  padding: 8px 0;
+  font-size: 15px;
   font-weight: 500;
   border: none;
   background: transparent;
@@ -138,9 +281,12 @@ ReservationListNew CSS Module .reservationListNew {
   border-bottom: 2px solid transparent;
   cursor: pointer;
   transition: all 0.2s;
-  gap: 6px;
+  gap: 4px;
   white-space: nowrap;
   min-width: fit-content;
+  justify-content: center;
+  min-height: 32px; /* 탭 높이 고정 */
+  line-height: 1;
 }
 
 .tabNew.active {
@@ -156,18 +302,6 @@ ReservationListNew CSS Module .reservationListNew {
   line-height: 1;
 }
 
-.tabCount {
-  background: #e0e7ff;
-  color: #4f46e5;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 9999px;
-  min-width: 20px;
-  text-align: center;
-  line-height: 1.2;
-}
-
 .tabNew.active .tabCount {
   background: #4f46e5;
   color: white;
@@ -175,10 +309,13 @@ ReservationListNew CSS Module .reservationListNew {
 
 /* 컨텐츠 */
 .contentNew {
-  flex: 1;
-  padding: 16px 20px;
+  flex: 1 1 auto;
+  min-height: calc(100dvh - 200px);
   overflow-y: auto;
-  background-color: white;
+  background-color: #fff;
+  padding: 70px 20px 70px 20px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 /* 예약 카드 */
@@ -195,8 +332,9 @@ ReservationListNew CSS Module .reservationListNew {
 .cardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 16px;
+  position: relative;
 }
 
 .statusBadge {
@@ -470,7 +608,6 @@ ReservationListNew CSS Module .reservationListNew {
 }
 
 .cancelBtn,
-.changeBtn,
 .rebookBtn {
   padding: 10px 16px;
   font-size: 14px;
@@ -497,27 +634,25 @@ ReservationListNew CSS Module .reservationListNew {
   flex: 1;
 }
 
-.changeBtn,
 .rebookBtn {
   background: #f3f4f6;
   color: #374151;
   border-color: #d1d5db;
 }
 
-.changeBtn:hover,
 .rebookBtn:hover {
   background: #e5e7eb;
   border-color: #9ca3af;
 }
 
-.cardActions.double .cancelBtn,
-.cardActions.double .changeBtn {
+.cardActions.double .cancelBtn {
   flex: 1;
 }
 
 /* 더보기 메뉴 */
 .moreMenuContainer {
   position: relative;
+  margin-left: auto;
 }
 
 .moreBtn {
@@ -597,24 +732,25 @@ ReservationListNew CSS Module .reservationListNew {
 
 /* 빈 상태 */
 .emptyState {
+  height: 100%;
+  min-height: calc(100dvh - 320px); /* 헤더+탭+버튼 등 상단/하단 여백 제외 */
+  overflow: hidden;
+  background: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-  color: #6b7280;
 }
 
 .emptyIcon {
   font-size: 48px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   opacity: 0.5;
 }
 
 .emptyState p {
   font-size: 16px;
-  margin: 0;
+  margin-bottom: 50px;
 }
 
 /* 로딩 스피너 */
@@ -683,4 +819,70 @@ ReservationListNew CSS Module .reservationListNew {
 
 .contentNew::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.2);
+}
+
+.periodDropdown {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  margin: 0 0 16px 0; /* 탭과 카드 사이 여백 */
+  position: relative;
+  z-index: 10;
+  background: #fff;
+  padding: 0 6px 0 6px;
+}
+
+.dropdownBtn {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 6px 16px;
+  font-size: 15px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.2s;
+}
+
+.dropdownBtn.open,
+.dropdownBtn:hover {
+  border-color: #4561db;
+}
+
+.dropdownArrow {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s;
+}
+
+.dropdownBtn.open .dropdownArrow {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  min-width: 120px;
+  z-index: 1000;
+  padding: 4px 0;
+}
+
+.dropdownItem {
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 15px;
+  color: #333;
+  transition: background 0.15s;
+}
+
+.dropdownItem:hover {
+  background: #f5f7ff;
 }

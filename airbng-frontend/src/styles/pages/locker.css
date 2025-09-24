@@ -277,3 +277,54 @@
 .airbng-locker .register-locker-btn:hover {
     background-color: #3651cb;
 }
+
+.airbng-locker .welcome-buttons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+.airbng-locker .login-btn,
+.airbng-locker .signup-btn {
+  padding: 12px 0;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  min-width: 0;
+  flex: 1 1 0;
+  width: 120px;
+  max-width: 160px;
+  box-sizing: border-box;
+  transition: all 0.18s;
+  letter-spacing: 0.5px;
+}
+
+.airbng-locker .login-btn {
+  border: none;
+  cursor: pointer;
+  background: #4561db;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(69, 97, 219, 0.08);
+}
+
+.airbng-locker .login-btn:hover {
+  background: #3651cb;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px rgba(69, 97, 219, 0.15);
+}
+
+.airbng-locker .signup-btn {
+  border: 1.5px solid #e8ebff;
+  background: #f8f9fa;
+  color: #4561db;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(69, 97, 219, 0.04);
+}
+
+.airbng-locker .signup-btn:hover {
+  background: #f8f9ff;
+  border-color: #4561db;
+  color: #3651cb;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px rgba(69, 97, 219, 0.10);
+}
