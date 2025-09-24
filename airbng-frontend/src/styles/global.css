@@ -78,7 +78,7 @@ button {
   /* App shell */
   --app-max-width: 412px;
   --header-height: 65px; /* used in header.css */
-  --bottom-nav-height: 80px; /* used in navigation.css */
+  --bottom-nav-height: 75px; /* used in navigation.css */
   --header-icon-size: 40px; /* used in header.css */
 
   /* Brand & palette */
