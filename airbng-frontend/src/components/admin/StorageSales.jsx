@@ -168,7 +168,7 @@ const StorageSales = () => {
                     {/* 보관소별 상세 목록 */}
                     <div className={styles.tableSection}>
                         <h3 className={styles.sectionTitle}>
-                            {searchLockerType === '전체' ? '보관소별 상세 현황' : `${searchLockerType} 보관소 일일 매출 현황`}
+                            {searchLockerType === '전체' ? '보관소별 상세 현황' : `${new Date().getMonth() + 1}월 ${searchLockerType} 보관소 일일 매출 현황`}
                         </h3>
 
                         <div className={styles.tableContainer}>
