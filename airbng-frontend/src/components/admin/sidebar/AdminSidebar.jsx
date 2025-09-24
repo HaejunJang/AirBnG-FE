@@ -6,7 +6,9 @@ import { FiTrendingUp } from "react-icons/fi";
 import { CiCalendar } from "react-icons/ci";
 import { LuBuilding } from "react-icons/lu";
 import { BiMoneyWithdraw } from "react-icons/bi";
+import { Modal, useModal } from "../../common/ModalUtil";
 import styles from '../../../styles/admin/layout/AdminSidebar.module.css';
+import {useAuth} from "../../../context/AuthContext";
 
 const AdminSidebar = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -14,6 +16,9 @@ const AdminSidebar = () => {
     const [activeSubMenu, setActiveSubMenu] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
+    const { logout } = useAuth();
+
+    const { modalState, hideModal, showConfirm } = useModal();
 
     const menuItems = [
         {
@@ -27,19 +32,19 @@ const AdminSidebar = () => {
             icon: <FiTrendingUp size={20} />,
             subItems: [
                 {
-                    name: '기간별매출',
+                    name: '기간별 매출 추이',
                     icon: <CiCalendar size={18} />,
                     path: '/admin/sales/period'
                 },
+                // {
+                //     name: '보관소 매출 현황',
+                //     icon: <LuBuilding size={18} />,
+                //     path: '/admin/sales/storage'
+                // },
                 {
-                    name: '보관소별 매출',
-                    icon: <LuBuilding size={18} />,
-                    path: '/admin/sales/storage'
-                },
-                {
-                    name: '순매출',
+                    name: '보관소 매출 현황',
                     icon: <BiMoneyWithdraw size={18} />,
-                    path: '/admin/sales/net'
+                    path: '/admin/sales/storage'
                 }
             ]
         }
@@ -56,11 +61,11 @@ const AdminSidebar = () => {
             setActiveMenu('매출');
             // 서브메뉴 설정
             if (currentPath.includes('/admin/sales/period')) {
-                setActiveSubMenu('기간별매출');
+                setActiveSubMenu('기간별 매출 추이');
+            // } else if (currentPath.includes('/admin/sales/storage')) {
+            //     setActiveSubMenu('보관소 매출 현황');
             } else if (currentPath.includes('/admin/sales/storage')) {
-                setActiveSubMenu('보관소별 매출');
-            } else if (currentPath.includes('/admin/sales/net')) {
-                setActiveSubMenu('순매출');
+                setActiveSubMenu('보관소 매출 현황');
             } else {
                 setActiveSubMenu('');
             }
@@ -83,6 +88,20 @@ const AdminSidebar = () => {
     const handleSubMenuClick = (subItem) => {
         setActiveSubMenu(subItem.name);
         navigate(subItem.path);
+    };
+
+    const onLogout = () => {
+        showConfirm(
+            "로그아웃",
+            "정말로 로그아웃하시겠습니까?",
+            async () => {
+                try {
+                    if (logout) await logout(); // 상위 컴포넌트에서 전달받은 logout 함수 실행
+                } catch (e) {
+                    console.error("로그아웃 실패:", e);
+                }
+            }
+        );
     };
 
     return (
@@ -132,6 +151,29 @@ const AdminSidebar = () => {
                     </div>
                 ))}
             </nav>
+
+            <div className={styles.logoutContainer}>
+                <button onClick={onLogout} className={`${styles.menuButton} ${styles.logoutButton}`}>
+                    <span className={styles.logoutIcon}></span>
+                    {sidebarOpen && <span className={styles.menuText}>로그아웃</span>}
+                </button>
+            </div>
+
+            {/* 모달 */}
+            <Modal
+                show={modalState.show}
+                type={modalState.type}
+                title={modalState.title}
+                message={modalState.message}
+                confirmText={modalState.confirmText}
+                cancelText={modalState.cancelText}
+                showCancel={modalState.showCancel}
+                onConfirm={modalState.onConfirm}
+                onCancel={modalState.onCancel}
+                onClose={hideModal}
+            />
+
+
         </div>
     );
 };

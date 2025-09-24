@@ -30,18 +30,20 @@ export const updateLocker = ({ lockerId, locker, images = [] }) => {
     images.forEach((f) => fd.append("images", f));
     return httpAuth.post(`/lockers/update/${lockerId}`, fd);
 };
+
 // 내가 보유한 보관소 존재 여부
 export const hasMyLocker = () => httpAuth.get("/lockers/me/exist");
 
+
 // 보관소 검색
 export const searchLockers = ({ address, lockerName, jimTypeId }) => {
-  return httpPublic.get("/lockers", {
-    params: {
-      address: address || "",
-      lockerName: lockerName || "",
-      jimTypeId: jimTypeId || null,
-    },
-  });
+    return httpPublic.get('/lockers', {
+        params: {
+            address: address || '',
+            lockerName: lockerName || '',
+            jimTypeId: jimTypeId || null
+        }
+    });
 };
 
 // 수정할 특정 보관소 정보 조회
@@ -54,6 +56,7 @@ export const getMyLocker = () => httpAuth.get("/lockers/me");
 // 수정용
 // export const getMyLockerForUpdate = () => httpAuth.get("/lockers/me/update");
 
+
 // 찜 여부 확인
 export const checkZzimExists = (lockerId, memberId) =>
   httpAuth.get(`/lockers/${lockerId}/members/${memberId}/zzim/exists`);
@@ -63,3 +66,6 @@ export const toggleZzim = (lockerId, memberId) =>
   httpAuth.post(`/lockers/${lockerId}/members/${memberId}/zzim`);
 
 // export const getMyLockerForUpdate = () => httpAuth.get("/lockers/me/update");
+
+// 내 보관소 상태 조회 (등록 가능/심사 상태 확인)
+export const getLockerViewStatus = () => httpAuth.get("/lockers/locker/status");

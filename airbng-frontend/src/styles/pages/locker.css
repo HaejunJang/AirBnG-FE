@@ -328,3 +328,131 @@
   transform: translateY(-2px) scale(1.04);
   box-shadow: 0 4px 16px rgba(69, 97, 219, 0.10);
 }
+
+.airbng-locker .register-locker-btn.disabled {
+    background-color: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.airbng-locker .register-locker-btn.disabled:hover {
+    background-color: #e5e7eb;
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* 모달 컨텐츠 */
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    max-width: 350px;
+    width: 90%;
+    margin: 20px;
+}
+
+/* 모달 아이콘 */
+.modal-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 auto 20px auto;
+    color: white;
+}
+
+.info-icon {
+    background-color: #17a2b8;
+}
+
+.warning-icon {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.error-icon {
+    background-color: #dc3545;
+}
+
+.success-icon {
+    background-color: #28a745;
+}
+
+/* 모달 제목 */
+.modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+/* 모달 메시지 */
+.modal-message {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+    margin: 0 0 25px 0;
+    white-space: pre-line;
+}
+
+/* 모달 버튼 */
+.modal-button {
+    background-color: #4561DB;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    min-width: 80px;
+}
+
+.modal-button:hover {
+    background-color: #3651cb;
+}
+
+.modal-button:active {
+    transform: translateY(1px);
+}
+
+/* 반응형 대응 */
+@media (max-width: 480px) {
+    .modal-content {
+        margin: 10px;
+        padding: 25px;
+    }
+
+    .modal-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
+
+    .modal-title {
+        font-size: 16px;
+    }
+
+    .modal-message {
+        font-size: 13px;
+    }
+}
