@@ -549,7 +549,7 @@ const LockerDetails = () => {
   const isAvailable = lockerDetail.isAvailable !== "NO";
 
   return (
-    <div className={styles.container}>
+    <div>
       <Header headerTitle="보관소 상세" showBackButton={true} />
       <div className={styles.content}>
         {renderImageGallery()}

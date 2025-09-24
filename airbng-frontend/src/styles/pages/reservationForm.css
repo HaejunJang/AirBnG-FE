@@ -1,29 +1,29 @@
-/* 기본 스타일 초기화 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
-    Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",
-    "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    sans-serif;
-}
+/*!* 기본 스타일 초기화 *!*/
+/** {*/
+/*  margin: 0;*/
+/*  padding: 0;*/
+/*  box-sizing: border-box;*/
+/*  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,*/
+/*    Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",*/
+/*    "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",*/
+/*    sans-serif;*/
+/*}*/
 
-body {
-  max-width: 412px;
-}
+/*body {*/
+/*  max-width: 412px;*/
+/*}*/
 
 /* 전체 컨테이너 */
-.reservation-container {
-  max-width: 412px;
-  margin: 0 auto;
-  background-color: white;
-  min-height: 100vh;
-}
+/*.reservation-container {*/
+/*  max-width: 412px;*/
+/*  margin: 0 auto;*/
+/*  background-color: white;*/
+/*  min-height: 100vh;*/
+/*}*/
 
 /* 컨텐츠 */
 .content {
-  padding: calc(var(--header-height) + 15px) 20px 80px 20px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -424,8 +424,6 @@ body {
 .bottom-button {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
   max-width: 412px;
   width: 100%;
   background: white;
