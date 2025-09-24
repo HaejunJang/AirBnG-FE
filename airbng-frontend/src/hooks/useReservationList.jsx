@@ -92,7 +92,7 @@ const useReservationList = (memberId) => {
                 setHasNextPage(true);
                 setReservations([]);
                 await fetchReservations(true);
-                return { success: true, refundAmount: data.refundAmount || 0 };
+                return { success: true, result: data.result || null };
             } else {
                 return { success: false };
             }
