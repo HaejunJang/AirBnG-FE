@@ -31,7 +31,9 @@ import AccountRegister from "./pages/AccountRegister";
 import MyWalletCharge from "./pages/MyWalletCharge";
 import MyWalletWithdraw from "./pages/MyWalletWithdraw";
 import MyWalletHistory from "./pages/MyWalletHistory";
+import UserRoute from "./components/common/UserRoute";
 import ReservationListNew from "./pages/ReservationListNew";
+
 
 function App() {
   useEffect(() => {
@@ -70,6 +72,7 @@ function App() {
       /^\/page\/chat\/\d+/.test(location.pathname);
 
     return (
+      <UserRoute>
       <div className="airbng-home">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -131,6 +134,7 @@ function App() {
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
+      </UserRoute>
     );
   }
 
