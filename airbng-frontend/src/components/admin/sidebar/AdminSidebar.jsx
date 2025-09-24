@@ -151,10 +151,11 @@ const AdminSidebar = () => {
                     </div>
                 ))}
             </nav>
-            {/* ---------------- 로그아웃 버튼 맨 아래 ---------------- */}
+
             <div className={styles.logoutContainer}>
                 <button onClick={onLogout} className={`${styles.menuButton} ${styles.logoutButton}`}>
-                    {sidebarOpen ? "로그아웃" : "⎋"}
+                    <span className={styles.logoutIcon}></span>
+                    {sidebarOpen && <span className={styles.menuText}>로그아웃</span>}
                 </button>
             </div>
 
