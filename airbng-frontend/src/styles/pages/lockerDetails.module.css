@@ -1,26 +1,26 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
-    Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",
-    "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    sans-serif;
-}
+/** {*/
+/*  margin: 0;*/
+/*  padding: 0;*/
+/*  box-sizing: border-box;*/
+/*  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,*/
+/*    Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",*/
+/*    "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",*/
+/*    sans-serif;*/
+/*}*/
 
-body {
-  background-color: #f5f5f5;
-  color: #333;
-}
+/*body {*/
+/*  background-color: #f5f5f5;*/
+/*  color: #333;*/
+/*}*/
 
-.container {
-  max-width: 412px;
-  margin: 0 auto;
-  background-color: white;
-  min-height: 100vh;
-  position: relative;
-  padding-top: 60px;
-}
+/*.container {*/
+/*  max-width: 412px;*/
+/*  margin: 0 auto;*/
+/*  background-color: white;*/
+/*  min-height: 100vh;*/
+/*  position: relative;*/
+/*  padding-top: 60px;*/
+/*}*/
 
 /* 헤더 스타일 */
 .header {
@@ -63,7 +63,6 @@ body {
   padding: 0 16px;
   border-bottom: 1px solid #eee;
   z-index: 1000;
-  position: relative; /* 추가 */
 }
 
 .headerTitle {
@@ -90,7 +89,7 @@ body {
   flex-direction: column;
   padding: 20px 24px;
   background: #fff;
-  padding-bottom: 120px; /* 하단 버튼 영역 확보 */
+  /*padding-bottom: 120px; !* 하단 버튼 영역 확보 *!*/
 }
 
 .lockerTitle {
@@ -296,8 +295,8 @@ body {
 .bottomSection {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  /*left: 50%;*/
+  /*transform: translateX(-50%);*/
   width: 100%;
   max-width: 412px;
   background: white;
