@@ -14,9 +14,9 @@ const BannerHeader = () => (
   <header>
     <h2 className="side-banner__logo">AirBnG</h2>
     <p className="side-banner__tag">
-      TEAM STORE
+      “여행을 가볍게, 하루를 자유롭게”
       <br />
-      간단한 정보 들어갈 자리
+      "보관 그 이상의 편안함"
     </p>
   </header>
 );
