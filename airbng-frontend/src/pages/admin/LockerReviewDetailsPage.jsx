@@ -253,7 +253,7 @@ const StorageDetailModal = ({ storage, status, onApprove, onReject, onStatusChan
                                     className={styles.rejectModalTextarea}
                                     value={rejectReason}
                                     onChange={e => setRejectReason(e.target.value)}
-                                    placeholder="반료 사유를 입력해주세요"
+                                    placeholder="반려 사유를 입력해주세요"
                                     rows={4}
                                     disabled={isLoading}
                                 />
