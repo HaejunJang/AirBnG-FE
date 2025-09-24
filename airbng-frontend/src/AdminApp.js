@@ -16,7 +16,9 @@ function AdminApp() {
             <Routes>
                 <Route path="/admin/login" element={<AdminLoginPage/>}/>
                 <Route path="/admin/home" element={
-                    <AdminDashboardPage/>
+                    <AdminRoute>
+                        <StorageReviewPage/>
+                    </AdminRoute>
                 }/>
 
                 <Route path="/admin/storage-review" element={
@@ -42,7 +44,6 @@ function AdminApp() {
                         <StorageSalesPage/>
                     </AdminRoute>
                 }/>
-
                 <Route path="/admin" element={<Navigate to="/admin/login" replace/>}/>
 
                 <Route path="/admin/*" element={

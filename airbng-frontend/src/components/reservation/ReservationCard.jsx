@@ -35,14 +35,28 @@ const ReservationCard = ({
     try {
       const response = await cancelReservationApi(reservationId);
       const data = response.data;
+      const result = data.result;
 
       if (data.code === 1000) {
+        const totalAmount = result ? result.amount + result.fee : 0;
+        const refundAmount = totalAmount - (result ? result.chargeFee : 0);
+        const refundMessage = result.chargeFee !== 0
+          ? `💰 환불 정보
+
+          결제 금액: ${totalAmount.toLocaleString()}원
+          취소 수수료: ${result.chargeFee.toLocaleString()}원
+          환불 금액: ${refundAmount.toLocaleString()}원
+          (*1일내 환불 처리)`
+          : `💰 환불 정보
+          
+          결제 금액: ${totalAmount.toLocaleString()}원
+          환불 금액: ${refundAmount.toLocaleString()}원
+          (*1일내 환불 처리)`;
+        
         modal.showSuccess(
           "예약 취소 완료",
-          "예약이 성공적으로 취소되었습니다.",
-          () => {
-            window.location.reload();
-          }
+          refundMessage, 
+          () => { window.location.reload(); }
         );
       } else {
         modal.showError("예약 취소 실패", data.message, () => {
@@ -131,7 +145,13 @@ const ReservationCard = ({
         <div className="actions-buttons">
           <button
             className="btn btn-cancel"
-            onClick={() => showCancelConfirm(reservation.reservationId)}
+            onClick={() => 
+              goToReservationDetail(
+                navigate,
+                reservation.reservationId,
+                memberId
+              )
+            }
           >
             취소 요청
           </button>
