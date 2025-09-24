@@ -104,70 +104,106 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
             return [];
         }
 
-        console.log('차트 데이터 변환 시작:', { rawData: rawData.length, tab }); // 디버깅용
+        console.log('차트 데이터 변환 시작:', { rawData: rawData.length, tab });
 
         if (tab === 'daily') {
-            // 오늘 기준 최근 7일
+            // 오늘 기준 최근 7일 (월화수목금토일)
             const today = dayjs();
-            const startDate = today.subtract(6, 'day'); // 오늘 포함 7일 전부터 시작
+            const startDate = today.subtract(6, 'day'); // 오늘 포함 7일 전부터
 
-            // 날짜별 버킷 생성 (연속된 7일)
+            console.log('주간 차트 날짜 범위:', startDate.format('YYYY-MM-DD'), '~', today.format('YYYY-MM-DD'));
+
+            // 최근 7일 버킷 생성
             const buckets = Array.from({ length: 7 }).map((_, idx) => {
                 const d = startDate.add(idx, 'day');
                 return {
                     date: d.format('YYYY-MM-DD'),
+                    displayDate: d.format('M/D'),
+                    weekday: WEEKDAY_KOR[d.day()],
                     sales: 0,
                     count: 0,
                 };
             });
 
+            // 실제 데이터로 버킷 채우기 (최근 7일 범위 내의 데이터만)
             rawData.forEach((item, index) => {
                 const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
                 if (!d) {
                     console.warn(`날짜 파싱 실패 (${index}):`, item);
                     return;
                 }
+
+                // 최근 7일 범위 체크
                 if (d.isBefore(startDate, 'day') || d.isAfter(today, 'day')) {
-                    return; // 최근 7일 범위 밖이면 스킵
+                    return; // 범위 밖이면 스킵
                 }
 
-                const idx = d.diff(startDate, 'day'); // 0 ~ 6 인덱스
-                const amt = parseAmount(item.amount);
-                buckets[idx].sales += amt;
-                buckets[idx].count += 1;
+                const dateStr = d.format('YYYY-MM-DD');
+                const bucketIndex = buckets.findIndex(b => b.date === dateStr);
+
+                if (bucketIndex !== -1) {
+                    const amt = parseAmount(item.amount);
+                    buckets[bucketIndex].sales += amt;
+                    buckets[bucketIndex].count += 1;
+                    console.log(`일별 데이터 추가: ${dateStr}, 금액: ${amt}`);
+                }
             });
 
-            return buckets.map((b) => ({
-                name: b.date, // ex: 2025-09-17
-                sales: b.sales,
-                orders: b.count,
-            }));
+            // 데이터가 있는 날짜만 반환 (sales가 0이 아닌 것만)
+            return buckets
+                .filter(b => b.sales > 0 || b.count > 0) // 실제 데이터가 있는 날짜만
+                .map((b) => ({
+                    name: `${b.displayDate}(${b.weekday})`, // ex: 9/18(수)
+                    sales: b.sales,
+                    orders: b.count,
+                }));
         }
 
         if (tab === 'monthly') {
-            // 1월(0) ~ 12월(11)
-            const buckets = Array.from({ length: 12 }).map(() => ({ sales: 0, count: 0 }));
+            // 2025년 1월~12월 고정 (올해 기준)
+            const currentYear = 2025;
+
+            // 1월(0) ~ 12월(11) 버킷 초기화
+            const monthlyBuckets = Array.from({ length: 12 }).map((_, index) => ({
+                month: index + 1,
+                name: `${index + 1}월`,
+                sales: 0,
+                count: 0
+            }));
+
+            // 실제 데이터로 버킷 채우기
             rawData.forEach((item, index) => {
                 const d = parseDateSafe(item.time || item.settlementDate || item.createdAt);
                 if (!d) {
                     console.warn(`날짜 파싱 실패 (${index}):`, item);
                     return;
                 }
-                const m = d.month(); // 0..11
+
+                // 2025년 데이터만 처리
+                if (d.year() !== currentYear) {
+                    return;
+                }
+
+                const monthIndex = d.month(); // 0~11 (1월~12월)
                 const amt = parseAmount(item.amount);
-                buckets[m].sales += amt;
-                buckets[m].count += 1;
-                console.log(`월간 데이터 추가: ${d.format('YYYY-MM')} -> ${m}월, 금액: ${amt}`); // 디버깅용
+
+                monthlyBuckets[monthIndex].sales += amt;
+                monthlyBuckets[monthIndex].count += 1;
+
+                console.log(`월간 데이터 추가: ${currentYear}년 ${monthIndex + 1}월, 금액: ${amt}`);
             });
 
-            return buckets.map((b, idx) => ({
-                name: `${idx + 1}월`,
-                sales: b.sales,
-                orders: b.count,
-            }));
+            // 데이터가 있는 월만 반환 (매출이나 거래가 있는 월)
+            return monthlyBuckets
+                .filter(bucket => bucket.sales > 0 || bucket.count > 0)
+                .map(bucket => ({
+                    name: bucket.name, // "1월", "2월", ...
+                    sales: bucket.sales,
+                    orders: bucket.count,
+                }));
         }
 
-        // yearly : 연도별 집계
+        // yearly : 실제 데이터가 있는 연도들만 처리
         const yearMap = {};
         const yearCountMap = {};
 
@@ -177,17 +213,18 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
                 console.warn(`날짜 파싱 실패 (${index}):`, item);
                 return;
             }
+
             const y = d.year();
             const amt = parseAmount(item.amount);
 
             yearMap[y] = (yearMap[y] || 0) + amt;
             yearCountMap[y] = (yearCountMap[y] || 0) + 1;
-            console.log(`연간 데이터 추가: ${y}년, 금액: ${amt}`); // 디버깅용
+            console.log(`연간 데이터 추가: ${y}년, 금액: ${amt}`);
         });
 
-        // 정렬된 연도 배열
+        // 실제 데이터가 있는 연도들만 정렬하여 반환
         const years = Object.keys(yearMap).map(Number).sort((a, b) => a - b);
-        console.log('연간 집계 결과:', yearMap, '연도 목록:', years); // 디버깅용
+        console.log('연간 집계 결과:', yearMap, '연도 목록:', years);
 
         return years.map((y) => ({
             name: `${y}년`,

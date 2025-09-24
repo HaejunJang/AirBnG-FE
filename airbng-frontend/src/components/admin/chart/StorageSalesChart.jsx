@@ -165,7 +165,7 @@ const StorageSalesChart = ({ data, chartType = 'pie', selectedLockerType = '전�
                             fill="#4561DB"
                             fillOpacity={0.7}
                             radius={[4, 4, 0, 0]}
-                            barSize={100}
+                            barSize={80}
                         />
 
                         {/* 라인 차트 - 거래수 */}
