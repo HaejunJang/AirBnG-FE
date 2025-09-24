@@ -1,0 +1,888 @@
+ReservationListNew CSS Module .reservationListNew {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh; 
+  background-color: #fff;
+  max-width: 412px;
+  margin: 0 auto;
+}
+
+/* 로그인/회원가입 웰컴 섹션 */
+.container {
+  width: 100%;
+  max-width: 412px;
+  min-height: 100dvh;
+  background: #fff;
+  margin: 0 auto;
+  box-shadow: 0 0 20px rgba(0,0,0,0.08);
+  position: relative;
+  padding-bottom: 0;
+  padding-top: 60px;   
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.welcomeSection {
+  text-align: center;
+  padding: 100px 20px 40px 20px; /* 아래로 더 내림 */
+  margin-bottom: 30px;
+  width: 100%;
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+  animation-delay: 0.1s;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcomeContent {
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.welcomeTitle {
+  font-size: 28px;    
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.welcomeSubtitle {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.6;
+  white-space: pre-line; /* 줄바꿈 적용 */
+  word-break: keep-all;
+}
+
+.welcomeButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btnPrimary,
+.btnSecondary {
+  padding: 8px 0;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  min-width: 0;
+  flex: 1 1 0;
+  width: 100%;
+  max-width: 160px;
+  box-sizing: border-box;
+}
+
+.btnPrimary {
+  border: none;
+  cursor: pointer;
+  background: #4561db;
+  color: white;
+  transition: all 0.2s;
+}
+
+.btnPrimary:hover {
+  background: #3651cb;
+  transform: translateY(-1px);
+}
+
+.btnSecondary {
+  border: 1px solid #e8ebff;
+  background: #f8f9fa;
+  color: #4561db;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnSecondary:hover {
+  background: #f8f9ff;
+  transform: translateY(-1px);
+}
+
+/* 반응형 */
+@media (max-width: 414px) {
+  .reservationListNew,
+  .container {
+    width: 100%;
+    box-shadow: none;
+    padding-top: 60px;
+    min-height: 100dvh;
+    max-width: 100vw;
+  }
+  .contentNew {
+    padding: 12px 8px;
+  }
+  .welcomeSection {
+    padding: 50px 10px 30px 10px;
+  }
+  .welcomeButtons {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .btnPrimary, .btnSecondary {
+    width: 100%;
+    max-width: none;
+  }
+  .tabsContainer {
+    gap: 18px;
+    padding: 0 4px;
+  }
+  .tabNew {
+    font-size: 14px;
+    padding: 10px 0;
+  }
+}
+
+/* 헤더 */
+.headerNew {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  /* background-color: blue; */
+}
+
+.backIcon {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.backIcon:hover {
+  color: #4f46e5;
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+/* 역할 선택 */
+.roleSelector {
+  background: white;
+  padding: 0;
+  position: sticky;
+  top: 57px;
+  z-index: 95;
+  /* border-bottom: 1px solid #e5e7eb; */
+}
+
+.roleSelectorContent {
+  /* background-color: #15803d; */
+  padding: 12px 20px;
+}
+
+/* .roleSelectorLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+} */
+
+/* .roleSelectorLabel span {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+} */
+
+.roleToggle {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.roleOption {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+  background: transparent;
+}
+
+.roleOption.active {
+  background: white;
+  color: #4f46e5;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e7ff;
+}
+
+.roleOption:hover:not(.active) {
+  color: #374151;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* 탭 메뉴 */
+.tabsNew {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 131px;
+  z-index: 95;
+  min-height: 48px;
+  box-sizing: border-box;
+  margin-bottom: 2px; /* 탭 아래 여백 추가 */
+}
+
+.tabsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 6px;
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.tabsContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.tabNew {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  gap: 4px;
+  white-space: nowrap;
+  min-width: fit-content;
+  justify-content: center;
+  min-height: 32px; /* 탭 높이 고정 */
+  line-height: 1;
+}
+
+.tabNew.active {
+  color: #4f46e5;
+  border-bottom-color: #4f46e5;
+}
+
+.tabNew:hover {
+  color: #374151;
+}
+
+.tabLabel {
+  line-height: 1;
+}
+
+.tabNew.active .tabCount {
+  background: #4f46e5;
+  color: white;
+}
+
+/* 컨텐츠 */
+.contentNew {
+  flex: 1 1 auto;
+  min-height: calc(100dvh - 200px);
+  overflow-y: auto;
+  background-color: #fff;
+  padding: 70px 20px 70px 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* 예약 카드 */
+.reservationCardNew {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
+  position: relative;
+  /* border: 1px solid #f3f4f6; */
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 상태별 색상 */
+.textOrange600 {
+  color: #ea580c;
+}
+
+.bgOrange50 {
+  background-color: #fff7ed;
+}
+
+.textBlue600 {
+  color: #2563eb;
+}
+
+.bgBlue50 {
+  background-color: #eff6ff;
+}
+
+.textYellow600 {
+  color: #ca8a04;
+}
+
+.bgYellow50 {
+  background-color: #fefce8;
+}
+
+.textPurple600 {
+  color: #9333ea;
+}
+
+.bgPurple50 {
+  background-color: #faf5ff;
+}
+
+.textGreen600 {
+  color: #16a34a;
+}
+
+.bgGreen50 {
+  background-color: #f0fdf4;
+}
+
+.textRed600 {
+  color: #dc2626;
+}
+
+.bgRed50 {
+  background-color: #fef2f2;
+}
+
+.textGray600 {
+  color: #4b5563;
+}
+
+.bgGray50 {
+  background-color: #f9fafb;
+}
+
+/* 아이콘 크기 */
+.w4 {
+  width: 16px;
+  height: 16px;
+}
+
+/* 인라인 액션 버튼 */
+.actionButtonsInline {
+  display: flex;
+  gap: 8px;
+}
+
+.approveBtn,
+.rejectBtn,
+.completeBtn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.approveBtn {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.approveBtn:hover {
+  background: #bbf7d0;
+}
+
+.rejectBtn {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.rejectBtn:hover {
+  background: #fecaca;
+}
+
+.completeBtn {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.completeBtn:hover {
+  background: #bfdbfe;
+}
+
+/* 카드 내용 */
+.cardContent {
+  margin-bottom: 16px;
+}
+
+.placeInfo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.placeImage {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.placeImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+  border-radius: 8px;
+}
+
+.placeDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.placeName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeMeta {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* 시간 정보 */
+.timeInfo {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #f3f4f6;
+}
+
+.timeCol {
+  flex: 1;
+  text-align: left;
+}
+
+.timeLabel {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.timeValue {
+  font-size: 13px;
+  color: #111827;
+  font-weight: 600;
+}
+
+/* 현재 이용중 표시 */
+.currentUseIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: #15803d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 완료대기 정보 */
+.finishingInfo {
+  margin-bottom: 16px;
+}
+
+.infoBox {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  border: 1px solid;
+}
+
+.infoBox.warning {
+  background: #fefce8;
+  border-color: #fde047;
+  color: #a16207;
+}
+
+.infoBox.purple {
+  background: #faf5ff;
+  border-color: #e9d5ff;
+  color: #7c2d12;
+}
+
+.infoTitle {
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.infoDesc {
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* 카드 액션 버튼들 */
+.cardActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.cardActions.single {
+  justify-content: center;
+}
+
+.cardActions.double {
+  justify-content: space-between;
+}
+
+.cardActions.withMenu {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cancelBtn,
+.rebookBtn {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.cancelBtn {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.cancelBtn:hover {
+  background: #fecaca;
+  border-color: #f87171;
+}
+
+.cancelBtn.fullWidth {
+  flex: 1;
+}
+
+.rebookBtn {
+  background: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.rebookBtn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.cardActions.double .cancelBtn {
+  flex: 1;
+}
+
+/* 더보기 메뉴 */
+.moreMenuContainer {
+  position: relative;
+  margin-left: auto;
+}
+
+.moreBtn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.moreBtn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.moreBtn svg {
+  width: 16px;
+  height: 16px;
+  color: #6b7280;
+}
+
+.moreMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  min-width: 80px;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.moreMenuItem {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #dc2626;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: left;
+}
+
+.moreMenuItem:hover {
+  background: #f9fafb;
+}
+
+/* 예약 상세 버튼 */
+.detailBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #4f46e5;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.detailBtn:hover {
+  border-bottom-color: #4f46e5;
+}
+
+/* 빈 상태 */
+.emptyState {
+  height: 100%;
+  min-height: calc(100dvh - 320px); /* 헤더+탭+버튼 등 상단/하단 여백 제외 */
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 10px;
+  opacity: 0.5;
+}
+
+.emptyState p {
+  font-size: 16px;
+  margin-bottom: 50px;
+}
+
+/* 로딩 스피너 */
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 로그인 필요 */
+.loginRequired {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+/* 반응형 */
+@media (max-width: 412px) {
+  .headerContent {
+    padding: 16px;
+  }
+
+  .roleSelectorContent {
+    padding: 0 16px;
+  }
+
+  .contentNew {
+    padding: 16px;
+  }
+
+  .reservationCardNew {
+    padding: 16px;
+  }
+}
+
+/* 스크롤바 스타일 */
+.contentNew::-webkit-scrollbar {
+  width: 4px;
+}
+
+.contentNew::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.contentNew::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.contentNew::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.periodDropdown {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  margin: 0 0 16px 0; /* 탭과 카드 사이 여백 */
+  position: relative;
+  z-index: 10;
+  background: #fff;
+  padding: 0 6px 0 6px;
+}
+
+.dropdownBtn {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 6px 16px;
+  font-size: 15px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.2s;
+}
+
+.dropdownBtn.open,
+.dropdownBtn:hover {
+  border-color: #4561db;
+}
+
+.dropdownArrow {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s;
+}
+
+.dropdownBtn.open .dropdownArrow {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  min-width: 120px;
+  z-index: 1000;
+  padding: 4px 0;
+}
+
+.dropdownItem {
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 15px;
+  color: #333;
+  transition: background 0.15s;
+}
+
+.dropdownItem:hover {
+  background: #f5f7ff;
+}
