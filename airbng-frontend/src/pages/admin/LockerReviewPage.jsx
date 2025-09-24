@@ -1,0 +1,587 @@
+// import React, { useState, useEffect } from 'react';
+// import StorageDetailModal from './LockerReviewDetailsPage';
+// import StorageSummaryCard from '../../components/admin/StorageSummaryCard';
+// import { getLockerReviewsByStatus, getLockerReviewDetail } from '../../api/admin/adminApi';
+// import { useSummaryData } from '../../hooks/useSummaryData';
+// import styles from '../../styles/admin/pages/LockerReview.module.css';
+// import { FiMenu } from "react-icons/fi";
+//
+// const StorageReviewContent = () => {
+//     const [selectedStatus, setSelectedStatus] = useState('대기');
+//     const [currentPage, setCurrentPage] = useState(1);
+//     const [showDetailView, setShowDetailView] = useState(false);
+//     const [showStorageDetail, setShowStorageDetail] = useState(false);
+//     const [selectedStorage, setSelectedStorage] = useState(null);
+//
+//     const { summaryData, loading: summaryLoading, reloadSummary } = useSummaryData();
+//     const [lockerData, setLockerData] = useState({
+//         waiting: { content: [], totalElements: 0, totalPages: 0 },
+//         approved: { content: [], totalElements: 0, totalPages: 0 },
+//         rejected: { content: [], totalElements: 0, totalPages: 0 },
+//     });
+//     const [loading, setLoading] = useState(false);
+//
+//     const getEnglishStatus = (koreanStatus) => {
+//         switch (koreanStatus) {
+//             case '대기': return 'WAITING';
+//             case '승인': return 'APPROVED';
+//             case '반려': return 'REJECTED';
+//             default: return 'WAITING';
+//         }
+//     };
+//
+//     // 상태별 데이터 로드
+//     useEffect(() => {
+//         if (showDetailView) loadStatusData();
+//     }, [selectedStatus, currentPage, showDetailView]);
+//
+//     const loadStatusData = async () => {
+//         try {
+//             setLoading(true);
+//             const englishStatus = getEnglishStatus(selectedStatus);
+//             const response = await getLockerReviewsByStatus(englishStatus, currentPage);
+//
+//             setLockerData(prev => ({
+//                 ...prev,
+//                 [englishStatus.toLowerCase()]: response.data
+//             }));
+//         } catch (error) {
+//             console.error('상태별 데이터 로드 실패:', error);
+//             alert('데이터를 불러오는 중 오류가 발생했습니다.');
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+//
+//     const handleStatusClick = (status) => {
+//         setSelectedStatus(status);
+//         setCurrentPage(1);
+//         setShowDetailView(true);
+//         setShowStorageDetail(false);
+//     };
+//
+//     const handleStorageClick = async (storage) => {
+//         try {
+//             setLoading(true);
+//             const response = await getLockerReviewDetail(storage.lockerReviewId);
+//             setSelectedStorage(response.data);
+//             setShowStorageDetail(true);
+//         } catch (error) {
+//             console.error('보관소 상세 정보를 불러오는 중 오류 발생:', error);
+//             alert('보관소 상세 정보를 불러올 수 없습니다.');
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+//
+//     // 요약 카드에서 아이템 클릭 핸들러
+//     // const handleSummaryItemClick = async (item, status) => {
+//     //     try {
+//     //         setLoading(true);
+//     //         const response = await getLockerReviewDetail(item.lockerReviewId);
+//     //         setSelectedStorage(response.data);
+//     //         setShowStorageDetail(true);
+//     //     } catch (error) {
+//     //         console.error('보관소 상세 정보를 불러오는 중 오류 발생:', error);
+//     //         alert('보관소 상세 정보를 불러올 수 없습니다.');
+//     //     } finally {
+//     //         setLoading(false);
+//     //     }
+//     // };
+//
+//     const handleSummaryItemClick = async (item, status) => {
+//         try {
+//             setLoading(true);
+//
+//             // 클릭한 아이템의 상태로 selectedStatus 업데이트
+//             setSelectedStatus(status);
+//
+//             const response = await getLockerReviewDetail(item.lockerReviewId);
+//             setSelectedStorage(response.data);
+//             setShowStorageDetail(true);
+//         } catch (error) {
+//             console.error('보관소 상세 정보를 불러오는 중 오류 발생:', error);
+//             alert('보관소 상세 정보를 불러올 수 없습니다.');
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+//
+//     const getCurrentData = () => {
+//         const status = getEnglishStatus(selectedStatus).toLowerCase();
+//         return lockerData[status] || { content: [], totalElements: 0, totalPages: 0 };
+//     };
+//
+//     const getCurrentPageData = () => getCurrentData().content || [];
+//     const getTotalPages = () => getCurrentData().totalPages || 0;
+//
+//     const getStatusInfo = () => ({
+//         '대기': { count: summaryData.waiting.count, color: styles.textOrange },
+//         '승인': { count: summaryData.approved.count, color: styles.textGreen },
+//         '반려': { count: summaryData.rejected.count, color: styles.textRed }
+//     });
+//
+//     // 보관소 상세 화면
+//     if (showStorageDetail && selectedStorage) {
+//         return (
+//             <div>
+//                 <StorageDetailModal
+//                     storage={selectedStorage}
+//                     status={selectedStatus}
+//                     onRefresh={loadStatusData}
+//                     onClose={async () => {
+//                         setShowStorageDetail(false);
+//                         setShowDetailView(true);
+//                         setCurrentPage(1);
+//                         await loadStatusData();
+//                         await reloadSummary();
+//                     }}
+//                 />
+//             </div>
+//         );
+//     }
+//
+//     // 메인 화면 (숫자 클릭 전)
+//     if (!showDetailView) {
+//         const statusInfo = getStatusInfo();
+//         return (
+//             <div>
+//                 <div className={styles.contentCard}>
+//                     <h2 className={styles.contentTitle}>보관소 심사</h2>
+//                     <div className={styles.textGray}>
+//                         <p>보관소 승인 및 심사 관리 페이지입니다.</p>
+//                         <p>메뉴를 클릭하면 해당 페이지로 이동합니다.</p>
+//                         <div className={styles.statsGrid}>
+//                             {['대기', '승인', '반려'].map(status => (
+//                                 <div
+//                                     key={status}
+//                                     className={`${styles.statCard} ${styles.clickableCard}`}
+//                                     onClick={() => handleStatusClick(status)}
+//                                 >
+//                                     <h3 className={styles.statLabel}>{status}</h3>
+//                                     <p className={`${styles.statValue} ${statusInfo[status].color}`}>
+//                                         {summaryLoading ? '...' : statusInfo[status].count}
+//                                     </p>
+//                                 </div>
+//                             ))}
+//                         </div>
+//                     </div>
+//                 </div>
+//
+//                 {/* 메인 화면에서도 보관소 상태 요약 표시 */}
+//                 <StorageSummaryCard
+//                     summaryData={summaryData}
+//                     title="보관소 상태"
+//                     maxItemsPerSection={5}
+//                     onItemClick={handleSummaryItemClick}
+//                 />
+//             </div>
+//         );
+//     }
+//
+//     // 상세 리스트 화면 (숫자 클릭 후)
+//     return (
+//         <div>
+//             <div className={styles.backButtonContainer}>
+//                 <button
+//                     onClick={async () => {
+//                         setShowDetailView(false);
+//                         setShowStorageDetail(false);
+//                         setCurrentPage(1);
+//                         await reloadSummary();
+//                         await loadStatusData();
+//                     }}
+//                     className={styles.squareButton}
+//                 >
+//                     {/*<FiMoreVertical />*/}
+//                     {/*목록*/}
+//                 </button>
+//             </div>
+//
+//             {/* 상단: 상세 리스트 */}
+//             <div className={styles.contentCard}>
+//                 <div className={styles.cardHeader}>
+//                     <h3 className={styles.subTitle}>
+//                         <FiMenu
+//                             onClick={async () => {
+//                                 setShowDetailView(false);
+//                                 setShowStorageDetail(false);
+//                                 setCurrentPage(1);
+//                                 await reloadSummary();
+//                                 await loadStatusData();
+//                             }}
+//                             // className={styles.squareButton}
+//                             title="목록으로 돌아가기"
+//                         />
+//                         {selectedStatus} 보관소 목록</h3>
+//                     <span className={styles.countBadge}>
+//                         총 {getCurrentData().totalElements}개
+//                     </span>
+//                 </div>
+//
+//                 {loading ? (
+//                     <div className={styles.loadingContainer}>
+//                         <p>데이터를 불러오는 중...</p>
+//                     </div>
+//                 ) : (
+//                     <div className={styles.storageDetailList}>
+//                         {getCurrentPageData().map(storage => (
+//                             <div
+//                                 key={storage.lockerReviewId}
+//                                 className={styles.storageDetailItem}
+//                                 onClick={() => handleStorageClick(storage)}
+//                             >
+//                                 <div className={styles.storageDetailHeader}>
+//                                     <h4 className={styles.storageName}>{storage.lockerName}</h4>
+//                                     <span className={`${styles.statusBadge} ${
+//                                         selectedStatus === '대기' ? styles.statusPending :
+//                                             selectedStatus === '승인' ? styles.statusApproved :
+//                                                 styles.statusRejected
+//                                     }`}>{selectedStatus}</span>
+//                                 </div>
+//                                 <div className={styles.storageDetailInfo}>
+//                                     <p>소유자: {storage.memberName}</p>
+//                                     <p>위치: {storage.address}</p>
+//                                     <p className={styles.dateText}>
+//                                         신청일: {new Date(storage.createdAt).toLocaleDateString()}
+//                                     </p>
+//                                 </div>
+//                             </div>
+//                         ))}
+//                     </div>
+//                 )}
+//
+//                 {/* 페이지네이션 */}
+//                 {getTotalPages() > 1 && (
+//                     <div className={styles.pagination}>
+//                         <button
+//                             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+//                             disabled={currentPage === 1}
+//                             className={`${styles.pageButton} ${currentPage === 1 ? styles.disabled : ''}`}
+//                         >
+//                             이전
+//                         </button>
+//
+//                         {[...Array(getTotalPages())].map((_, i) => (
+//                             <button
+//                                 key={i + 1}
+//                                 onClick={() => setCurrentPage(i + 1)}
+//                                 className={`${styles.pageButton} ${currentPage === i + 1 ? styles.pageButtonActive : ''}`}
+//                             >
+//                                 {i + 1}
+//                             </button>
+//                         ))}
+//
+//                         <button
+//                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
+//                             disabled={currentPage === getTotalPages()}
+//                             className={`${styles.pageButton} ${currentPage === getTotalPages() ? styles.disabled : ''}`}
+//                         >
+//                             다음
+//                         </button>
+//                     </div>
+//                 )}
+//             </div>
+//
+//             {/* 하단: 보관소 상태 요약 - 분리된 컴포넌트 사용 */}
+//             <StorageSummaryCard
+//                 summaryData={summaryData}
+//                 title="보관소 상태"
+//                 maxItemsPerSection={5}
+//                 onItemClick={handleSummaryItemClick}
+//             />
+//         </div>
+//     );
+// };
+//
+// export default StorageReviewContent;
+
+import React, { useState, useEffect } from 'react';
+import StorageDetailModal from './LockerReviewDetailsPage';
+import StorageSummaryCard from '../../components/admin/StorageSummaryCard';
+import { getLockerReviewsByStatus, getLockerReviewDetail } from '../../api/admin/adminApi';
+import { useSummaryData } from '../../hooks/useSummaryData';
+import styles from '../../styles/admin/pages/LockerReview.module.css';
+import { FiMenu } from "react-icons/fi";
+
+const StorageReviewContent = () => {
+    const [selectedStatus, setSelectedStatus] = useState('대기');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [showDetailView, setShowDetailView] = useState(false);
+
+    // 모달 관련 상태
+    const [showStorageModal, setShowStorageModal] = useState(false);
+    const [selectedStorage, setSelectedStorage] = useState(null);
+
+    const { summaryData, loading: summaryLoading, reloadSummary } = useSummaryData();
+    const [lockerData, setLockerData] = useState({
+        waiting: { content: [], totalElements: 0, totalPages: 0 },
+        approved: { content: [], totalElements: 0, totalPages: 0 },
+        rejected: { content: [], totalElements: 0, totalPages: 0 },
+    });
+    const [loading, setLoading] = useState(false);
+
+    const getEnglishStatus = (koreanStatus) => {
+        switch (koreanStatus) {
+            case '대기': return 'WAITING';
+            case '승인': return 'APPROVED';
+            case '반려': return 'REJECTED';
+            default: return 'WAITING';
+        }
+    };
+
+    // 상태별 데이터 로드
+    useEffect(() => {
+        if (showDetailView) loadStatusData();
+    }, [selectedStatus, currentPage, showDetailView]);
+
+    const loadStatusData = async () => {
+        try {
+            setLoading(true);
+            const englishStatus = getEnglishStatus(selectedStatus);
+            const response = await getLockerReviewsByStatus(englishStatus, currentPage);
+
+            setLockerData(prev => ({
+                ...prev,
+                [englishStatus.toLowerCase()]: response.data
+            }));
+        } catch (error) {
+            console.error('상태별 데이터 로드 실패:', error);
+            alert('데이터를 불러오는 중 오류가 발생했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleStatusClick = (status) => {
+        setSelectedStatus(status);
+        setCurrentPage(1);
+        setShowDetailView(true);
+    };
+
+    // 보관소 클릭 시 모달 열기
+    const handleStorageClick = async (storage) => {
+        try {
+            setLoading(true);
+            const response = await getLockerReviewDetail(storage.lockerReviewId);
+            setSelectedStorage(response.data);
+            setShowStorageModal(true);
+        } catch (error) {
+            console.error('보관소 상세 정보를 불러오는 중 오류 발생:', error);
+            alert('보관소 상세 정보를 불러올 수 없습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 요약 카드에서 아이템 클릭 핸들러
+    const handleSummaryItemClick = async (item, status) => {
+        try {
+            setLoading(true);
+
+            // 클릭한 아이템의 상태로 selectedStatus 업데이트
+            setSelectedStatus(status);
+
+            const response = await getLockerReviewDetail(item.lockerReviewId);
+            setSelectedStorage(response.data);
+            setShowStorageModal(true);
+        } catch (error) {
+            console.error('보관소 상세 정보를 불러오는 중 오류 발생:', error);
+            alert('보관소 상세 정보를 불러올 수 없습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 모달 닫기 핸들러
+    const handleCloseModal = async () => {
+        setShowStorageModal(false);
+        setSelectedStorage(null);
+
+        // 데이터 새로고침
+        await reloadSummary();
+        if (showDetailView) {
+            await loadStatusData();
+        }
+    };
+
+    const getCurrentData = () => {
+        const status = getEnglishStatus(selectedStatus).toLowerCase();
+        return lockerData[status] || { content: [], totalElements: 0, totalPages: 0 };
+    };
+
+    const getCurrentPageData = () => getCurrentData().content || [];
+    const getTotalPages = () => getCurrentData().totalPages || 0;
+
+    const getStatusInfo = () => ({
+        '대기': { count: summaryData.waiting.count, color: styles.textOrange },
+        '승인': { count: summaryData.approved.count, color: styles.textGreen },
+        '반려': { count: summaryData.rejected.count, color: styles.textRed }
+    });
+
+    // 메인 화면 (숫자 클릭 전)
+    if (!showDetailView) {
+        const statusInfo = getStatusInfo();
+        return (
+            <div>
+                <div className={styles.contentCard}>
+                    <h2 className={styles.contentTitle}>보관소 심사</h2>
+                    <div className={styles.textGray}>
+                        <p>보관소 승인 및 심사 관리 페이지입니다.</p>
+                        <p>메뉴를 클릭하면 해당 페이지로 이동합니다.</p>
+                        <div className={styles.statsGrid}>
+                            {['대기', '승인', '반려'].map(status => (
+                                <div
+                                    key={status}
+                                    className={`${styles.statCard} ${styles.clickableCard}`}
+                                    onClick={() => handleStatusClick(status)}
+                                >
+                                    <h3 className={styles.statLabel}>{status}</h3>
+                                    <p className={`${styles.statValue} ${statusInfo[status].color}`}>
+                                        {summaryLoading ? '...' : statusInfo[status].count}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* 메인 화면에서도 보관소 상태 요약 표시 */}
+                <StorageSummaryCard
+                    summaryData={summaryData}
+                    title="보관소 상태"
+                    maxItemsPerSection={5}
+                    onItemClick={handleSummaryItemClick}
+                />
+
+                {/* 보관소 상세 모달 */}
+                <StorageDetailModal
+                    storage={selectedStorage}
+                    status={selectedStatus}
+                    isOpen={showStorageModal}
+                    onClose={handleCloseModal}
+                    onStatusChange={async (lockerId, newStatus, reason) => {
+                        // 상태 변경 후 데이터 새로고침
+                        await reloadSummary();
+                        if (showDetailView) {
+                            await loadStatusData();
+                        }
+                    }}
+                />
+            </div>
+        );
+    }
+
+    // 상세 리스트 화면 (숫자 클릭 후)
+    return (
+        <div>
+            {/* 상단: 상세 리스트 */}
+            <div className={styles.contentCard}>
+                <div className={styles.cardHeader}>
+                    <h3 className={styles.subTitle}>
+                        <FiMenu
+                            onClick={async () => {
+                                setShowDetailView(false);
+                                setCurrentPage(1);
+                                await reloadSummary();
+                            }}
+                            title="목록으로 돌아가기"
+                            style={{ cursor: 'pointer', marginRight: '10px' }}
+                        />
+                        {selectedStatus} 보관소 목록
+                    </h3>
+                    <span className={styles.countBadge}>
+                        총 {getCurrentData().totalElements}개
+                    </span>
+                </div>
+
+                {loading ? (
+                    <div className={styles.loadingContainer}>
+                        <p>데이터를 불러오는 중...</p>
+                    </div>
+                ) : (
+                    <div className={styles.storageDetailList}>
+                        {getCurrentPageData().map(storage => (
+                            <div
+                                key={storage.lockerReviewId}
+                                className={styles.storageDetailItem}
+                                onClick={() => handleStorageClick(storage)}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <div className={styles.storageDetailHeader}>
+                                    <h4 className={styles.storageName}>{storage.lockerName}</h4>
+                                    <span className={`${styles.statusBadge} ${
+                                        selectedStatus === '대기' ? styles.statusPending :
+                                            selectedStatus === '승인' ? styles.statusApproved :
+                                                styles.statusRejected
+                                    }`}>{selectedStatus}</span>
+                                </div>
+                                <div className={styles.storageDetailInfo}>
+                                    <p>소유자: {storage.memberName}</p>
+                                    <p>위치: {storage.address}</p>
+                                    <p className={styles.dateText}>
+                                        신청일: {new Date(storage.createdAt).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* 페이지네이션 */}
+                {getTotalPages() > 1 && (
+                    <div className={styles.pagination}>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className={`${styles.pageButton} ${currentPage === 1 ? styles.disabled : ''}`}
+                        >
+                            이전
+                        </button>
+
+                        {[...Array(getTotalPages())].map((_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => setCurrentPage(i + 1)}
+                                className={`${styles.pageButton} ${currentPage === i + 1 ? styles.pageButtonActive : ''}`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
+                            disabled={currentPage === getTotalPages()}
+                            className={`${styles.pageButton} ${currentPage === getTotalPages() ? styles.disabled : ''}`}
+                        >
+                            다음
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* 하단: 보관소 상태 요약 - 분리된 컴포넌트 사용 */}
+            <StorageSummaryCard
+                summaryData={summaryData}
+                title="보관소 상태"
+                maxItemsPerSection={5}
+                onItemClick={handleSummaryItemClick}
+            />
+
+            {/* 보관소 상세 모달 */}
+            <StorageDetailModal
+                storage={selectedStorage}
+                status={selectedStatus}
+                isOpen={showStorageModal}
+                onClose={handleCloseModal}
+                onStatusChange={async (lockerId, newStatus, reason) => {
+                    // 상태 변경 후 데이터 새로고침
+                    await reloadSummary();
+                    await loadStatusData();
+                }}
+            />
+        </div>
+    );
+};
+
+export default StorageReviewContent;

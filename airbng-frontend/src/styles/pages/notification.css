@@ -233,6 +233,9 @@
     font-size: 14px;
     color: #495057;
     margin-bottom: 8px;
+    /* 줄바꿈 적용 */
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .notification-details {
@@ -255,5 +258,11 @@
 
 .notification-type.cancel-notice {
     background-color: #4561DB;
-    color: #212529;
+}
+
+.notification-type.locker-approved {
+    background-color: #4561DB;
+}
+.notification-type.locker-rejected {
+    background-color: #4561DB;
 }

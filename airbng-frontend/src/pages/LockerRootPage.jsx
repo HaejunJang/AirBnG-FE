@@ -3,56 +3,74 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header/Header";
 import LockerWelcome from "../components/locker/LockerWelcome";
+import { useModal, Modal } from "../components/common/ModalUtil";
 import LockerSummaryCard from "../components/locker/LockerSummaryCard";
 import EmptyLockerCTA from "../components/locker/EmptyLockerCTA";
 import {
-  hasMyLocker,
-  getMyLocker,
-  toggleLockerActivation,
-  deleteLocker,
+    hasMyLocker,
+    getMyLocker,
+    getLockerViewStatus,
+    toggleLockerActivation,
+    deleteLocker,
 } from "../api/lockerApi";
-import { Modal, useModal } from "../components/common/ModalUtil";
 import "../styles/pages/locker.css";
 import "../styles/pages/manage.css";
+import "../styles/common/modalUtil.css"
 
 const unbox = (res) => res?.data?.result ?? res?.data?.data ?? res?.data;
 
 export default function LockerRootPage() {
-  const { ready, isLoggedIn } = useAuth() || {};
-  const [loading, setLoading] = useState(true);
-  const [hasLocker, setHasLocker] = useState(false);
-  const [locker, setLocker] = useState(null);
-  const navigate = useNavigate();
-  const modal = useModal();
+    const { ready, isLoggedIn } = useAuth() || {};
+    const [loading, setLoading] = useState(true);
+    const [hasLocker, setHasLocker] = useState(false);
+    const [locker, setLocker] = useState(null);
+    const [lockerStatus, setLockerStatus] = useState("REGISTER");
+    const [canRegister, setCanRegister] = useState(false);
+    const { modalState, hideModal, modal } = useModal();
+    const navigate = useNavigate();
 
-  const load = useCallback(async () => {
-    try {
-      setLoading(true);
-      const existRes = await hasMyLocker();
-      const exists = !!unbox(existRes);
-      setHasLocker(exists);
+    const load = useCallback(async () => {
+        try {
+            setLoading(true);
+            const existRes = await hasMyLocker();
+            const exists = !!unbox(existRes);
+            setHasLocker(exists);
 
-      if (exists) {
-        const meRes = await getMyLocker();
-        setLocker(unbox(meRes));
-      } else {
-        setLocker(null);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+            if (exists) {
+                const meRes = await getMyLocker();
+                setLocker(unbox(meRes));
+            } else {
+                setLocker(null);
 
-  useEffect(() => {
-    if (!ready) return;
-    if (!isLoggedIn) {
-      setHasLocker(false);
-      setLocker(null);
-      setLoading(false);
-      return;
-    }
-    load();
-  }, [ready, isLoggedIn, load]);
+                // 등록 가능 여부 확인
+                try {
+                    const statusRes = await getLockerViewStatus();
+                    const status = unbox(statusRes);
+                    // REJECTED도 등록 가능
+                    setCanRegister(
+                        status?.reviewStatus === "REGISTER" || status?.reviewStatus === "REJECTED"
+                    );
+                } catch (err) {
+                    console.error("Locker status fetch failed", err);
+                    setCanRegister(false);
+                }
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!ready) return;
+        if (!isLoggedIn) {
+            setHasLocker(false);
+            setLocker(null);
+            setCanRegister(false);
+            setLoading(false);
+            return;
+        }
+        load();
+    }, [ready, isLoggedIn, load]);
 
   const handleManage = useCallback(() => {
     if (!locker?.lockerId) return;
@@ -104,25 +122,41 @@ export default function LockerRootPage() {
   if (!isLoggedIn) return <LockerWelcome />;
   if (loading) return <div className="manage-container">불러오는 중…</div>;
 
-  return (
-    <div className="airbng-locker">
-      <div className="container">
-        <Header headerTitle="보관소" showBackButton={false} />
-        <main className="main-content">
-          {hasLocker ? (
-            <LockerSummaryCard
-              locker={locker}
-              onManage={handleManage}
-              onDetail={handleDetail}
-              onToggle={handleToggle}
-              onDelete={handleDelete}
+    return (
+        <div className="airbng-locker">
+            <div className="container">
+                <Header headerTitle="보관소" showBackButton={false} />
+                <main className="main-content">
+                    {hasLocker ? (
+                        <LockerSummaryCard
+                            locker={locker}
+                            onManage={handleManage}
+                            onDetail={handleDetail}
+                            onToggle={handleToggle}
+                            onDelete={handleDelete} // 현재 없음 - 나중에 추가
+                        />
+                    ) : (
+                        <EmptyLockerCTA
+                            onRegister={() => navigate("/page/lockers/register")}
+                            canRegister={canRegister}
+                        />
+                    )}
+                </main>
+            </div>
+
+            {/* 알림 모달 */}
+            <Modal
+                show={modalState.show}
+                type={modalState.type}
+                title={modalState.title}
+                message={modalState.message}
+                confirmText={modalState.confirmText}
+                cancelText={modalState.cancelText}
+                showCancel={modalState.showCancel}
+                onConfirm={modalState.onConfirm}
+                onCancel={modalState.onCancel}
+                onClose={hideModal}
             />
-          ) : (
-            <EmptyLockerCTA onRegister={() => navigate("/page/lockers/register")} />
-          )}
-        </main>
-      </div>
-      <Modal {...modal.modalState} onClose={modal.hideModal} />
-    </div>
-  );
+        </div>
+    );
 }

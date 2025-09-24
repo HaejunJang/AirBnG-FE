@@ -137,3 +137,71 @@
 .subMenuText {
     font-size: 0.9rem;
 }
+
+.logoutContainer {
+    margin-top: auto;
+    padding: 10px 0;
+}
+
+.logoutButton {
+    background-color: #fff;
+    color: #495057;
+}
+
+.logoutButton:hover {
+    background-color: #ced4da;
+    color: #fff;
+}
+
+.logoutIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    position: relative;
+}
+
+.logoutIcon::before {
+    content: "";
+    width: 16px;
+    height: 13px;
+    border: 2px solid #495057;
+    border-right: none;
+    border-radius: 2px 0 0 2px;
+    position: relative;
+}
+
+.logoutIcon::after {
+    content: "";
+    position: absolute;
+    top: 45%;
+    right: 10px;
+    transform: translateY(-20%);
+    transform: translateX(130%);
+    width: 10px;
+    height: 2px;
+    background: #495057;
+    box-shadow: 3px -2px 0 -1px #495057, 3px 2px 0 -1px #495057;
+}
+
+/* 로그아웃 버튼 호버 시 아이콘 색상 변경 */
+.logoutButton:hover .logoutIcon::before {
+    border-color: #fff;
+}
+
+.logoutButton:hover .logoutIcon::after {
+    background: #fff;
+    box-shadow: 3px -2px 0 -1px #fff, 3px 2px 0 -1px #fff;
+}
+
+.logoutButton {
+    background-color: #fff;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logoutButton:hover {
+    color: #fff;
+}
