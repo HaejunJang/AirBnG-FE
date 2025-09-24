@@ -214,6 +214,12 @@ export const useStorageSales = () => {
 
             console.log('📊 원본 기간별 데이터:', salesData);
 
+            // 백엔드 응답 데이터 상세 분석
+            console.log('🔍 백엔드 응답 상세 분석:');
+            salesData.forEach((item, index) => {
+                console.log(`${index + 1}. 날짜: ${item.aggregatedDate}, 타입: ${item.lockerType}, 보관소ID: ${item.lockerId}, 거래수: ${item.totalCount}, 매출: ${item.totalSales}`);
+            });
+
             // 날짜별로 데이터 그룹핑 (해당 보관소 타입의 데이터만 집계)
             const dateGroups = {};
 
@@ -279,7 +285,7 @@ export const useStorageSales = () => {
                         date: group.date
                     };
                 })
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
+                .sort((a, b) => new Date(b.date) - new Date(a.date)); // 내림차순 정렬 (최신 날짜가 위로)
 
             console.log('📊 최종 기간별 데이터:', periodicalData);
 
