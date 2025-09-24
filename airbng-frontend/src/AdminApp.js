@@ -6,9 +6,9 @@ import styles from "./styles/admin/AdminRoute.module.css";
 import "./styles/admin/Adminglobal.module.css";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import SalesOverviewPage from "./components/admin/SalesOverviewPage";
-import StorageReviewPage from "./pages/admin/StorageReviewPage";
 import PeriodSalesPage from "./pages/admin/PeriodSalesPage";
 import StorageSalesPage from "./pages/admin/StorageSalesPage";
+import StorageReviewContent from './pages/admin/LockerReviewPage';
 
 function AdminApp() {
     return (
@@ -17,13 +17,13 @@ function AdminApp() {
                 <Route path="/admin/login" element={<AdminLoginPage/>}/>
                 <Route path="/admin/home" element={
                     <AdminRoute>
-                        <StorageReviewPage/>
+                        <StorageReviewContent/>
                     </AdminRoute>
                 }/>
 
                 <Route path="/admin/storage-review" element={
                     <AdminRoute>
-                        <StorageReviewPage/>
+                        <StorageReviewContent/>
                     </AdminRoute>
                 }/>
 
