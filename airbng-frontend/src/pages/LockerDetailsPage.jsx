@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getLockerById } from "../api/lockerApi";
 import { getReservationForm } from "../api/reservationApi";
 import { checkZzimExists, toggleZzim as toggleZzimApi } from "../api/lockerApi";
@@ -11,12 +11,14 @@ import lockertel from "../assets/call.svg";
 import favicon from "../assets/favicon.svg";
 import Header from "../components/Header/Header";
 import { Modal, useModal } from "../components/common/ModalUtil";
+import { getConversationByPeer, getOrCreateConversation } from "../api/chatApi";
 
 const LockerDetails = () => {
   console.log("LockerDetailsPage 렌더링");
   const { lockerId } = useParams();
   console.log("lockerId:", typeof lockerId);
 
+  const navigate = useNavigate();
   const [lockerDetail, setLockerDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -161,6 +163,10 @@ const LockerDetails = () => {
 
           setLockerDetail(apiData.result);
 
+          // 이미지 인덱스 초기화 (새로고침 시 항상 첫 번째 이미지부터 시작)
+          setCurrentImageIndex(0);
+          setModalImageIndex(0);
+
           sessionStorage.setItem(
             `lockerData_${apiData.result.lockerId}`,
             JSON.stringify({
@@ -224,7 +230,14 @@ const LockerDetails = () => {
   // 이미지 처리 헬퍼 함수
   const getDisplayImages = () => {
     if (lockerDetail?.images && lockerDetail.images.length > 0) {
-      return lockerDetail.images.slice(0, 5);
+      // 이미지 배열 파일명기준 정렬
+      const sortedImages = [...lockerDetail.images].sort((a, b) => {
+        // URL이나 파일명으로 정렬
+        const aStr = String(a || "");
+        const bStr = String(b || "");
+        return aStr.localeCompare(bStr);
+      });
+      return sortedImages.slice(0, 5);
     }
     return [favicon]; // 이미지가 없을 때 favicon 반환
   };
@@ -581,6 +594,44 @@ const LockerDetails = () => {
               : isAvailable
               ? "보관소 선택"
               : "이용 불가"}
+          </button>
+          <button
+            className={styles.chatGoBtn}
+            onClick={async () => {
+              if (!lockerDetail?.keeperId || isMyLocker) return;
+              try {
+                // 1. 기존 대화방 조회
+                let convId;
+                const res = await getConversationByPeer(lockerDetail.keeperId);
+                console.log("getConversationByPeer result:", res);
+                convId = res?.id || res?.convId || res?.data?.result?.convId;
+                // 2. 없으면 새로 생성
+                if (!convId) {
+                  const createRes = await getOrCreateConversation(
+                    lockerDetail.keeperId
+                  );
+                  console.log("getOrCreateConversation result:", createRes);
+                  convId =
+                    createRes?.id ||
+                    createRes?.convId ||
+                    createRes?.data?.result?.convId;
+                }
+                // 3. 있으면 이동, 없으면 에러
+                if (convId) {
+                  navigate(`/page/chat/${convId}`);
+                } else {
+                  showError("채팅 오류", "대화방을 찾거나 생성할 수 없습니다.");
+                }
+              } catch (e) {
+                showError("채팅 오류", "대화방을 찾거나 생성할 수 없습니다.");
+              }
+            }}
+            disabled={isMyLocker}
+            aria-label="채팅하기"
+          >
+            <svg className={styles.chatIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
           </button>
         </div>
       </div>

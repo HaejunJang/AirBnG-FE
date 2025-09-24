@@ -25,10 +25,20 @@ export const getReservationList = ({
 };
 
 // 예약 취소
-export const cancelReservationApi = (reservationId, memberId) => {
-  return httpAuth.post(
-    `/reservations/${reservationId}/members/${memberId}/cancel`
+export const cancelReservationApi = (reservationId) => {
+  return httpAuth.patch(`/reservations/${reservationId}/cancel`);
+};
+
+// 예약 승인/거절
+export const confirmReservationApi = (reservationId, approve) => {
+  return httpAuth.patch(
+    `/reservations/${reservationId}/confirm?approve=${approve}`
   );
+};
+
+// 예약 완료
+export const completeReservationApi = (reservationId, approve) => {
+  return httpAuth.patch(`/reservations/${reservationId}/complete`);
 };
 
 // 예약 폼 가져오기
@@ -59,5 +69,11 @@ export const getReservationDetail = async (reservationId, memberId) => {
   const response = await httpAuth.get(
     `/reservations/${reservationId}/members/${memberId}/detail`
   );
+  return response.data;
+};
+
+// 포인트 잔액 조회
+export const getWalletBalance = async () => {
+  const response = await httpAuth.get("/wallet/me/balance");
   return response.data;
 };

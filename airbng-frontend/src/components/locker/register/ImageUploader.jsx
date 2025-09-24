@@ -1,14 +1,16 @@
 import { useMemo } from 'react';
 import ImgUpload from '../../../assets/img_upload_ic.svg';
+import { useModal, Modal } from '../../common/ModalUtil';
 
 
 export default function ImageUploader({ files, setFiles, max = 5 }) {
     const previews = useMemo(() => files.map(f => URL.createObjectURL(f)), [files]);
+    const modal = useModal();
 
     const onChange = (e) => {
         const incoming = Array.from(e.target.files || []);
         if (files.length + incoming.length > max) {
-            alert(`사진은 최대 ${max}장까지 업로드할 수 있습니다.`);
+            modal.showError('업로드 제한', `사진은 최대 ${max}장까지 업로드할 수 있습니다.`);
             e.target.value = '';
             return;
         }
@@ -43,6 +45,7 @@ export default function ImageUploader({ files, setFiles, max = 5 }) {
                     ))}
                 </div>
             </div>
+            <Modal {...modal.modalState} onClose={modal.hideModal} />
         </div>
     );
 }

@@ -6,45 +6,10 @@
   position: relative;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
-  position: sticky;
-  top: 0;
-  background-color: #ffffff;
-  z-index: 100;
-}
-
-.backBtn {
-  background: none;
-  border: none;
-  padding: 4px;
-  margin-right: 12px;
-  cursor: pointer;
-  color: #333333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.backBtn:hover {
-  color: #5463ff;
-}
-
-.title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333333;
-  margin: 0;
-  flex: 1;
-  text-align: center;
-  margin-right: 40px; /* Back button width compensation */
-}
-
 .content {
   padding: 20px;
+  padding-top: 80px;
+  padding-bottom: 70px;
 }
 
 /* Reservation Success Section */
@@ -211,7 +176,8 @@
 }
 
 .btnCancel,
-.btnConfirm {
+.btnConfirm,
+.btnDisabled {
   width: 50%;
   height: 52px;
   border-radius: 8px;
@@ -244,9 +210,80 @@
   background-color: #3d52c4;
 }
 
+.btnDisabled {
+  background-color: #f0f0f0;
+  color: #999999;
+  cursor: not-allowed;
+  border: 1px solid #e0e0e0;
+}
+
+.btnDisabled:hover {
+  background-color: #f0f0f0;
+  color: #999999;
+}
+
 .btnConfirm:active,
 .btnCancel:active {
   transform: translateY(1px);
+}
+
+/* 채팅 바로가기 버튼 스타일 추가 */
+.chatGoBtn {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  margin-left: auto;
+  background: #fff;
+  color: #4561db;
+  border: 2px solid #ccd4fa;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(69, 97, 219, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.chatGoBtn:hover,
+.chatGoBtn:focus {
+  background: rgb(211, 224, 255);
+  color: #4561db;
+  border-color: #4561db;
+  box-shadow: 0 4px 16px rgba(69, 97, 219, 0.15);
+  outline: none;
+  transform: scale(1.05);
+}
+
+.chatGoBtn:active {
+  background: #4561db;
+  color: #fff;
+  border-color: #4561db;
+  box-shadow: 0 2px 8px rgba(69, 97, 219, 0.08);
+  transform: scale(0.98);
+}
+
+.chatGoBtn[disabled],
+.chatGoBtn.disabled {
+  background: #f5f5f5;
+  color: #bbb;
+  border-color: #eee;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.chatIcon {
+  width: 26px;
+  height: 26px;
+  transition: all 0.3s ease;
+}
+
+.chatGoBtn:hover .chatIcon {
+  transform: scale(1.1);
 }
 
 /* Responsive adjustments */

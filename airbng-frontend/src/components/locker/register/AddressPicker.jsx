@@ -1,12 +1,17 @@
 import { useDaumPostcode, useKakaoGeocoder } from '../../../hooks/useExternalScripts';
 import LocationSearch from '../../../assets/location_search_ic.svg';
+import { useModal, Modal } from '../../common/ModalUtil';
 
 export default function AddressPicker({ address, setAddress, setAddressEnglish, setLat, setLng }) {
     const daumReady = useDaumPostcode();
     const kakaoReady = useKakaoGeocoder();
+    const modal = useModal();
 
     const openSearch = () => {
-        if (!daumReady) return alert('주소 검색 로딩 중입니다. 잠시만 기다려주세요.');
+        if (!daumReady) {
+            modal.showError('주소 검색 준비 중', '주소 검색 로딩 중입니다. 잠시만 기다려주세요.');
+            return;
+        }
         new window.daum.Postcode({
             oncomplete: (data) => {
                 const kor = data.roadAddress || data.jibunAddress;
@@ -18,10 +23,10 @@ export default function AddressPicker({ address, setAddress, setAddressEnglish, 
                     const geocoder = new window.kakao.maps.services.Geocoder();
                     geocoder.addressSearch(kor, (result, status) => {
                         if (status === window.kakao.maps.services.Status.OK) {
-                        setLat(parseFloat(result[0].y));
-                        setLng(parseFloat(result[0].x));
+                            setLat(parseFloat(result[0].y));
+                            setLng(parseFloat(result[0].x));
                         } else {
-                        alert('좌표 변환 실패. 주소를 확인해주세요.');
+                            modal.showError('좌표 변환 실패', '주소를 확인해주세요.');
                         }
                     });
                 }
@@ -43,6 +48,7 @@ export default function AddressPicker({ address, setAddress, setAddressEnglish, 
                     value={address || ''} 
                 />
             </div>
+            <Modal {...modal.modalState} onClose={modal.hideModal} />
         </div>
     );
 }

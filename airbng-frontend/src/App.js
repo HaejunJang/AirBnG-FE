@@ -1,5 +1,10 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { getStompClient } from "./utils/stompClient";
+import { useEffect } from "react";
 import Navbar from "./components/Footer/Navbar";
+import WsPersonalBridge from "./components/ws/WsPersonalBridge";
+import { UnreadProvider } from "./context/UnreadContext";
+import "./styles/App.css";
 
 import ReservationDetail from "./pages/ReservationDetail";
 import HomePage from "./pages/HomePage";
@@ -13,6 +18,9 @@ import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
 import ReservationList from "./pages/ReservationList";
 import LoginPage from "./pages/LoginPage";
+import ChatListPage from "./pages/ChatListPage";
+import ChatStartPage from "./pages/ChatStartPage";
+import ChatRoomPage from "./pages/ChatRoomPage";
 import LockerDetailsPage from "./pages/LockerDetailsPage";
 import Notification from "./pages/notification";
 import { SSEProvider } from "./context/SseContext";
@@ -26,11 +34,19 @@ import MyWalletHistory from "./pages/MyWalletHistory";
 import ReservationListNew from "./pages/ReservationListNew";
 
 function App() {
+  useEffect(() => {
+    const c = getStompClient();
+    if (!c.active) c.activate();          // ← 최초 1회 연결
+    return () => { c.deactivate(); };     // 앱 unload 시 정리
+  }, []);
+
   function getActiveNav(pathname) {
     if (pathname.startsWith("/page/lockers")) return "cart";
     if (pathname.startsWith("/page/chatList")) return "chat";
     if (pathname.startsWith("/page/reservations")) return "calendar";
     if (pathname.startsWith("/page/mypage")) return "mypage";
+    if (pathname.startsWith("/page/login")) return "mypage";
+    if (pathname.startsWith("/page/signup")) return "mypage";
     return "home";
   }
 
@@ -42,12 +58,16 @@ function App() {
     const hideNavbarPaths = [
       "/page/reservations/detail",
       "/page/reservations/form",
+      "/page/lockers/manage", 
+      "/page/lockers/register",
+      "/page/chat/new",
+      "/page/mypage/update",
     ];
 
-    // 현재 경로가 네비바를 숨겨야 하는 경로인지 확인
-    const shouldHideNavbar = hideNavbarPaths.some((path) =>
-      location.pathname.startsWith(path)
-    );
+    // 채팅방 상세 경로는 별도 처리
+    const shouldHideNavbar =
+      hideNavbarPaths.some((path) => location.pathname.startsWith(path)) ||
+      /^\/page\/chat\/\d+/.test(location.pathname);
 
     return (
       <div className="airbng-home">
@@ -84,9 +104,11 @@ function App() {
           <Route path="/page/mypage" element={<MyPage />} />
           <Route path="/page/signup" element={<SignupPage />} />
           <Route path="/page/login" element={<LoginPage />} />
-          <Route path="/page/notification" element={<Notification />} />
-
+          <Route path="/page/chatList" element={<ChatListPage />} />
+          <Route path="/page/chat/new" element={<ChatStartPage />} />
+          <Route path="/page/chat/:convId" element={<ChatRoomPage />} />
           <Route path="/page/mypage/update" element={<MyInfoPage />} />
+          <Route path="/page/notification" element={<Notification />} />
 
           <Route path="/page/mypage/wallet" element={<MyWallet />} />
           <Route
@@ -105,6 +127,7 @@ function App() {
             path="/page/mypage/wallet/history"
             element={<MyWalletHistory />}
           />
+          <Route path="/page/mypage/update" element={<MyInfoPage />} />
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
@@ -115,9 +138,12 @@ function App() {
 
   return (
     <BrowserRouter>
-      <SSEProvider memberId={profile?.id || null}>
-        <MainContent />
-      </SSEProvider>
+      <UnreadProvider>
+        <WsPersonalBridge />
+        <SSEProvider memberId={profile?.id || null}>
+            <MainContent />
+        </SSEProvider>
+      </UnreadProvider>
     </BrowserRouter>
   );
 }

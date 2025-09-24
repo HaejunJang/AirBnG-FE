@@ -16,9 +16,16 @@ export const useSSEManager = (memberId) => {
     const isInitializedRef = useRef(false);
     const connectionTimeoutRef = useRef(null); // 연결 타임아웃 추가
 
+    const processedEventIdsRef = useRef(new Set());
+
     // memberId 자동 감지
     const profile = getUserProfile();
     const resolvedMemberId = memberId || profile?.id || null;
+
+    const lastProcessedKey = `lastProcessedEventId_${resolvedMemberId}`;
+    const lastProcessedRef = useRef(
+        Number(localStorage.getItem(lastProcessedKey) || 0)
+    );
 
     console.log('[SSE Hook] memberId param:', memberId);
 
@@ -138,21 +145,47 @@ export const useSSEManager = (memberId) => {
                 setIsConnecting(false);
             });
 
-            // alarm 이벤트 리스너
             eventSourceRef.current.addEventListener('alarm', (event) => {
+                const eventId = event.lastEventId || event.id;
+                if (!eventId) return;
+
+                // 중복 체크
+                if (processedEventIdsRef.current.has(eventId)) {
+                    console.log('[SSE Hook] 중복 알림 무시:', eventId);
+                    return;
+                }
+
+                // 처리 완료 후 저장
+                processedEventIdsRef.current.add(eventId);
+
+                let alarmData;
                 try {
-                    const alarmData = JSON.parse(event.data);
-                    console.log('[SSE Hook] 알림 수신:', alarmData);
-                    handleAlarmEvent(alarmData);
+                    alarmData = JSON.parse(event.data);
                 } catch (e) {
-                    console.error('[SSE Hook] 알림 데이터 파싱 오류:', e, 'Raw data:', event.data);
+                    console.error('[SSE Hook] 알림 파싱 오류:', e, 'Raw data:', event.data);
+                    alarmData = { message: event.data };
+                }
+
+                console.log('[SSE Hook] 알림 수신:', alarmData);
+                handleAlarmEvent(alarmData);
+
+                showNotification(
+                    'AirBnG 알림',
+                    alarmData.message || '새 알림이 도착했습니다.',
+                    { tag: `alarm-${eventId}` } // tag도 eventId 기준으로 고정
+                );
+
+                // lastProcessed 갱신 (숫자형 ID인 경우)
+                const numericId = Number(eventId);
+                if (!isNaN(numericId) && numericId > (lastProcessedRef.current || 0)) {
+                    lastProcessedRef.current = numericId;
+                    localStorage.setItem(lastProcessedKey, String(numericId));
                 }
             });
 
-            // onopen은 단순히 HTTP 연결만 확인 (실제 연결 완료가 아님)
+
             eventSourceRef.current.onopen = () => {
                 console.log('[SSE Hook] HTTP 연결 열림 (아직 서버 준비 대기중)');
-                // updateConnectionStatus는 여기서 호출하지 않음
             };
 
             eventSourceRef.current.onerror = (error) => {

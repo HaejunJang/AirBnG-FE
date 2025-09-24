@@ -3,6 +3,7 @@ import AddressPicker from '../register/AddressPicker';
 import ImageUploader from '../register/ImageUploader';
 import CircleFull from '../../../assets/circle_check_full.svg';
 import CircleBlank from '../../../assets/circle_check_blank.svg';
+import { useModal, Modal } from '../../common/ModalUtil';
 
 export default function ManageForm({
   detail, setDetail,
@@ -11,6 +12,7 @@ export default function ManageForm({
   onSubmit
 }) {
   const fileInputRef = useRef(null);
+  const modal = useModal();
   if (!detail) return null;
   const set = (k, v) => setDetail(prev => ({ ...prev, [k]: v }));
 
@@ -19,7 +21,7 @@ export default function ManageForm({
       j.jimTypeId === id ? { ...j, enabled: !j.enabled } : j
     );
     if (next.filter(j => j.enabled).length === 0) {
-      alert('최소 하나 이상의 짐 타입을 선택해야 합니다.');
+      modal.showError('선택 필요', '최소 하나 이상의 짐 타입을 선택해야 합니다.');
       return;
     }
     set('jimTypeResults', next);
@@ -31,7 +33,7 @@ export default function ManageForm({
     const incoming = Array.from(e.target.files || []);
     if (incoming.length === 0) return;
     if (incoming.length > 5) {
-      alert('사진은 최대 5장까지 업로드할 수 있습니다.');
+      modal.showError('업로드 제한', '사진은 최대 5장까지 업로드할 수 있습니다.');
       e.target.value = '';
       return;
     }
@@ -126,6 +128,7 @@ export default function ManageForm({
       <div className="form-actions">
         <button className="save-btn" onClick={onSubmit}>수정하기</button>
       </div>
+      <Modal {...modal.modalState} onClose={modal.hideModal} />
     </div>
   );
 }

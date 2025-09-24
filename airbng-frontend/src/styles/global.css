@@ -37,6 +37,8 @@ button { border: 0; background: none; cursor: pointer; }
   --success: #2EB872;
   --warning: #F5A524;
   --danger:  #E5484D;
+  --chatting: #4561DB;
+  --chatting-nav : #ff686d;
 
   /* Greys */
   --text-strong: #111111;
@@ -102,7 +104,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
-  padding-bottom: var(--bottom-nav-height);
+  /* padding-bottom: var(--bottom-nav-height); */
   min-height: 100vh;
   overflow-y: auto;
 }

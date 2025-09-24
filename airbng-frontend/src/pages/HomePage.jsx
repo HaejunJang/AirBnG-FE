@@ -14,7 +14,7 @@ import { useAuth } from "../context/AuthContext";
 
 function HomePage() {
   const navigate = useNavigate();
-  const { isLoggedIn, ready } = useAuth();
+  const { ready } = useAuth();
 
   const profile = getUserProfile();
   const resolvedMemberId = profile?.id || null;
@@ -48,16 +48,8 @@ function HomePage() {
   const jimTypeIdMap = { 0: 1, 1: 2, 2: 4, 3: 5 };
 
   const handleCategoryClick = (index) => {
-    if (!ready) return; // 컨텍스트 준비 전 클릭 무시
+    if (!ready) return;                                  
     const jimTypeId = jimTypeIdMap[index];
-
-    // if (!isLoggedIn) {
-    //   const target = jimTypeId ? `/page/lockerSearch?jimTypeId=${jimTypeId}` : '/page/home';
-    //   if (window.confirm("로그인이 필요합니다. 로그인 페이지로 이동할까요?")) {
-    //     navigate(`/page/login?redirect=${encodeURIComponent(target)}`);
-    //   }
-    //   return;
-    // }
 
     if (index === 1) return; // 캐리어 모달 예정(기존 로직 유지)
     if (jimTypeId) navigate(`/page/lockerSearch?jimTypeId=${jimTypeId}`);
