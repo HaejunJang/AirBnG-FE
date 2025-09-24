@@ -5,21 +5,22 @@ import {getNotification, hasreadAlarm} from '../api/notification';
 import '../styles/pages/notification.css';
 import {useDot} from "../hooks/useDot";
 import {useNavigate} from "react-router-dom";
+import Header from '../components/Header/Header';
 
 
-const Header = ({ title, showBackButton, backUrl }) => (
-    <div className="header">
-        {showBackButton && (
-            <button
-                onClick={() => (window.location.href = backUrl)}
-                className="notification-back-button"
-            >
-                ←
-            </button>
-        )}
-        <h1 className="header-title">{title}</h1>
-    </div>
-);
+// const Header = ({ title, showBackButton, backUrl }) => (
+//     <div className="header">
+//         {showBackButton && (
+//             <button
+//                 onClick={() => (window.location.href = backUrl)}
+//                 className="notification-back-button"
+//             >
+//                 ←
+//             </button>
+//         )}
+//         <h1 className="header-title">{title}</h1>
+//     </div>
+// );
 
 const Welcome = ({ subtitle }) => {
     const navigate = useNavigate(); // 여기서 훅 사용
@@ -125,7 +126,7 @@ const NotificationList = ({ notifications, deletedNotificationIds, onRemove, onC
                     disabled={visibleNotifications.length === 0}
                     className={`clear-all-button ${visibleNotifications.length === 0 ? 'disabled' : ''}`}
                 >
-                    모든 알림 지우기 ({visibleNotifications.length}개)
+                    전체 삭제 ({visibleNotifications.length}개)
                 </button>
             </div>
             <div className="notification-list">
@@ -301,7 +302,11 @@ const NotificationApp = () => {
         <div className="app-container">
             <div className="notification-app-content">
                 <div className="main-content">
-                    <Header title="알림" showBackButton={true} backUrl="/page/home" />
+                    <Header
+                        headerTitle="알림"
+                        showBackButton={true}
+                        backUrl="/page/home"
+                    />
                     {!memberId ? (
                         <div className="welcome-wrapper">
                             <Welcome subtitle="로그인 후 사용 가능합니다." />
