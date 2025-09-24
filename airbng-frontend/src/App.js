@@ -32,6 +32,8 @@ import MyWalletCharge from "./pages/MyWalletCharge";
 import MyWalletWithdraw from "./pages/MyWalletWithdraw";
 import MyWalletHistory from "./pages/MyWalletHistory";
 import UserRoute from "./components/common/UserRoute";
+import ReservationListNew from "./pages/ReservationListNew";
+
 
 function App() {
   useEffect(() => {
@@ -89,7 +91,11 @@ function App() {
             element={<LockerDetailsPage />}
           />
           <Route path="/page/lockerDetails" element={<LockerDetailsPage />} />
-          <Route path="/page/reservations/list" element={<ReservationList />} />
+          {/* <Route path="/page/reservations/list" element={<ReservationList />} /> */}
+          <Route
+            path="/page/reservations/list"
+            element={<ReservationListNew />}
+          />
           <Route
             path="/page/reservations/detail/:reservationId"
             element={<ReservationDetail />}
