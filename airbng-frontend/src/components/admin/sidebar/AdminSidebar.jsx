@@ -32,19 +32,19 @@ const AdminSidebar = () => {
             icon: <FiTrendingUp size={20} />,
             subItems: [
                 {
-                    name: '기간별매출',
+                    name: '기간별 매출 추이',
                     icon: <CiCalendar size={18} />,
                     path: '/admin/sales/period'
                 },
+                // {
+                //     name: '보관소 매출 현황',
+                //     icon: <LuBuilding size={18} />,
+                //     path: '/admin/sales/storage'
+                // },
                 {
-                    name: '보관소별 매출',
-                    icon: <LuBuilding size={18} />,
-                    path: '/admin/sales/storage'
-                },
-                {
-                    name: '순매출',
+                    name: '보관소 매출 현황',
                     icon: <BiMoneyWithdraw size={18} />,
-                    path: '/admin/sales/net'
+                    path: '/admin/sales/storage'
                 }
             ]
         }
@@ -61,11 +61,11 @@ const AdminSidebar = () => {
             setActiveMenu('매출');
             // 서브메뉴 설정
             if (currentPath.includes('/admin/sales/period')) {
-                setActiveSubMenu('기간별매출');
+                setActiveSubMenu('기간별 매출 추이');
+            // } else if (currentPath.includes('/admin/sales/storage')) {
+            //     setActiveSubMenu('보관소 매출 현황');
             } else if (currentPath.includes('/admin/sales/storage')) {
-                setActiveSubMenu('보관소별 매출');
-            } else if (currentPath.includes('/admin/sales/net')) {
-                setActiveSubMenu('순매출');
+                setActiveSubMenu('보관소 매출 현황');
             } else {
                 setActiveSubMenu('');
             }

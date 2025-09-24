@@ -1,6 +1,27 @@
 import { httpAuth } from "../http";
 
-export const getAdminFirstPage = () => httpAuth.get("/admin");
+
+export const getPeriodSales = ({ startDate, endDate, page = 0, size = 10 }) => {
+    return httpAuth.get("/admin/sales/period", {
+        params: {
+            startDate,
+            endDate,
+            page,
+            size
+        },
+    });
+};
+
+export const getStorageSales = ({ lockerType, startDate, endDate, page = 0, size = 10 }) => {
+    return httpAuth.get("/admin/sales/storage", {
+        params: {
+            lockerType: lockerType || null,
+            startDate,
+            endDate,
+            page,
+            size
+        },
+    });
 
 // 보관소 리뷰 목록 조회 (상태별 + 페이징)
 export const getLockerReviewsByStatus = (status, page = 1) =>
