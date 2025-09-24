@@ -278,6 +278,16 @@
     background-color: #3651cb;
 }
 
+.airbng-locker .register-locker-btn.disabled {
+    background-color: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.airbng-locker .register-locker-btn.disabled:hover {
+    background-color: #e5e7eb;
+}
+
 /* locker.css 파일에 추가할 모달 스타일 */
 
 /* 모달 오버레이 */

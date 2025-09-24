@@ -26,7 +26,7 @@ export default function LockerRootPage() {
     const [locker, setLocker] = useState(null);
     const [lockerStatus, setLockerStatus] = useState("REGISTER");
     const [canRegister, setCanRegister] = useState(false);
-    const { modalState, hideModal, showWarning, modal } = useModal();
+    const { modalState, hideModal, modal } = useModal();
     const navigate = useNavigate();
 
     const load = useCallback(async () => {
@@ -137,16 +137,9 @@ export default function LockerRootPage() {
                         />
                     ) : (
                         <EmptyLockerCTA
-                            onRegister={() => {
-                                if (!canRegister) {
-                                    showWarning("등록불가", "심사 중인 보관소가 있습니다.\n심사를 기다려주세요.");
-                                    return;
-                                }
-                                navigate("/page/lockers/register");
-                            }}
-                            disabled={!canRegister}
+                            onRegister={() => navigate("/page/lockers/register")}
+                            canRegister={canRegister}
                         />
-
                     )}
                 </main>
             </div>
