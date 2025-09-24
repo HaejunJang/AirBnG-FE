@@ -16,7 +16,7 @@ import LockerRootPage from "./pages/LockerRootPage";
 import ReservationFormPage from "./pages/ReservationFormPage";
 import MyPage from "./pages/MyPage";
 import SignupPage from "./pages/SignupPage";
-import ReservationList from "./pages/ReservationList";
+// import ReservationList from "./pages/ReservationList";
 import LoginPage from "./pages/LoginPage";
 import ChatListPage from "./pages/ChatListPage";
 import ChatStartPage from "./pages/ChatStartPage";
