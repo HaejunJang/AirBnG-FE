@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { getStompClient } from "./utils/stompClient";
 import { useEffect } from "react";
 import Navbar from "./components/Footer/Navbar";
@@ -31,7 +31,10 @@ import AccountRegister from "./pages/AccountRegister";
 import MyWalletCharge from "./pages/MyWalletCharge";
 import MyWalletWithdraw from "./pages/MyWalletWithdraw";
 import MyWalletHistory from "./pages/MyWalletHistory";
+import UserRoute from "./components/common/UserRoute";
 import ReservationListNew from "./pages/ReservationListNew";
+import SplashScreen from "./pages/SplashPage";
+
 
 function App() {
   useEffect(() => {
@@ -53,6 +56,7 @@ function App() {
   function MainContent() {
     const location = useLocation();
     const active = getActiveNav(location.pathname);
+    const navigate = useNavigate();
 
     // 네비바를 숨길 페이지들 정의
     const hideNavbarPaths = [
@@ -66,13 +70,23 @@ function App() {
 
     // 채팅방 상세 경로는 별도 처리
     const shouldHideNavbar =
-      hideNavbarPaths.some((path) => location.pathname.startsWith(path)) ||
+        location.pathname === "/" ||
+        hideNavbarPaths.some((path) => location.pathname.startsWith(path)) ||
       /^\/page\/chat\/\d+/.test(location.pathname);
 
     return (
+      <UserRoute>
       <div className="airbng-home">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/"
+            element={
+                <SplashScreen
+                    onNavigateToHome={() => navigate('/page/home')}
+                />
+            }
+          />
+          {/*<Route path="/" element={<SplashScreen />} />*/}
           <Route path="/page/home" element={<HomePage />} />
           <Route path="/page/lockerSearchDetails" element={<SearchPage />} />
           <Route path="/page/lockerSearch" element={<SearchFilterPage />} />
@@ -131,6 +145,7 @@ function App() {
         </Routes>
         {!shouldHideNavbar && <Navbar active={active} />}
       </div>
+      </UserRoute>
     );
   }
 
