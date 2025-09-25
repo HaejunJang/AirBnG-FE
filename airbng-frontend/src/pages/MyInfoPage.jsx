@@ -119,7 +119,7 @@ const MyInfoPage = () => {
 
         <ErrorMessage message={error} onClose={() => setError("")} />
 
-        <LoadingSpinner isVisible={isLoading} message="정보를 불러오는 중..." />
+        {/*<LoadingSpinner isVisible={isLoading} message="정보를 불러오는 중..." />*/}
 
         <form className={info.editProfileForm} onSubmit={handleSubmit}>
           {/* 이메일 필드 */}
