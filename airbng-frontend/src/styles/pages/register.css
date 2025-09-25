@@ -1,107 +1,160 @@
-.airbng-register {
-    min-height: 100dvh;
-    background: #fff;
-}
-
-.airbng-register .register-container {
-    width: 100%;
+/* 기본 컨테이너 */
+.register-container {
+    padding: 20px;
     max-width: 412px;
     margin: 0 auto;
     background: #fff;
-    display: flex;
-    flex-direction: column;
+    min-height: 100vh;
     box-sizing: border-box;
-    padding-top: calc(var(--header-height) + 12px);
-    padding-bottom: calc(var(--bottom-nav-height) + 24px);
-    padding-left: 20px;
-    padding-right: 20px;
 }
 
-.airbng-register .step-indicator {
+.back-button {
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* 스텝 인디케이터 */
+.step-indicator {
     width: 100%;
     display: flex;
     justify-content: center;
-    margin: 8px 0 16px;
+    margin: 0 0 30px 0;
 }
-.airbng-register .step-wrapper {
+
+.step-wrapper {
     display: flex;
     align-items: center;
-    gap: 6px;
 }
-.airbng-register .step-icon {
+
+.step-icon {
     width: 30px;
     height: 30px;
     flex: 0 0 auto;
     display: block;
 }
-.airbng-register .step-line {
+
+.step-line {
     width: 67px;
     height: 4px;
     flex: 0 0 auto;
     display: block;
+    margin: 0 6px;
 }
 
-.airbng-register .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
-.airbng-register .form-group label {
+/* 스텝 컨테이너 */
+.step {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 폼 그룹 */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    /*flex: 1;*/
+}
+
+.form-group label {
     color: #333;
-    font-family: 'Pretendard', sans-serif;
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 12px;
+    display: block;
 }
 
-.airbng-register .form-group input[type="text"],
-.airbng-register input[type="text"],
-.airbng-register #hostName,
-.airbng-register #lockerName,
-.airbng-register #detailAddress,
-.airbng-register .detail-address {
-    height: 44px;
+/* 기본 인풋 스타일 */
+.form-group input[type="text"],
+input[type="text"],
+#hostName,
+#lockerName,
+#detailAddress,
+.detail-address {
+    width: 100%;
+    height: 54px;
     border: 1px solid #D5D5D5;
     border-radius: 10px;
-    padding: 10px 14px;
+    padding: 0 14px;
     background: #fff;
     font-size: 16px;
     font-weight: 500;
     margin-bottom: 0;
+    box-sizing: border-box;
+    outline: none;
 }
 
-.airbng-register .step {
-    min-height: 420px;
+.form-group input[type="text"]:focus,
+input[type="text"]:focus,
+#hostName:focus,
+#lockerName:focus,
+#detailAddress:focus,
+.detail-address:focus {
+    border-color: #4561DB;
 }
 
-.airbng-register .next-btn,
-.airbng-register .submit-btn {
-    position: sticky;
-    bottom: calc(var(--bottom-nav-height) + 12px);
+.form-group input[type="text"]::placeholder,
+input[type="text"]::placeholder {
+    color: #999;
+    font-weight: 400;
+}
+
+/* 버튼 스타일 */
+.next-btn,
+.submit-btn {
     width: 100%;
-    padding: 14px 0;
+    height: 54px;
+    padding: 0;
     font-size: 16px;
     font-weight: 700;
-    background: #3b57ef;
+    background: #4561DB;
     color: #fff;
     border: 0;
     border-radius: 10px;
-    margin-top: 24px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.10);
+    margin-top: auto;
+    box-shadow: 0 2px 8px rgba(69, 97, 219, 0.2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 54px;
 }
-.airbng-register .next-btn:disabled,
-.airbng-register .submit-btn:disabled {
+
+.next-btn:hover,
+.submit-btn:hover {
+    background: #3b57ef;
+    box-shadow: 0 4px 12px rgba(69, 97, 219, 0.3);
+}
+
+.next-btn:disabled,
+.submit-btn:disabled {
     background: #ccc;
     cursor: not-allowed;
     box-shadow: none;
 }
 
-/* ------------------------------
-   주소 입력(아이콘 포함)
------------------------------- */
-.airbng-register .input-with-icon {
-    display: flex; align-items: center; gap: 8px;
-    height: 54px; border: 1px solid #D5D5D5; border-radius: 10px;
-    padding: 0 14px; background: #fff; cursor: pointer;
+/* 주소 입력 */
+.input-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 54px;
+    border: 1px solid #D5D5D5;
+    border-radius: 10px;
+    padding: 0 14px;
+    background: #fff;
+    cursor: pointer;
+    box-sizing: border-box;
+    margin-bottom: 10px;
 }
 
-.airbng-register .input-with-icon input.address-field {
+.input-with-icon:hover {
+    border-color: #4561DB;
+}
+
+.input-with-icon input.address-field {
     flex: 1;
     border: none !important;
     outline: none !important;
@@ -112,70 +165,238 @@
     font-weight: 500;
     cursor: pointer;
     color: #333;
+    height: auto;
 }
 
-.airbng-register #detailAddress,
-.airbng-register .detail-address {
-    margin-top: 10px;
-    margin-bottom: 24px;
+.input-with-icon input.address-field::placeholder {
+    color: #999;
 }
 
-.airbng-register .image-upload-area { margin-top: 8px; }
-
-/* ------------------------------
-   이미지 업로더
------------------------------- */
-.airbng-register .image-upload-area { display: flex; align-items: center; gap: 8px; overflow-x: auto; }
-.airbng-register .image-upload-box img {
-    width: 100px; height: 100px; border: 1px solid #D5D5D5; border-radius: 6px; background: #fff; cursor: pointer;
-}
-.airbng-register .preview-list { display: flex; gap: 8px; }
-.airbng-register .preview-item {
-    position: relative; width: 70px; height: 70px; flex: 0 0 auto;
-    border: 1px solid #ddd; border-radius: 6px; overflow: hidden; background: #fff;
-}
-.airbng-register .preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.airbng-register .preview-item button {
-    position: absolute; top: 2px; right: 2px;
-    width: 18px; height: 18px; border-radius: 50%;
-    border: 0; background: #ff4d4f; color: #fff; font-size: 12px; font-weight: 700;
+#detailAddress,
+.detail-address {
+    /*margin-top: 0;*/
+    margin-bottom: 20px;
 }
 
-/* ------------------------------
-   운영시간
------------------------------- */
-.airbng-register .time-select-group { display: flex; gap: 12px; justify-content: space-between; }
-.airbng-register .time-select-box { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.airbng-register .time-label { font-size: 13px; color: #666; font-weight: 500; }
-.airbng-register select {
+/* 이미지 업로더 */
+.image-upload-area {
+    margin-top: 12px;
+    margin-bottom: 20px;
+}
+
+.image-upload-area {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.image-upload-box img {
+    width: 80px;
+    height: 80px;
+    border: 2px dashed #D5D5D5;
+    border-radius: 10px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    object-fit: contain;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.image-upload-box img:hover {
+    border-color: #4561DB;
+    background: #f0f2ff;
+}
+
+.preview-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.preview-item {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    flex: 0 0 auto;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.preview-item img {
     width: 100%;
-    height: 44px;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.preview-item button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 0;
+    background: #ff4d4f;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 운영시간 선택 */
+.time-select-group {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.time-select-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.time-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+select {
+    width: 100%;
+    height: 54px;
     border: 1px solid #D5D5D5;
     border-radius: 10px;
     background: #fff;
     font-size: 16px;
     padding: 0 12px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
 }
 
-/* ------------------------------
-   짐 조건
------------------------------- */
-.airbng-register .condition-row {
-    display: flex; align-items: center; gap: 10px;
-    height: 66px; padding: 0 14px;
-    border: 1.5px solid #E5E5E5; border-radius: 6px;
-    background: #fff; margin-bottom: 10px;
-    transition: border-color .2s ease, background .2s ease;
+select:focus {
+    border-color: #4561DB;
 }
-.airbng-register .condition-row.selected { border-color: #4561DB; background: rgba(69, 97, 219, .10); }
-.airbng-register .condition-row > span { min-width: 100px; margin-right: auto; font-size: 16px; font-weight: 500; color: #333; }
-.airbng-register .input-wrapper {
-    width: 88px; height: 37px; display: grid; place-items: center;
-    border: 1px solid #E5E5E5; border-radius: 6px; background: #fff;
+
+/* 짐 조건 */
+.condition-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 70px;
+    padding: 0 16px;
+    border: 1.5px solid #E5E5E5;
+    border-radius: 10px;
+    background: #fff;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
-.airbng-register .price-display { font-family: 'Pretendard', sans-serif; font-size: 17px; color: #E5E5E5; transition: color .2s ease; }
-.airbng-register .condition-row.selected .input-wrapper { border-color: #4561DB; }
-.airbng-register .condition-row.selected .price-display { color: #4561DB; }
-.airbng-register .check-btn { width: 22px; height: 22px; display: inline-grid; place-items: center; }
-.airbng-register .check-btn img { width: 22px; height: 22px; opacity: .7; transition: opacity .2s; }
-.airbng-register .condition-row.selected .check-btn img { opacity: 1; }
+
+.condition-row:hover {
+    border-color: #4561DB;
+}
+
+.condition-row.selected {
+    border-color: #4561DB;
+    background: rgba(69, 97, 219, 0.05);
+}
+
+.condition-row > span {
+    flex: 1;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin-right: 12px;
+}
+
+.input-wrapper {
+    width: 88px;
+    height: 37px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #E5E5E5;
+    border-radius: 6px;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.condition-row.selected .input-wrapper {
+    border-color: #4561DB;
+    background: rgba(69, 97, 219, 0.1);
+}
+
+.price-display {
+    font-size: 14px;
+    font-weight: 600;
+    color: #999;
+    transition: color 0.2s ease;
+}
+
+.condition-row.selected .price-display {
+    color: #4561DB;
+}
+
+.check-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.check-btn img {
+    width: 24px;
+    height: 24px;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.condition-row.selected .check-btn img {
+    opacity: 1;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+    .register-container {
+        padding: 16px;
+    }
+
+    .condition-row {
+        height: 60px;
+        padding: 0 12px;
+    }
+
+    .condition-row > span {
+        font-size: 15px;
+    }
+
+    .input-wrapper {
+        width: 80px;
+        height: 32px;
+    }
+
+    .price-display {
+        font-size: 13px;
+    }
+}
