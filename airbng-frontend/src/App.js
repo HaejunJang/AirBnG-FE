@@ -31,6 +31,8 @@ import AccountRegister from "./pages/AccountRegister";
 import MyWalletCharge from "./pages/MyWalletCharge";
 import MyWalletWithdraw from "./pages/MyWalletWithdraw";
 import MyWalletHistory from "./pages/MyWalletHistory";
+import UserRoute from "./components/common/UserRoute";
+import ReservationListNew from "./pages/ReservationListNew";
 import SideBanner from "./components/home/SideBanner";
 
 // 로딩 컴포넌트
@@ -100,6 +102,7 @@ function App() {
             /^\/page\/chat\/\d+/.test(location.pathname);
 
         return (
+            <UserRoute>
             <div className="airbng-home">
                 <Suspense fallback={<LoadingSpinner />}>
                     <Routes>
@@ -119,7 +122,11 @@ function App() {
                             element={<LockerDetailsPage />}
                         />
                         <Route path="/page/lockerDetails" element={<LockerDetailsPage />} />
-                        <Route path="/page/reservations/list" element={<ReservationList />} />
+                        {/*<Route path="/page/reservations/list" element={<ReservationList />} />*/}
+                        <Route
+                            path="/page/reservations/list"
+                            element={<ReservationListNew />}
+                        />
                         <Route
                             path="/page/reservations/detail/:reservationId"
                             element={<ReservationDetail />}
@@ -156,19 +163,10 @@ function App() {
                         />
                         <Route path="/page/mypage/update" element={<MyInfoPage />} />
                     </Routes>
-                </Suspense>
-
-                {/* Navbar를 고정 높이로 미리 공간 확보 */}
-                <div
-                    className={`navbar-container ${shouldHideNavbar ? 'navbar-hidden' : ''}`}
-                    style={{
-                        height: shouldHideNavbar ? '0px' : 'var(--navbar-height, 60px)',
-                        transition: 'height 0.3s ease'
-                    }}
-                >
                     {!shouldHideNavbar && <Navbar active={active} />}
-                </div>
+                </Suspense>
             </div>
+            </UserRoute>
         );
     }
 

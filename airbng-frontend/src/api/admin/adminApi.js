@@ -1,93 +1,86 @@
 import { httpAuth } from "../http";
 
 export const getPeriodSales = ({ startDate, endDate, page = 0, size = 10 }) => {
-  return httpAuth.get("/admin/sales/period", {
-    params: {
-      startDate,
-      endDate,
-      page,
-      size,
-    },
-  });
+    return httpAuth.get("/admin/sales/period", {
+        params: {
+            startDate,
+            endDate,
+            page,
+            size
+        },
+    });
 };
 
-export const getStorageSales = ({
-  lockerType,
-  startDate,
-  endDate,
-  page = 0,
-  size = 10,
-}) => {
-  return httpAuth.get("/admin/sales/storage", {
-    params: {
-      lockerType: lockerType || null,
-      startDate,
-      endDate,
-      page,
-      size,
-    },
-  });
-};
+export const getStorageSales = ({ lockerType, startDate, endDate, page = 0, size = 10 }) => {
+    return httpAuth.get("/admin/sales/storage", {
+        params: {
+            lockerType: lockerType || null,
+            startDate,
+            endDate,
+            page,
+            size
+        },
+    });
+}
 
 // 보관소 리뷰 목록 조회 (상태별 + 페이징)
 export const getLockerReviewsByStatus = (status, page = 1) =>
-  httpAuth.get(`/admin/lockers`, {
-    params: {
-      status: status,
-      page: page,
-    },
-  });
+    httpAuth.get(`/admin/lockers`, {
+        params: {
+            status: status,
+            page: page
+        }
+    });
 
 // 보관소 리뷰 상세 조회
 export const getLockerReviewDetail = (lockerReviewId) =>
-  httpAuth.get(`/admin/lockers/${lockerReviewId}`);
+    httpAuth.get(`/admin/lockers/${lockerReviewId}`);
 
 // 보관소 승인
 export const approveLockerReview = (lockerReviewId, memberId) =>
-  httpAuth.post("/admin/lockers/approve", null, {
-    params: {
-      lockerReviewId: lockerReviewId,
-      memberId: memberId,
-    },
-  });
+    httpAuth.post("/admin/lockers/approve", null, {
+        params: {
+            lockerReviewId: lockerReviewId,
+            memberId: memberId
+        }
+    });
 
 // 보관소 반려
 export const rejectLockerReview = (lockerReviewId, memberId, reason) =>
-  httpAuth.post("/admin/lockers/reject", null, {
-    params: {
-      lockerReviewId: lockerReviewId,
-      memberId: memberId,
-      reason: reason,
-    },
-  });
+    httpAuth.post("/admin/lockers/reject", null, {
+        params: {
+            lockerReviewId: lockerReviewId,
+            memberId: memberId,
+            reason: reason
+        }
+    });
 
 // 편의를 위한 상태별 조회 함수들
 export const getPendingLockers = (page = 1) =>
-  getLockerReviewsByStatus("WAITING", page);
+    getLockerReviewsByStatus('WAITING', page);
 
 export const getApprovedLockers = (page = 1) =>
-  getLockerReviewsByStatus("APPROVED", page);
+    getLockerReviewsByStatus('APPROVED', page);
 
 export const getRejectedLockers = (page = 1) =>
-  getLockerReviewsByStatus("REJECTED", page);
+    getLockerReviewsByStatus('REJECTED', page);
 
 // 상태별 전체 데이터 조회 (요약용)
 export const getAllLockerReviewsSummary = async () => {
-  try {
-    const [pendingResponse, approvedResponse, rejectedResponse] =
-      await Promise.all([
-        getPendingLockers(1),
-        getApprovedLockers(1),
-        getRejectedLockers(1),
-      ]);
+    try {
+        const [pendingResponse, approvedResponse, rejectedResponse] = await Promise.all([
+            getPendingLockers(1),
+            getApprovedLockers(1),
+            getRejectedLockers(1)
+        ]);
 
-    return {
-      pending: pendingResponse.data,
-      approved: approvedResponse.data,
-      rejected: rejectedResponse.data,
-    };
-  } catch (error) {
-    console.error("요약 데이터 조회 실패:", error);
-    throw error;
-  }
+        return {
+            pending: pendingResponse.data,
+            approved: approvedResponse.data,
+            rejected: rejectedResponse.data
+        };
+    } catch (error) {
+        console.error('요약 데이터 조회 실패:', error);
+        throw error;
+    }
 };
