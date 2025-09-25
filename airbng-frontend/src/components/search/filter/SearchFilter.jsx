@@ -11,8 +11,6 @@ const SearchFilter = ({ jimTypeId = '모든 짐' }) => {
         searchQuery,
         selectedDate,
         selectedBagType,
-        selectedStartTime,
-        selectedEndTime,
         showDateModal,
         showTimeModal,
         searchResults,
@@ -44,8 +42,6 @@ const SearchFilter = ({ jimTypeId = '모든 짐' }) => {
                 selectedDate={selectedDate}
                 selectedBagType={selectedBagType}
                 setSelectedBagType={setSelectedBagType}
-                selectedStartTime={selectedStartTime}
-                selectedEndTime={selectedEndTime}
                 onDateClick={openDateModal}
                 onTimeClick={openTimeModal}
                 onSearch={handleSearch}
@@ -74,8 +70,6 @@ const SearchFilter = ({ jimTypeId = '모든 짐' }) => {
                 showTimeModal={showTimeModal}
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
-                selectedStartTime={selectedStartTime}
-                selectedEndTime={selectedEndTime}
                 setSelectedStartTime={setSelectedStartTime}
                 setSelectedEndTime={setSelectedEndTime}
                 onCloseDateModal={closeDateModal}

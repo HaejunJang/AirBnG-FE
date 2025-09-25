@@ -7,8 +7,6 @@ export const useSearchFilter = (jimTypeId = '모든 짐') => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedBagType, setSelectedBagType] = useState(jimTypeId);
-    const [selectedStartTime, setSelectedStartTime] = useState('18:00');
-    const [selectedEndTime, setSelectedEndTime] = useState('20:00');
 
     // 모달 상태
     const [showDateModal, setShowDateModal] = useState(false);
@@ -64,8 +62,6 @@ export const useSearchFilter = (jimTypeId = '모든 짐') => {
         searchQuery,
         selectedDate,
         selectedBagType,
-        selectedStartTime,
-        selectedEndTime,
         showDateModal,
         showTimeModal,
         searchResults,
@@ -75,8 +71,6 @@ export const useSearchFilter = (jimTypeId = '모든 짐') => {
         setSearchQuery,
         setSelectedDate,
         setSelectedBagType,
-        setSelectedStartTime,
-        setSelectedEndTime,
 
         // 액션 핸들러
         handleSearch,
