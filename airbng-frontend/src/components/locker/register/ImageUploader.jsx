@@ -25,9 +25,9 @@ export default function ImageUploader({ files, setFiles, max = 5 }) {
     };
 
     return (
-        <div className="form-group">
-            <label>사진 업로드</label>
-            <div className="image-upload-area">
+        <div>
+            {/*<label>사진 업로드</label>*/}
+            <div className="locker-image-upload-area">
                 {files.length < max && (
                     <div className="image-upload-box" id="uploadIconBox">
                         <label>
