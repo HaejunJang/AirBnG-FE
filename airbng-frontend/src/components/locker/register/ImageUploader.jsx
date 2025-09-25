@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import ImgUpload from '../../../assets/img_upload_ic.svg';
 import { useModal, Modal } from '../../common/ModalUtil';
+import '../../../styles/pages/manage.css';
 
 
 export default function ImageUploader({ files, setFiles, max = 5 }) {
