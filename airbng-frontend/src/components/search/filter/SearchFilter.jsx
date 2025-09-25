@@ -35,7 +35,7 @@ const SearchFilter = ({ jimTypeId = '모든 짐' }) => {
     } = useSearchFilter(jimTypeId);
 
     return (
-        <div className="page-container">
+        <div className="search-filter-page-container">
             <SearchHeader />
 
             <SearchFilterBox

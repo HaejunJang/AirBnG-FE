@@ -12,7 +12,7 @@ const SearchHeader = () => {
             <button onClick={handleBackClick}>
                 <img className="search-back-icon" src={arrowLeft} alt="뒤로가기" />
             </button>
-            <h1 className="header-title">검색</h1>
+            <h1 className="search-filter-header-title">검색</h1>
         </header>
     );
 };
