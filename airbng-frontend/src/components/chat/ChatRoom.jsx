@@ -8,7 +8,8 @@ import useStomp from '../../hooks/useStomp';
 import usePersonalQueues from '../../hooks/usePersonalQueues';
 import usePeer from '../../hooks/usePeer';
 import { decideReservation } from '../../api/chatApi';
-import { markRead as markReadApi, uploadAttachment } from '../../api/chatApi'; // ← 추가
+import { markRead as markReadApi, uploadAttachment } from '../../api/chatApi';
+import { cancelReservationApi } from '../../api/reservationApi';
 import { decorateWithDividers } from '../../utils/chatDate';
 import '../../styles/chat.css';
 import arrowLeft from '../../assets/arrow-left.svg';
@@ -36,7 +37,7 @@ export default function ChatRoom({ convId, meId }) {
 
   const reportSeenRef = useRef(null);
 
-  const { connected, publish } = useStomp();
+  const { connected, publish, client } = useStomp();
   const { messages, sendMessage, loadMore, hasMore, applyAck, pushLocal } =
     useChatRoom(convId, meId, { ready: connected }); // ← pushLocal 사용
 
@@ -92,6 +93,7 @@ export default function ChatRoom({ convId, meId }) {
       lastSeenSeqRef.current = seq;
       setMyLastReadSeq(seq);
       try {
+        console.log('[READ SEND]', { convId, seq });
         await markReadApi(convId, seq);
         publish(`/app/conversations/${convId}/read`, { lastSeenSeq: seq });
       } catch (e) {
@@ -104,10 +106,24 @@ export default function ChatRoom({ convId, meId }) {
   useEffect(() => {
     lastSeenSeqRef.current = 0;
     setMyLastReadSeq(0);
-    setPeerLastReadSeq(0);
+    try {
+      const cacheKey = `peerRead:${convId}`;
+      const cached = Number(sessionStorage.getItem(cacheKey) || 0);
+      setPeerLastReadSeq(Number.isFinite(cached) ? cached : 0);
+    } catch { setPeerLastReadSeq(0); }
     setPeerInRoom(false);
     setPresenceSettled(false);
     clearTimeout(peerDecayTimerRef.current);
+  }, [convId]);
+
+  useEffect(() => {
+    // 현재 열린 방 브로드캐스트
+    try {
+      window.dispatchEvent(new CustomEvent('chat:open', { detail: { convId } }));
+    } catch {}
+    return () => {
+      try { window.dispatchEvent(new Event('chat:close')); } catch {}
+    };
   }, [convId]);
 
   // 최근 수신이 상대면 presence
@@ -131,7 +147,10 @@ export default function ChatRoom({ convId, meId }) {
   // 개인큐: READ/TYPING
   useEffect(() => {
     personal.subscribeRead?.(convId, (ev) => {
-      const s = Number(ev?.lastReadSeq ?? ev?.seq ?? ev?.last_seen_seq ?? NaN);
+      console.log('[READ EVT]', { convId, ev, meId });
+      const s = Number(
+        (typeof ev === 'number') ? ev : (ev?.lastReadSeq ?? ev?.seq ?? ev?.last_seen_seq)
+      );
       const readerId = ev?.userId ?? ev?.readerId ?? ev?.reader ?? ev?.uid;
       if (!Number.isFinite(s)) return;
 
@@ -141,12 +160,18 @@ export default function ChatRoom({ convId, meId }) {
           setMyLastReadSeq(s);
         }
       } else {
+        console.log('[PEER READ]', { convId, readerId, s });
         pokePeerInRoom();
-        setPeerLastReadSeq((prev) => (s > prev ? s : prev));
+        setPeerLastReadSeq(prev => {
+          const next = s > prev ? s : prev;
+          try { sessionStorage.setItem(`peerRead:${convId}`, String(next)); } catch {}
+          return next;
+        });
       }
     });
 
     personal.subscribeTyping?.(convId, (ev) => {
+      console.log('[TYPING EVT]', { convId, ev });
       pokePeerInRoom();
       const isTyping = !!ev?.typing;
       setPeerTyping(isTyping);
@@ -165,6 +190,7 @@ export default function ChatRoom({ convId, meId }) {
   useEffect(() => {
     if (!peerInRoom || !messages?.length) return;
     const lastSeq = lastValidSeqOf(messages);
+    console.log('[BUMP PEER READ TO LAST]', { convId, lastSeq });
     if (lastSeq) setPeerLastReadSeq((prev) => Math.max(prev, lastSeq));
   }, [peerInRoom, messages]);
 
@@ -181,12 +207,14 @@ export default function ChatRoom({ convId, meId }) {
     reportSeenRef.current?.(lastSeq);
   }, [messages]);
 
-  // 연결 직후
+  // 연결 직후 (구독이 잡힌 다음 살짝 딜레이 후 sync 전송)
   useEffect(() => {
     if (!connected) return;
-
-    const ping = () => publish(`/app/conversations/${convId}/typing`, { typing: false });
-    ping();
+    const sendSync = () => {
+      publish(`/app/conversations/${convId}/read-sync`, {});
+      publish(`/app/conversations/${convId}/typing`, { typing: false });
+    };
+    const afterSub = setTimeout(sendSync, 200); 
 
     const doSync = () => {
       const lastSeq = lastValidSeqOf(messages);
@@ -203,9 +231,9 @@ export default function ChatRoom({ convId, meId }) {
     } catch {}
 
     const grace = setTimeout(() => setPresenceSettled(true), PRESENCE_GRACE_MS);
-    const keep = setInterval(ping, PRESENCE_PING_MS);
+    const keep = setInterval(() => publish(`/app/conversations/${convId}/typing`, { typing: false }), PRESENCE_PING_MS);
 
-    return () => { clearInterval(keep); clearTimeout(syncTimer); clearTimeout(grace); };
+    return () => { clearInterval(keep); clearTimeout(syncTimer); clearTimeout(grace); clearTimeout(afterSub); };
   }, [connected, convId, publish, messages]);
 
   const onSend = useCallback((text) => {
@@ -263,6 +291,62 @@ export default function ChatRoom({ convId, meId }) {
     await decideReservation({ convId, reservationId, approve: false, reason });
   }, [convId]);
 
+  // ====== 예약 취소 핸들러(옵션 A: 기존 consumer API 바로 호출) ======
+  const cancelReservation = useCallback(async (reservationId) => {
+    try {
+      await cancelReservationApi(reservationId, meId);
+      // 성공 시 서버가 ReservationCancelledEvent → 채팅카드 push 하므로 추가 동작 불필요
+    } catch (e) {
+      console.error('cancelReservation failed', e);
+      // 필요 시 토스트 처리
+    }
+  }, [meId]);
+
+  // ====== 카드 구독: /user/queue/chat.cards ======
+  useEffect(() => {
+    if (!client || !connected) return;
+
+    const onPersonal = (frame) => {
+      try {
+        const payload = JSON.parse(frame.body);
+        pushLocal({
+          convId,
+          msgId: `card-${payload?.reservation?.reservationId}-${Date.now()}`,
+          senderId: 0,
+          senderName: 'system',
+          type: 'CANCELLED_WITH_REFUND',
+          payload,
+          sentAtMs: Date.now(),
+        });
+      } catch (e) { console.error('card payload parse error', e); }
+    };
+
+  const onTopic = (frame) => {
+    try {
+      const payload = JSON.parse(frame.body); // CancelledWithRefundCardDto
+      // convId가 payload에 함께 오니 신뢰해서 사용(혹은 현재 convId 비교)
+      const cid = payload?.convId || convId;
+      pushLocal({
+        convId: cid,
+        msgId: `card-${payload?.reservation?.reservationId}-${Date.now()}`,
+        senderId: 0,
+        senderName: 'system',
+        type: 'CANCELLED_WITH_REFUND',
+        payload,
+        sentAtMs: Date.now(),
+      });
+    } catch (e) { console.error('topic card payload parse error', e); }
+  };
+
+    const subs = [];
+    // 개인 큐: 이미 열려있는 화면에 즉시
+    subs.push(client.subscribe('/user/queue/chat.cards', onPersonal));
+    // 대화 토픽: 백엔드가 /topic/conversations/{convId}/cards 로 쏘고 있음
+    subs.push(client.subscribe(`/topic/conversations/${convId}/cards`, onTopic));
+
+    return () => { subs.forEach(s => { try { s?.unsubscribe(); } catch {} }); };
+  }, [client, connected, convId, pushLocal]);
+
   return (
     <section className="chat-room">
       <header className="chat-room__header">
@@ -303,7 +387,8 @@ export default function ChatRoom({ convId, meId }) {
 
           return (
             <ChatMessage
-              key={m.msgId}
+              // key={m.msgId}
+              key={isMine ? `${m.msgId}-${peerLastReadSeq}-${peerInRoom?1:0}` : m.msgId}
               me={isMine}
               msg={m}
               name={displayName}
@@ -316,6 +401,7 @@ export default function ChatRoom({ convId, meId }) {
               meId={meId}
               onApproveReservation={(reservationId) => approveReservation(reservationId)}
               onRejectReservation={(reservationId, reason) => rejectReservation(reservationId, reason)}
+              onCancelReservation={(reservationId) => cancelReservation(reservationId)}
             />
           );
         })}

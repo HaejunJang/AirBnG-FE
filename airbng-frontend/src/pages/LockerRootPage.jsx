@@ -26,7 +26,7 @@ export default function LockerRootPage() {
     const [locker, setLocker] = useState(null);
     const [lockerStatus, setLockerStatus] = useState("REGISTER");
     const [canRegister, setCanRegister] = useState(false);
-    const { modalState, hideModal, modal } = useModal();
+    const { modalState, showConfirm, showSuccess, showError, hideModal } = useModal();
     const navigate = useNavigate();
 
     const load = useCallback(async () => {
@@ -84,7 +84,7 @@ export default function LockerRootPage() {
 
   const handleToggle = useCallback(async () => {
     if (!locker?.lockerId) return;
-    modal.showConfirm(
+    showConfirm(
       locker.isAvailable === "YES" ? "중지 확인" : "재개 확인",
       locker.isAvailable === "YES"
         ? "정말 중지하겠습니까?"
@@ -92,7 +92,7 @@ export default function LockerRootPage() {
       async () => {
         await toggleLockerActivation(locker.lockerId);
         await load();
-        modal.showSuccess(
+        showSuccess(
           locker.isAvailable === "YES" ? "중지 완료" : "재개 완료",
           locker.isAvailable === "YES"
             ? "보관소가 중지되었습니다."
@@ -100,23 +100,23 @@ export default function LockerRootPage() {
         );
       }
     );
-  }, [locker, load, modal]);
+  }, [locker, load]);
 
   const handleDelete = useCallback(async () => {
     if (!locker?.lockerId) return;
-    modal.showConfirm(
+    showConfirm(
       "삭제 확인",
       "정말 삭제하시겠습니까? 삭제된 정보는 복구할 수 없습니다.",
       async () => {
         await deleteLocker(locker.lockerId);
         await load();
-        modal.showSuccess(
+        showSuccess(
           "삭제 완료",
           "보관소가 삭제되었습니다."
         );
       }
     );
-  }, [locker, load, modal]);
+  }, [locker, load]);
 
   if (!ready) return null;
   if (!isLoggedIn) return <LockerWelcome />;

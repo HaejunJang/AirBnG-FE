@@ -1,5 +1,6 @@
 import React, { useMemo, memo } from 'react';
 import ReservationMessage from './ReservationMessage';
+import ReservationCancelledMessage from './ReservationCancelledMessage';
 // decideReservation 직접 쓰지 말고, 부모 콜백 우선 (없으면 fallback)
 import { decideReservation as decideReservationApi } from '../../api/chatApi';
 
@@ -34,7 +35,7 @@ function ChatMessage({
   me, msg, name, showName, avatarUrl,
   peerLastReadSeq, peerInRoom, presenceSettled,
   convId, meId,
-  onApproveReservation, onRejectReservation, // 부모 콜백(있으면 사용)
+  onApproveReservation, onRejectReservation, onCancelReservation, // 부모 콜백(있으면 사용)
 }) {
   // Hook은 최상단에서, 모든 렌더에서 항상 호출
   const seoulTimeFmt = useMemo(
@@ -73,7 +74,10 @@ function ChatMessage({
 
   // ===== 본문(body) 생성 - 단일 분기 =====
   let body;
-  if (msg?.type === 'reservation' && msg?.reservation) {
+  // 2-1) 취소/환불 카드
+  if (msg?.type === 'CANCELLED_WITH_REFUND' && msg?.payload) {
+    body = <ReservationCancelledMessage payload={msg.payload} />;
+  } else if (msg?.type === 'reservation' && msg?.reservation) {
     const card = msg.reservation;
 
     // 부모 콜백이 오면 그걸 쓰고, 없으면 API로 fallback
@@ -89,6 +93,7 @@ function ChatMessage({
 
     // 버튼 노출 여부: 서버 페이로드가 최종 판단
     const canAct = !!card?.canApprove && Number(meId) !== Number(msg?.senderId);
+    const onCancel = () => onCancelReservation?.(card.reservationId);
 
     body = (
       <ReservationMessage
@@ -97,6 +102,7 @@ function ChatMessage({
         canAct={canAct}
         onApprove={onApprove}
         onReject={onReject}
+        onCancel={onCancel}
       />
     );
   } else if (msg?.attachments?.length) {
@@ -144,4 +150,16 @@ function ChatMessage({
   );
 }
 
-export default memo(ChatMessage);
+export default memo(ChatMessage, (prev, next) => {
+  if (prev.peerLastReadSeq !== next.peerLastReadSeq) return false;
+  if (prev.peerInRoom !== next.peerInRoom) return false;
+  if (prev.presenceSettled !== next.presenceSettled) return false;
+  if (prev.me !== next.me) return false;
+  // 메시지 레퍼런스/핵심 필드 변경도 감지
+  if (prev.msg !== next.msg) return false;
+  const p = prev.msg || {}, n = next.msg || {};
+  if ((p.seq ?? 0) !== (n.seq ?? 0)) return false;
+  if (!!p._pending !== !!n._pending) return false;
+  if (!!p.failed !== !!n.failed) return false;
+  return true;
+});

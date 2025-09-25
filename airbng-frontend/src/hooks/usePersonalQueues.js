@@ -12,6 +12,7 @@ export default function usePersonalQueues({
   onAck,        // (ack) => void         // { msgId, seq, sentAt | sentAtMs }
   onError,      // (err) => void
   onInboxHint,  // (hint) => void        // { convId, preview, sentAtMs, unreadTotal, ... }
+  onInboxRead,
 } = {}) {
   const { connected, subscribe } = useStomp();
 
@@ -80,6 +81,7 @@ export default function usePersonalQueues({
             window.dispatchEvent(new CustomEvent('inbox:read', {
               detail: { convId: raw.convId, unreadTotal: 0 }
             }));
+            onInboxRead?.({ convId: raw.convId, unreadTotal: 0 });
           }
         } catch {}
       })
@@ -89,13 +91,16 @@ export default function usePersonalQueues({
       baseUnsubsRef.current.forEach(u => u?.());
       baseUnsubsRef.current = [];
     };
-  }, [connected, subscribe, onAck, onError, onInboxHint]);
+  }, [connected, subscribe, onAck, onError, onInboxHint, onInboxRead]);
 
   /* ===== 2) 방별 개인 큐 동적 구독: READ ===== */
   function subscribeRead(convId, handler) {
     unsubscribeRead(convId);
+    console.log('[SUB read]', `/user/queue/read.${convId}`);
     const unsub = subscribe(`/user/queue/read.${convId}`, frame => {
-      const payload = safeJSON(frame.body);          // number | { lastReadSeq, ... }
+      const raw = safeJSON(frame.body); // number | object
+      console.log('[READ FRAME]', `/user/queue/read.${convId}`, raw);
+      const payload = (typeof raw === 'number') ? { lastReadSeq: raw } : raw;
       handler?.(payload);
     });
     readSubsRef.current.set(convId, { unsub, handler });
@@ -112,6 +117,7 @@ export default function usePersonalQueues({
     console.log('[SUB typing]', `/user/queue/typing.${convId}`);
     const unsub = subscribe(`/user/queue/typing.${convId}`, frame => {
       const payload = safeJSON(frame.body);          // { userId, typing: boolean, at }
+      console.log('[TYPING FRAME]', `/user/queue/typing.${convId}`, payload);
       handler?.(payload);
     });
     typingSubsRef.current.set(convId, { unsub, handler });
@@ -130,7 +136,8 @@ export default function usePersonalQueues({
     for (const [convId, { handler }] of readSubsRef.current.entries()) {
       try { readSubsRef.current.get(convId)?.unsub?.(); } catch {}
       const unsub = subscribe(`/user/queue/read.${convId}`, frame => {
-        const payload = safeJSON(frame.body);
+        const raw = safeJSON(frame.body);
+        const payload = (typeof raw === 'number') ? { lastReadSeq: raw } : raw;
         handler?.(payload);
       });
       readSubsRef.current.set(convId, { unsub, handler });

@@ -963,3 +963,121 @@
 }
 .fab--primary { background: var(--primary); color: #fff; }
 .fab:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0,0,0,.18); }
+
+/* chat.css - 예약 취소 메시지 말풍선/카드 스타일 */
+.bubble--system {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 18px;
+  padding: 0;
+  margin: 8px 0;
+  box-shadow: 0 2px 8px rgba(255, 229, 143, 0.08);
+  max-width: 340px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.reservation-cancel-card {
+  width: 100%;
+  background: #fffbe6;
+  border: 1.5px solid #ffe58f;
+  border-radius: 16px;
+  padding: 18px 18px 14px 18px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(255, 229, 143, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reservation-cancel-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 4px;
+}
+
+.reservation-cancel-badge {
+  display: inline-block;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.reservation-cancel-title {
+  margin: 0 0 2px 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #222;
+  line-height: 1.3;
+}
+
+.reservation-cancel-subtitle {
+  color: #6b7280;
+  margin: 0 0 2px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.reservation-cancel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.reservation-cancel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 0;
+  gap: 12px;
+}
+
+.reservation-cancel-label {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 80px;
+  text-align: left;
+}
+
+.reservation-cancel-value {
+  color: #222;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: right;
+  word-break: keep-all;
+  flex: 1 1 auto;
+}
+
+.reservation-cancel-value.strong {
+  font-weight: 700;
+  color: #3651cb;
+}
+
+@media (max-width: 560px) {
+  .bubble--system {
+    max-width: 98vw;
+  }
+  .reservation-cancel-card {
+    padding: 14px 8px 10px 8px;
+  }
+  .reservation-cancel-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .reservation-cancel-label,
+  .reservation-cancel-value {
+    text-align: left;
+    width: 100%;
+  }
+}
