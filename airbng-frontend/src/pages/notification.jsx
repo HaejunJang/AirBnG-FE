@@ -5,20 +5,21 @@ import { getNotification, hasreadAlarm } from "../api/notification";
 import "../styles/pages/notification.css";
 import { useDot } from "../hooks/useDot";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header/Header";
 
-const Header = ({ title, showBackButton, backUrl }) => (
-  <div className="header">
-    {showBackButton && (
-      <button
-        onClick={() => (window.location.href = backUrl)}
-        className="notification-back-button"
-      >
-        ←
-      </button>
-    )}
-    <h1 className="header-title">{title}</h1>
-  </div>
-);
+// const Header = ({ title, showBackButton, backUrl }) => (
+//   <div className="header">
+//     {showBackButton && (
+//       <button
+//         onClick={() => (window.location.href = backUrl)}
+//         className="notification-back-button"
+//       >
+//         ←
+//       </button>
+//     )}
+//     <h1 className="header-title">{title}</h1>
+//   </div>
+// );
 
 const Welcome = ({ subtitle }) => {
   const navigate = useNavigate(); // 여기서 훅 사용
@@ -329,29 +330,25 @@ const NotificationApp = () => {
     alarms?.length || 0
   );
 
-  return (
-    <div className="app-container">
-      <div className="notification-app-content">
-        <div className="main-content">
-          <Header title="알림" showBackButton={true} backUrl="/page/home" />
-          {!memberId ? (
-            <div className="welcome-wrapper">
-              <Welcome subtitle="로그인 후 사용 가능합니다." />
-            </div>
-          ) : (
-            <>
-              <NotificationList
-                notifications={alarms || []}
-                deletedNotificationIds={deletedRef}
-                onRemove={removeNotification}
-                onClearAll={clearAllNotifications}
-              />
-            </>
-          )}
+    return (
+        <div className="notification-app-content">
+            <Header headerTitle="알림" showBackButton={true} backUrl="/page/home"/>
+            {!memberId ? (
+                <div className="welcome-wrapper">
+                    <Welcome subtitle="로그인 후 사용 가능합니다."/>
+                </div>
+            ) : (
+                <>
+                    <NotificationList
+                        notifications={alarms || []}
+                        deletedNotificationIds={deletedRef}
+                        onRemove={removeNotification}
+                        onClearAll={clearAllNotifications}
+                    />
+                </>
+            )}
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default NotificationApp;

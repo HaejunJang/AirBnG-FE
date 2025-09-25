@@ -1,57 +1,57 @@
-/* 전체 앱 컨테이너 */
-.app-container {
-  font-family: "Pretendard", sans-serif;
-  margin: 0 auto;
-  max-width: 412px;
-  background-color: #f5f5f5;
-  box-sizing: border-box;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
+/*!* 전체 앱 컨테이너 *!*/
+/*.app-container {*/
+/*  font-family: "Pretendard", sans-serif;*/
+/*  margin: 0 auto;*/
+/*  max-width: 412px;*/
+/*  background-color: #f5f5f5;*/
+/*  box-sizing: border-box;*/
+/*  height: 100vh;*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*  width: 100%;*/
+/*}*/
 
 .notification-app-content {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  background-color: #f5f5f5;
+  background-color: white;
   width: 100%;
 }
 
-.main-content {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  width: 100%;
-  max-width: 412px;
-  flex-direction: column;
-  flex-grow: 1;
-  overflow: hidden;
-  padding-top: 60px;
-  padding-bottom: 80px;
-  margin: 0 auto;
-}
+/*.main-content {*/
+/*  background: white;*/
+/*  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);*/
+/*  display: flex;*/
+/*  width: 100%;*/
+/*  max-width: 412px;*/
+/*  flex-direction: column;*/
+/*  flex-grow: 1;*/
+/*  overflow: hidden;*/
+/*  padding-top: 60px;*/
+/*  padding-bottom: 80px;*/
+/*  margin: 0 auto;*/
+/*}*/
 
 /* Header 스타일 */
-.header {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: var(--app-max-width);
-  height: 65px;
-  background-color: white;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  z-index: 1000;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  border-bottom: 1px solid var(--border);
-}
+/*.header {*/
+/*  position: fixed;*/
+/*  top: 0;*/
+/*  left: 50%;*/
+/*  transform: translateX(-50%);*/
+/*  width: 100%;*/
+/*  max-width: var(--app-max-width);*/
+/*  height: 65px;*/
+/*  background-color: white;*/
+/*  color: #fff;*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*  padding: 0 16px;*/
+/*  z-index: 1000;*/
+/*  border-bottom-left-radius: 0;*/
+/*  border-bottom-right-radius: 0;*/
+/*  border-bottom: 1px solid var(--border);*/
+/*}*/
 
 .notification-back-button {
   background: none;
@@ -62,21 +62,21 @@
   margin-right: 16px;
 }
 
-.header-title {
-  font-size: 18px;
-  font-weight: bold;
-  margin: 0;
-}
+/*.header-title {*/
+/*  font-size: 18px;*/
+/*  font-weight: bold;*/
+/*  margin: 0;*/
+/*}*/
 
-@media (min-width: 1024px) {
-  .header {
-    left: calc(
-      (100vw - (var(--banner-w) + var(--col-gap) + var(--app-max-width))) / 2 +
-        var(--banner-w) + var(--col-gap)
-    );
-    transform: none;
-  }
-}
+/*@media (min-width: 1024px) {*/
+/*  .header {*/
+/*    left: calc(*/
+/*      (100vw - (var(--banner-w) + var(--col-gap) + var(--app-max-width))) / 2 +*/
+/*        var(--banner-w) + var(--col-gap)*/
+/*    );*/
+/*    transform: none;*/
+/*  }*/
+/*}*/
 
 /* Welcome 컴포넌트 스타일 */
 .welcome-container {
@@ -197,7 +197,7 @@
   display: flex;
   gap: 12px;
   position: relative;
-  border-left: 4px solid #4561db;
+  /*border-left: 4px solid #4561db;*/
 }
 
 .notification-content {
