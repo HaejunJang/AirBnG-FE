@@ -337,6 +337,12 @@ ReservationListNew CSS Module .reservationListNew {
   position: relative;
 }
 
+.headerRightSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .statusBadge {
   display: flex;
   align-items: center;
@@ -419,31 +425,43 @@ ReservationListNew CSS Module .reservationListNew {
 .approveBtn,
 .rejectBtn,
 .completeBtn {
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: 10px 16px;
+  font-size: 14px;
   font-weight: 500;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  text-align: center;
 }
 
 .approveBtn {
-  background: #dcfce7;
-  color: #16a34a;
+  background-color: #4561db;
+  color: #ffffff;
+  border: 1px solid #4561db;
+  flex: 1;
 }
 
 .approveBtn:hover {
-  background: #bbf7d0;
+  background-color: #3d52c4;
+  border-color: #3d52c4;
 }
 
 .rejectBtn {
-  background: #fef2f2;
-  color: #dc2626;
+  background-color: rgba(69, 97, 219, 0.1);
+  color: #4561db;
+  border: 1px solid rgba(69, 97, 219, 0.2);
+  flex: 1;
 }
 
 .rejectBtn:hover {
-  background: #fecaca;
+  background-color: rgba(69, 97, 219, 0.15);
+  border-color: rgba(69, 97, 219, 0.25);
+}
+
+.completeBtn {
+  background: #dbeafe;
+  color: #2563eb;
 }
 
 .completeBtn {
@@ -640,6 +658,14 @@ ReservationListNew CSS Module .reservationListNew {
   border-color: #d1d5db;
 }
 
+.rebookBtn.fullWidth {
+  flex: 1;
+}
+
+.completeBtn.fullWidth {
+  flex: 1;
+}
+
 .rebookBtn:hover {
   background: #e5e7eb;
   border-color: #9ca3af;
@@ -656,10 +682,10 @@ ReservationListNew CSS Module .reservationListNew {
 }
 
 .moreBtn {
-  width: 36px;
-  height: 36px;
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #dbeafe;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
@@ -669,14 +695,13 @@ ReservationListNew CSS Module .reservationListNew {
 }
 
 .moreBtn:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
+  background: #bfdbfe;
 }
 
 .moreBtn svg {
   width: 16px;
   height: 16px;
-  color: #6b7280;
+  color: #2563eb;
 }
 
 .moreMenu {
@@ -699,35 +724,34 @@ ReservationListNew CSS Module .reservationListNew {
   font-size: 14px;
   font-weight: 500;
   color: #dc2626;
-  background: none;
-  border: none;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s;
-  text-align: left;
+  transition: all 0.2s;
+  text-align: center;
 }
 
 .moreMenuItem:hover {
-  background: #f9fafb;
+  background: #fecaca;
+  border-color: #f87171;
 }
 
 /* 예약 상세 버튼 */
 .detailBtn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: none;
-  border: none;
-  color: #4f46e5;
+  padding: 6px 12px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  padding: 4px 0;
-  border-bottom: 1px solid transparent;
   transition: all 0.2s;
+  background: #dbeafe;
+  color: #2563eb;
 }
 
 .detailBtn:hover {
-  border-bottom-color: #4f46e5;
+  background: #bfdbfe;
 }
 
 /* 빈 상태 */
