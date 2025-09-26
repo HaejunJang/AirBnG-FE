@@ -37,7 +37,7 @@ export const confirmReservationApi = (reservationId, approve) => {
 };
 
 // 예약 완료
-export const completeReservationApi = (reservationId, approve) => {
+export const completeReservationApi = (reservationId) => {
   return httpAuth.patch(`/reservations/${reservationId}/complete`);
 };
 

@@ -25,17 +25,22 @@ export const getStatusText = (state) => {
 
 
 //예약 상세 보기
-export const goToReservationDetail = (navigate, reservationId, memberId) => {
-  navigate(`/page/reservations/detail/${reservationId}`, {
-    state: { reservationId, memberId },
+export const goToReservationDetail = (navigate, reservationId, memberId, returnState = {}) => {
+  const queryParams = new URLSearchParams();
+  if (returnState.activeTab) queryParams.set('returnTab', returnState.activeTab);
+  if (returnState.userRole) queryParams.set('returnRole', returnState.userRole);
+  
+  const queryString = queryParams.toString();
+  const url = `/page/reservations/detail/${reservationId}${queryString ? `?${queryString}` : ''}`;
+  
+  navigate(url, {
+    state: { reservationId, memberId, ...returnState },
   });
 };
 
 //다시 예약
 export const reBooking = (navigate, lockerId) => {
-    navigate(`/reservations/form?lockerId=${lockerId}`,{
-        state: { lockerId }
-    });
+    navigate(`/page/lockers/${lockerId}`);
 };
 
 //예약 취소하기
