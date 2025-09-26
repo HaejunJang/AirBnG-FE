@@ -12,6 +12,7 @@ import favicon from "../assets/favicon.svg";
 import Header from "../components/Header/Header";
 import { Modal, useModal } from "../components/common/ModalUtil";
 import { getConversationByPeer, getOrCreateConversation } from "../api/chatApi";
+import BsChat from "../assets/messages.svg";
 
 const LockerDetails = () => {
   console.log("LockerDetailsPage 렌더링");
@@ -583,19 +584,6 @@ const LockerDetails = () => {
             )}
           </button>
           <button
-            className={`${styles.reserveBtn} ${
-              !isAvailable || isMyLocker ? styles.disabled : ""
-            }`}
-            onClick={handleReserveClick}
-            disabled={!isAvailable || isMyLocker} // 이용 불가거나 내 보관소면 비활성화
-          >
-            {isMyLocker
-              ? "내 보관소 선택 불가"
-              : isAvailable
-              ? "보관소 선택"
-              : "이용 불가"}
-          </button>
-          <button
             className={styles.chatGoBtn}
             onClick={async () => {
               if (!lockerDetail?.keeperId || isMyLocker) return;
@@ -629,9 +617,21 @@ const LockerDetails = () => {
             disabled={isMyLocker}
             aria-label="채팅하기"
           >
-            <svg className={styles.chatIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
+          <img src={BsChat} className={styles.chatIcon} alt="채팅" width={22} height={22} />
+
+          </button>
+          <button
+            className={`${styles.reserveBtn} ${
+              !isAvailable || isMyLocker ? styles.disabled : ""
+            }`}
+            onClick={handleReserveClick}
+            disabled={!isAvailable || isMyLocker}
+          >
+            {isMyLocker
+              ? "내 보관소 선택 불가"
+              : isAvailable
+              ? "보관소 선택"
+              : "이용 불가"}
           </button>
         </div>
       </div>

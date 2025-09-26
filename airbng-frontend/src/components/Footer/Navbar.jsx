@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import cartIcon from '../../assets/shopping-cart.svg';
 import chatIcon from '../../assets/messages.svg';
 import homeIcon from '../../assets/home.svg';
@@ -16,12 +17,12 @@ function Navbar({ active = "home" }) {
 
   return (
     <nav className="bottom-nav">
-      <a href="/page/lockers" className={`nav-item${active === "cart" ? " active" : ""}`}>
+      <Link to="/page/lockers" className={`nav-item${active === "cart" ? " active" : ""}`}>
         <img src={cartIcon} alt="보관소" className="nav-icon" />
         <span className="nav-text">보관소</span>
-      </a>
+      </Link>
 
-      <a href="/page/chatList" className={`nav-item${active === "chat" ? " active" : ""}`}>
+      <Link to="/page/chatList" className={`nav-item${active === "chat" ? " active" : ""}`}>
         {showBadge ? (
           <span className="nav-icon-wrap">
             <img src={chatIcon} alt="채팅" className="nav-icon" />
@@ -31,22 +32,22 @@ function Navbar({ active = "home" }) {
           <img src={chatIcon} alt="채팅" className="nav-icon" />
         )}
         <span className="nav-text">채팅</span>
-      </a>
+      </Link>
 
-      <a href="/page/home" className={`nav-item${active === "home" ? " active" : ""}`}>
+      <Link to="/page/home" className={`nav-item${active === "home" ? " active" : ""}`}>
         <img src={homeIcon} alt="홈" className="nav-icon" />
         <span className="nav-text">홈</span>
-      </a>
+      </Link>
 
-      <a href="/page/reservations/list" className={`nav-item${active === "calendar" ? " active" : ""}`}>
+      <Link to="/page/reservations/list" className={`nav-item${active === "calendar" ? " active" : ""}`}>
         <img src={calendarIcon} alt="예약" className="nav-icon" />
         <span className="nav-text">예약</span>
-      </a>
+      </Link>
 
-      <a href="/page/mypage" className={`nav-item${active === "mypage" ? " active" : ""}`}>
+      <Link to="/page/mypage" className={`nav-item${active === "mypage" ? " active" : ""}`}>
         <img src={userIcon} alt="마이" className="nav-icon" />
         <span className="nav-text">마이</span>
-      </a>
+      </Link>
     </nav>
   );
 }

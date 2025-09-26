@@ -64,8 +64,11 @@ export default memo(function ReservationMessage({ me, card, canAct, onApprove, o
 
   const pickupLabel = card?.pickupMemo ?? card?.pickup_note ?? card?.pickup ?? '-';
 
-  const showActions = canAct && card?.canApprove && !acted;
-
+  const isCancelled = /(CANCELLED|CANCEL|canceled|취소)/i.test(String(card?.status));
+  console.log('isCancelled:', isCancelled, 'card.status:', card?.status);
+  const showActions = canAct && card?.canApprove && !acted && !isCancelled;
+  
+  console.log('card.status:', card?.status);
   const handleApprove = async () => {
     if (pending) return;
     setPending(true); setActed(true);

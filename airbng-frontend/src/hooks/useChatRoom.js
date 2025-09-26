@@ -20,6 +20,12 @@ export default function useChatRoom(convId, meId, { ready = true } = {}) {
   const { publish } = useStomp();
   const [messages, setMessages] = useState([]);
   const [oldestSeq, setOldestSeq] = useState(null);
+  const idSetRef = useRef(new Set());
+
+  // convId가 바뀌면 idSet 초기화
+  useEffect(() => {
+    idSetRef.current = new Set((messages || []).map(m => m.msgId));
+  }, [convId]);
 
   // ACK 전 임시 큐 & 타이머 (텍스트 메시지용)
   const outboxRef = useRef([]); // [{msgId,text,sentAt:number}]
@@ -108,8 +114,25 @@ export default function useChatRoom(convId, meId, { ready = true } = {}) {
 
   // ===== 새 API: 첨부 낙관적 메시지 추가 =====
   // ChatRoom.onAttach에서 사용. outbox/timer 없음(HTTP 업로드 → 토픽으로 교체됨).
-  const pushLocal = useCallback((messageLike) => {
-    setMessages((prev) => [...prev, messageLike]);
+  // 취소 메시지일 때 status: "CANCELLED" 강제 추가
+  const pushLocal = useCallback((dto) => {
+    if (!dto?.msgId) return;
+
+    // 취소 메시지라면 status 보정
+    let nextDto = { ...dto };
+    if (dto.type === "reservation_cancelled" || /cancel/i.test(dto.status)) {
+      nextDto.status = "CANCELLED";
+    }
+
+    setMessages(prev => {
+      const idx = prev.findIndex(m => m.msgId === nextDto.msgId);
+      if (idx >= 0) {
+        const next = prev.slice();
+        next[idx] = { ...prev[idx], ...nextDto };
+        return next;
+      }
+      return [...prev, nextDto];
+    });
   }, []);
 
   // 텍스트 메시지 전송
