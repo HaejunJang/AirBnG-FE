@@ -24,9 +24,9 @@ export default function LockerRegisterPage() {
   const onBack = () => (f.step === 1 ? navigate(-1) : f.prev());
 
   return (
-    <div className='airbng-register'>
-      <div className="register-container">
+    <div>
         <Header headerTitle="보관소 등록" showBackButton onBack={onBack} />
+      <div className="register-container">
         <StepIndicator current={f.step} />
 
         {f.step === 1 && (

@@ -569,58 +569,57 @@ const ReservationListNew = () => {
               </div>
             )}
           </div>
-
         </div>
 
-        {/* 예약 정보 */}
-        <div className={styles.cardContent}>
-          <div className={styles.placeInfo}>
-            <div className={styles.placeImage}>
-              {reservation.lockerImage ? (
-                <img src={reservation.lockerImage} alt="보관소" />
-              ) : (
-                <div className={styles.placeImagePlaceholder}></div>
-              )}
-            </div>
-            <div className={styles.placeDetails}>
-              <h3 className={styles.placeName}>
-                {reservation.lockerName || reservation.placeName}
-              </h3>
-              <p className={styles.placeMeta}>
-                {formatDuration(reservation.durationHours)} • {jimTypes}
-              </p>
-            </div>
-          </div>
+              {/* 예약 정보 */}
+              <div className={styles.cardContent}>
+                  <div className={styles.placeInfo}>
+                      <div className={styles.placeImage}>
+                          {reservation.lockerImage ? (
+                              <img src={reservation.lockerImage} alt="보관소"/>
+                          ) : (
+                              <div className={styles.placeImagePlaceholder}></div>
+                          )}
+                      </div>
+                      <div className={styles.placeDetails}>
+                          <h3 className={styles.placeName}>
+                              {reservation.lockerName || reservation.placeName}
+                          </h3>
+                          <p className={styles.placeMeta}>
+                              {formatDuration(reservation.durationHours)} • {jimTypes}
+                          </p>
+                      </div>
+                  </div>
 
-          {/* 시간 정보 */}
-          <div className={styles.timeInfo}>
-            <div className={styles.timeCol}>
-              <div className={styles.timeLabel}>시작 날짜</div>
-              <div className={styles.timeValue}>
-                {formatDateTime(reservation.startTime)}
+                  {/* 시간 정보 */}
+                  <div className={styles.timeInfo}>
+                      <div className={styles.timeCol}>
+                          <div className={styles.timeLabel}>시작 날짜</div>
+                          <div className={styles.timeValue}>
+                              {formatDateTime(reservation.startTime)}
+                          </div>
+                      </div>
+                      <div className={styles.timeCol}>
+                          <div className={styles.timeLabel}>종료 날짜</div>
+                          <div className={styles.timeValue}>
+                              {formatDateTime(reservation.endTime)}
+                          </div>
+                      </div>
+                  </div>
               </div>
-            </div>
-            <div className={styles.timeCol}>
-              <div className={styles.timeLabel}>종료 날짜</div>
-              <div className={styles.timeValue}>
-                {formatDateTime(reservation.endTime)}
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* 현재 이용중 표시 */}
-        {isCurrentUse && (
-          <div className={styles.currentUseIndicator}>
-            <CheckCircle className={styles.w4} />
-            <span>
+              {/* 현재 이용중 표시 */}
+              {isCurrentUse && (
+                  <div className={styles.currentUseIndicator}>
+                      <CheckCircle className={styles.w4}/>
+                      <span>
               {userRole === "customer"
-                ? "현재 이용중인 예약입니다"
-                : "현재 보관중인 예약입니다"}
+                  ? "현재 이용중인 예약입니다"
+                  : "현재 보관중인 예약입니다"}
             </span>
-          </div>
-        )}
-
+                  </div>
+              )}
+              
         {/* 완료대기 탭 추가 정보 (완료 확인을 이미 한 경우만) */}
         {activeTab === "finishing" && (
           <div className={styles.finishingInfo}>
@@ -685,23 +684,6 @@ const ReservationListNew = () => {
               onClick={() => showCancelConfirm(reservation.reservationId, reservation.state)}
             >
               예약 취소
-            </button>
-          </div>
-        )}
-
-        {reservation.state === "PENDING" && userRole === "host" && (
-          <div className={`${styles.cardActions} ${styles.double}`}>
-            <button
-              className={styles.rejectBtn}
-              onClick={() => handleReject(reservation.reservationId)}
-            >
-              거절
-            </button>
-            <button
-              className={styles.approveBtn}
-              onClick={() => handleApprove(reservation.reservationId)}
-            >
-              승인
             </button>
           </div>
         )}

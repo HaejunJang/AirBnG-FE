@@ -1,6 +1,6 @@
 .reservationDetail {
   max-width: 412px;
-  margin: 0 auto;
+  /*margin: 0 auto;*/
   background-color: #ffffff;
   min-height: 100vh;
   position: relative;
@@ -8,8 +8,8 @@
 
 .content {
   padding: 20px;
-  padding-top: 80px;
-  padding-bottom: 70px;
+  /*padding-top: 80px;*/
+  /*padding-bottom: 70px;*/
 }
 
 /* Reservation Success Section */
@@ -160,19 +160,17 @@
 
 /* Action Buttons */
 .actionButtons {
+    position: relative;
   display: flex;
   gap: 12px;
-  position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
   max-width: 412px;
   width: 100%;
-  padding: 16px 20px 20px 20px;
+  padding: 20px 20px 0 20px;
   box-sizing: border-box;
   background-color: #ffffff;
   border-top: 1px solid #f0f0f0;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  /*box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);*/
 }
 
 .btnCancel,
@@ -298,7 +296,7 @@
 
   .content {
     padding: 16px;
-    padding-bottom: 100px; /* 버튼 공간 확보 */
+    /*padding-bottom: 100px; !* 버튼 공간 확보 *!*/
   }
 
   .actionButtons {

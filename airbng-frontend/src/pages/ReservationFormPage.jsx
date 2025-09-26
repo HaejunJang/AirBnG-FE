@@ -728,310 +728,312 @@ function ReservationFormPage() {
     );
   };
 
-  return (
-    <div className="reservation-container">
-      <Header headerTitle="예약하기" showBackButton showHomeButton />
+    return (
+        <div className="reservation-container">
+            <Header headerTitle="예약하기" showBackButton showHomeButton/>
 
-      <div className="content">
-        {/* 보관소 정보 */}
-        <div id="lockerInfo">
-          <div className="locker-info-content">
-            <svg
-              className="locker-icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
-              ></path>
-            </svg>
-            <div className="locker-details">
-              <h2 className="locker-name">{lockerData.lockerName}</h2>
-              <p className="locker-address">{lockerData.addressKr}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* 보관 날짜 */}
-        {renderDateButtons()}
-
-        {/* 보관 시간 */}
-        <div id="timeSection">
-          <h3 className="section-title">보관 시간</h3>
-          <div className="time-selectors">
-            <div className="time-selector">
-              <label className="time-label">시작 시간</label>
-              <div className="dropdown-wrapper">
-                <div
-                  className={`dropdown-selected ${
-                    dropdownStates.startTime ? "active" : ""
-                  }`}
-                  onClick={() => toggleDropdown("startTime")}
-                >
-                  <span>{selectedStartTime || "시간 선택"}</span>
-                  <svg
-                    className={`dropdown-arrow ${
-                      dropdownStates.startTime ? "rotate" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 12 8"
-                  >
-                    <path
-                      d="M1 1.5L6 6.5L11 1.5"
-                      stroke="#6B7280"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                {dropdownStates.startTime && (
-                  <div className="dropdown-options">
-                    {startTimeOptions.map((time) => (
-                      <div
-                        key={time}
-                        className={`dropdown-option ${
-                          selectedStartTime === time ? "selected" : ""
-                        }`}
-                        onClick={() => selectTimeOption("startTime", time)}
-                      >
-                        {selectedStartTime === time && (
-                          <span className="check-mark">✓</span>
-                        )}
-                        {time}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="time-selector">
-              <label className="time-label">종료 시간</label>
-              <div className="dropdown-wrapper">
-                <div
-                  className={`dropdown-selected ${
-                    dropdownStates.endTime ? "active" : ""
-                  }`}
-                  onClick={() => toggleDropdown("endTime")}
-                >
-                  <span>{selectedEndTime || "시간 선택"}</span>
-                  <svg
-                    className={`dropdown-arrow ${
-                      dropdownStates.endTime ? "rotate" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 12 8"
-                  >
-                    <path
-                      d="M1 1.5L6 6.5L11 1.5"
-                      stroke="#6B7280"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                {dropdownStates.endTime && (
-                  <div className="dropdown-options">
-                    {endTimeOptions.map((time) => (
-                      <div
-                        key={time}
-                        className={`dropdown-option ${
-                          selectedEndTime === time ? "selected" : ""
-                        }`}
-                        onClick={() => selectTimeOption("endTime", time)}
-                      >
-                        {selectedEndTime === time && (
-                          <span className="check-mark">✓</span>
-                        )}
-                        {time}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 짐 종류 */}
-        <div id="jimSection" className="jim-section">
-          <h3 className="section-title">짐 종류</h3>
-          <div className="jim-types" id="jimTypes">
-            {currentJimTypes.map((jimType) => {
-              const count = jimTypeCounts[jimType.jimTypeId] || 0;
-              const isSelected = count > 0;
-
-              return (
-                <div
-                  key={jimType.jimTypeId}
-                  className={`jim-type-item ${isSelected ? "selected" : ""}`}
-                >
-                  <div className="jim-type-content">
-                    <div className="jim-type-info">
-                      <div className="jim-type-name">{jimType.typeName}</div>
-                      <div className="jim-type-price">
-                        시간당 {jimType.pricePerHour.toLocaleString()}원
-                      </div>
+            <div className="content">
+                {/* 보관소 정보 */}
+                <div id="lockerInfo">
+                    <div className="locker-info-content">
+                        <svg
+                            className="locker-icon"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                            ></path>
+                        </svg>
+                        <div className="locker-details">
+                            <h2 className="locker-name">{lockerData.lockerName}</h2>
+                            <p className="locker-address">{lockerData.addressKr}</p>
+                        </div>
                     </div>
-                    <div className="quantity-controls">
-                      <button
-                        type="button"
-                        className={`quantity-btn ${
-                          isSelected ? "selected" : ""
-                        }`}
-                        onClick={() => changeQuantity(jimType.jimTypeId, -1)}
-                      >
-                        -
-                      </button>
-                      <input
-                        type="number"
-                        className={`quantity-input ${
-                          isSelected ? "selected" : ""
-                        }`}
-                        value={count}
-                        readOnly
-                      />
-                      <button
-                        type="button"
-                        className={`quantity-btn ${
-                          isSelected ? "selected" : ""
-                        }`}
-                        onClick={() => changeQuantity(jimType.jimTypeId, 1)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* 결제 수단 */}
-        <div id="paymentSection" className="payment-section">
-          <h3 className="section-title">결제 수단</h3>
-          <div id="paymentMethods" className="payment-methods">
-            {paymentMethods.map((method) => (
-              <div
-                key={method.id}
-                className={`payment-method ${
-                  selectedPaymentMethod?.id === method.id ? "selected" : ""
-                }`}
-                onClick={() => selectPaymentMethod(method.id)}
-              >
-                <div className="payment-method-content">
-                  <div className="payment-method-radio">
-                    <div
-                      className={`radio-circle ${
-                        selectedPaymentMethod?.id === method.id
-                          ? "selected"
-                          : ""
-                      }`}
-                    >
-                      {selectedPaymentMethod?.id === method.id && (
-                        <div className="radio-inner"></div>
-                      )}
+                {/* 보관 날짜 */}
+                {renderDateButtons()}
+
+                {/* 보관 시간 */}
+                <div id="timeSection">
+                    <h3 className="section-title">보관 시간</h3>
+                    <div className="time-selectors">
+                        <div className="time-selector">
+                            <label className="time-label">시작 시간</label>
+                            <div className="dropdown-wrapper">
+                                <div
+                                    className={`dropdown-selected ${
+                                        dropdownStates.startTime ? "active" : ""
+                                    }`}
+                                    onClick={() => toggleDropdown("startTime")}
+                                >
+                                    <span>{selectedStartTime || "시간 선택"}</span>
+                                    <svg
+                                        className={`dropdown-arrow ${
+                                            dropdownStates.startTime ? "rotate" : ""
+                                        }`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 12 8"
+                                    >
+                                        <path
+                                            d="M1 1.5L6 6.5L11 1.5"
+                                            stroke="#6B7280"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </div>
+                                {dropdownStates.startTime && (
+                                    <div className="dropdown-options">
+                                        {startTimeOptions.map((time) => (
+                                            <div
+                                                key={time}
+                                                className={`dropdown-option ${
+                                                    selectedStartTime === time ? "selected" : ""
+                                                }`}
+                                                onClick={() => selectTimeOption("startTime", time)}
+                                            >
+                                                {selectedStartTime === time && (
+                                                    <span className="check-mark">✓</span>
+                                                )}
+                                                {time}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="time-selector">
+                            <label className="time-label">종료 시간</label>
+                            <div className="dropdown-wrapper">
+                                <div
+                                    className={`dropdown-selected ${
+                                        dropdownStates.endTime ? "active" : ""
+                                    }`}
+                                    onClick={() => toggleDropdown("endTime")}
+                                >
+                                    <span>{selectedEndTime || "시간 선택"}</span>
+                                    <svg
+                                        className={`dropdown-arrow ${
+                                            dropdownStates.endTime ? "rotate" : ""
+                                        }`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 12 8"
+                                    >
+                                        <path
+                                            d="M1 1.5L6 6.5L11 1.5"
+                                            stroke="#6B7280"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </div>
+                                {dropdownStates.endTime && (
+                                    <div className="dropdown-options">
+                                        {endTimeOptions.map((time) => (
+                                            <div
+                                                key={time}
+                                                className={`dropdown-option ${
+                                                    selectedEndTime === time ? "selected" : ""
+                                                }`}
+                                                onClick={() => selectTimeOption("endTime", time)}
+                                            >
+                                                {selectedEndTime === time && (
+                                                    <span className="check-mark">✓</span>
+                                                )}
+                                                {time}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                  <img
-                    className="payment-method-icon"
-                    src={method.icon}
-                    alt={method.name}
-                  />
-                  <div className="payment-method-info">
-                    <div className="payment-method-name">{method.name}</div>
-                  </div>
-                  {method.id === "jimpay" &&
-                    selectedPaymentMethod?.id === method.id && (
-                      <div 
-                        className="payment-method-actions"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigateToCharge();
-                        }}
-                      >
+                </div>
+
+                {/* 짐 종류 */}
+                <div id="jimSection" className="jim-section">
+                    <h3 className="section-title">짐 종류</h3>
+                    <div className="jim-types" id="jimTypes">
+                        {currentJimTypes.map((jimType) => {
+                            const count = jimTypeCounts[jimType.jimTypeId] || 0;
+                            const isSelected = count > 0;
+
+                            return (
+                                <div
+                                    key={jimType.jimTypeId}
+                                    className={`jim-type-item ${isSelected ? "selected" : ""}`}
+                                >
+                                    <div className="jim-type-content">
+                                        <div className="jim-type-info">
+                                            <div className="jim-type-name">{jimType.typeName}</div>
+                                            <div className="jim-type-price">
+                                                시간당 {jimType.pricePerHour.toLocaleString()}원
+                                            </div>
+                                        </div>
+                                        <div className="quantity-controls">
+                                            <button
+                                                type="button"
+                                                className={`quantity-btn ${
+                                                    isSelected ? "selected" : ""
+                                                }`}
+                                                onClick={() => changeQuantity(jimType.jimTypeId, -1)}
+                                            >
+                                                -
+                                            </button>
+                                            <input
+                                                type="number"
+                                                className={`quantity-input ${
+                                                    isSelected ? "selected" : ""
+                                                }`}
+                                                value={count}
+                                                readOnly
+                                            />
+                                            <button
+                                                type="button"
+                                                className={`quantity-btn ${
+                                                    isSelected ? "selected" : ""
+                                                }`}
+                                                onClick={() => changeQuantity(jimType.jimTypeId, 1)}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* 결제 수단 */}
+                <div id="paymentSection" className="payment-section">
+                    <h3 className="section-title">결제 수단</h3>
+                    <div id="paymentMethods" className="payment-methods">
+                        {paymentMethods.map((method) => (
+                            <div
+                                key={method.id}
+                                className={`payment-method ${
+                                    selectedPaymentMethod?.id === method.id ? "selected" : ""
+                                }`}
+                                onClick={() => selectPaymentMethod(method.id)}
+                            >
+                                <div className="payment-method-content">
+                                    <div className="payment-method-radio">
+                                        <div
+                                            className={`radio-circle ${
+                                                selectedPaymentMethod?.id === method.id
+                                                    ? "selected"
+                                                    : ""
+                                            }`}
+                                        >
+                                            {selectedPaymentMethod?.id === method.id && (
+                                                <div className="radio-inner"></div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <img
+                                        className="payment-method-icon"
+                                        src={method.icon}
+                                        alt={method.name}
+                                    />
+                                    <div className="payment-method-info">
+                                        <div className="payment-method-name">{method.name}</div>
+                                    </div>
+                                    {method.id === "jimpay" &&
+                                        selectedPaymentMethod?.id === method.id && (
+                                            <div
+                                                className="payment-method-actions"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigateToCharge();
+                                                }}
+                                            >
                         <span className="balance-simple">
                           {walletBalance === null
-                            ? ""
-                            : `${Math.floor(walletBalance).toLocaleString()}원`}
+                              ? ""
+                              : `${Math.floor(walletBalance).toLocaleString()}원`}
                         </span>
-                        <button className="charge-button">
-                          <svg 
-                            width="16" height="16" viewBox="0 0 24 24" fill="none" 
-                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 18l6-6-6-6"/>
-                          </svg>
-                        </button>
-                      </div>
-                    )}
+                                                <button className="charge-button">
+                                                    <svg
+                                                        width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round">
+                                                        <path d="M9 18l6-6-6-6"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* 가격 계산 */}
-        <div className="price-calculation">
-          {calculation.items.map((item, index) => (
-            <div key={index} className="price-item">
+                {/* 가격 계산 */}
+                <div className="price-calculation">
+                    {calculation.items.map((item, index) => (
+                        <div key={index} className="price-item">
               <span>
                 {item.name} × {item.count}개 × {formatHours(item.hours)}
               </span>
-              <span>{item.price.toLocaleString()}원</span>
+                            <span>{item.price.toLocaleString()}원</span>
+                        </div>
+                    ))}
+                    <div className="price-item">
+                        <span>서비스 수수료 (5%)</span>
+                        <span>{calculation.serviceFee.toLocaleString()}원</span>
+                    </div>
+                    <hr className="price-divider"/>
+                    <div className="price-total">
+                        <span>총 결제 금액</span>
+                        <span>{calculation.totalPrice.toLocaleString()}원</span>
+                    </div>
+                </div>
+
+                {/* 하단 버튼 */}
+                <div className="bottom-button">
+                    <button
+                        type="submit"
+                        form="reservationForm"
+                        className={`submit-button ${
+                            calculation.totalPrice === 0 ? "reserve-only" : ""
+                        }`}
+                        onClick={handleSubmit}
+                    >
+                        {calculation.totalPrice > 0
+                            ? `${calculation.totalPrice.toLocaleString()}원 결제하기`
+                            : "빠진 정보 확인하기"}
+                    </button>
+                </div>
             </div>
-          ))}
-          <div className="price-item">
-            <span>서비스 수수료 (5%)</span>
-            <span>{calculation.serviceFee.toLocaleString()}원</span>
-          </div>
-          <hr className="price-divider" />
-          <div className="price-total">
-            <span>총 결제 금액</span>
-            <span>{calculation.totalPrice.toLocaleString()}원</span>
-          </div>
+
+
+            {/* ModalUtil Modal */}
+            <Modal
+                show={modalState.show}
+                type={modalState.type}
+                title={modalState.title}
+                message={modalState.message}
+                confirmText={modalState.confirmText}
+                cancelText={modalState.cancelText}
+                showCancel={modalState.showCancel}
+                onConfirm={modalState.onConfirm}
+                onCancel={modalState.onCancel}
+                onClose={hideModal}
+            />
         </div>
-      </div>
-
-      {/* 하단 버튼 */}
-      <div className="bottom-button">
-        <button
-          type="submit"
-          form="reservationForm"
-          className={`submit-button ${
-            calculation.totalPrice === 0 ? "reserve-only" : ""
-          }`}
-          onClick={handleSubmit}
-        >
-          {calculation.totalPrice > 0
-            ? `${calculation.totalPrice.toLocaleString()}원 결제하기`
-            : "빠진 정보 확인하기"}
-        </button>
-      </div>
-
-      {/* ModalUtil Modal */}
-      <Modal
-        show={modalState.show}
-        type={modalState.type}
-        title={modalState.title}
-        message={modalState.message}
-        confirmText={modalState.confirmText}
-        cancelText={modalState.cancelText}
-        showCancel={modalState.showCancel}
-        onConfirm={modalState.onConfirm}
-        onCancel={modalState.onCancel}
-        onClose={hideModal}
-      />
-    </div>
-  );
+    );
 }
 
 export default ReservationFormPage;

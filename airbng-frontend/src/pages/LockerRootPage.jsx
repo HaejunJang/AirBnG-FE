@@ -26,7 +26,7 @@ export default function LockerRootPage() {
     const [locker, setLocker] = useState(null);
     const [lockerStatus, setLockerStatus] = useState("REGISTER");
     const [canRegister, setCanRegister] = useState(false);
-    const { modalState, hideModal, showSuccess, showConfirm } = useModal();
+    const { modalState, showConfirm, showSuccess, showError, hideModal } = useModal();
     const navigate = useNavigate();
 
     const load = useCallback(async () => {
@@ -72,16 +72,16 @@ export default function LockerRootPage() {
         load();
     }, [ready, isLoggedIn, load]);
 
-  const handleManage = useCallback(() => {
-    if (!locker?.lockerId) return;
-    navigate(`/page/lockers/manage?lockerId=${locker.lockerId}`);
-  }, [navigate, locker]);
+    const handleManage = useCallback(() => {
+        if (!locker?.lockerId) return;
+        navigate(`/page/lockers/manage?lockerId=${locker.lockerId}`);
+    }, [navigate, locker]);
 
-  const handleDetail = useCallback(() => {
-    if (!locker?.lockerId) return;
-    navigate(`/page/lockers/${locker.lockerId}`);
-  }, [navigate, locker]);
-
+    const handleDetail = useCallback(() => {
+        if (!locker?.lockerId) return;
+        navigate(`/page/lockers/${locker.lockerId}`);
+    }, [navigate, locker]);
+  
   const handleToggle = useCallback(async () => {
     if (!locker?.lockerId) return;
     showConfirm(
@@ -118,9 +118,9 @@ export default function LockerRootPage() {
     );
   }, [locker, load, showConfirm, showSuccess]);
 
-  if (!ready) return null;
-  if (!isLoggedIn) return <LockerWelcome />;
-  if (loading) return <div className="manage-container">불러오는 중…</div>;
+    if (!ready) return null;
+    if (!isLoggedIn) return <LockerWelcome />;
+    if (loading) return <div className="manage-container">불러오는 중…</div>;
 
     return (
         <div className="airbng-locker">

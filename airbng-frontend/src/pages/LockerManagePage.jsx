@@ -40,8 +40,8 @@ export default function LockerManagePage({ initial = null }) {
 
   return (
     <main className="airbng-manage">
-      <div className="manage-container">
         <Header headerTitle="보관소 수정" showBackButton backUrl="/page/lockers" />
+      <div className="manage-container">
 
         <ManageForm
           detail={detail} setDetail={setDetail}

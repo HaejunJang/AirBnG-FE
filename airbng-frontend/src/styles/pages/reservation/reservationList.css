@@ -20,7 +20,8 @@
   flex-direction: column;
   max-width: 412px;
   width: 100%;
-  padding: 60px 10px 24px;
+  /* 여기 헤더위치 변경해야함 */
+  padding: 0px 10px 24px;
   background-color: #ffffff;
   min-height: 100vh;
 }

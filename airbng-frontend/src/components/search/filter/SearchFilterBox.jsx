@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useDropdown } from '../../../hooks/useFilterDropdown';
 import '../../../styles/pages/searchFilter.css';
 import Group2 from '../../../assets/Group 2.svg';
@@ -13,8 +13,6 @@ const SearchFilterBox = ({
                              selectedDate,
                              selectedBagType,
                              setSelectedBagType,
-                             selectedStartTime,
-                             selectedEndTime,
                              onDateClick,
                              onTimeClick,
                              onSearch
@@ -47,6 +45,20 @@ const SearchFilterBox = ({
     const selectBagType = (bagType) => {
         setSelectedBagType(bagType);
     };
+
+    const getDefaultTimeRange = () => {
+        const now = new Date();
+        const startHour = now.getHours();
+        const endHour = (startHour + 2) % 24;
+        const pad = n => n.toString().padStart(2, '0');
+        return {
+            start: `${pad(startHour)}:00`,
+            end: `${pad(endHour)}:00`
+        };
+    };
+
+    const [selectedStartTime, setSelectedStartTime] = useState(getDefaultTimeRange().start);
+    const [selectedEndTime, setSelectedEndTime] = useState(getDefaultTimeRange().end);
 
     const today = new Date().toISOString().slice(0, 10);
 
@@ -99,11 +111,8 @@ const SearchFilterBox = ({
                 <div className="filter-item time-filter" onClick={onTimeClick}>
                     <img className="filter-icon" src={clock} alt="시계"/>
                     <span>
-            {selectedStartTime && selectedEndTime
-                ? `${selectedStartTime} - ${selectedEndTime}`
-                : '시간 선택'
-            }
-          </span>
+                        {selectedStartTime} ~ {selectedEndTime}
+                    </span>
                 </div>
             </div>
 

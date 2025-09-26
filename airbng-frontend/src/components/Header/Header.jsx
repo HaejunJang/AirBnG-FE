@@ -22,7 +22,7 @@ export default function Header({
   showBackButton = false,
   backUrl,
   showHomeButton = false,
-  homeUrl = "/",
+  homeUrl = "/page/home",
   className = "",
   onBack,
   onHome,

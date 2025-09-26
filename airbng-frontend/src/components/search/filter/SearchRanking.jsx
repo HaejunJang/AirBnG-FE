@@ -61,31 +61,35 @@ const SearchRanking = ({ onRankingClick }) => {
         <div className="search-ranking">
             <h3 className="ranking-title">인기 보관소</h3>
             <div className="ranking-list">
-                {popularLocations.map((item) => (
-                    <div
-                        key={item.rank}
-                        className="ranking-item"
-                        onClick={() => onRankingClick({
-                            address: item.address,   // or item.address
-                            jimTypeId: item.jimTypeId // 백엔드에서 내려준 값
-                        })}
-                    >
-                        <div className="ranking-content">
-                            <div className="ranking-number-container">
-                                <div className="cube-face front">{item.rank}</div>
-                                <div className="cube-face back">{item.rank}</div>
-                                <div className="cube-face top">{item.rank}</div>
-                                <div className="cube-face bottom">{item.rank}</div>
-                            </div>
-                            <div className="ranking-location-container">
-                                <div className="cube-face front">{item.location}</div>
-                                <div className="cube-face back">{item.location}</div>
-                                <div className="cube-face top">{item.location}</div>
-                                <div className="cube-face bottom">{item.location}</div>
+                {popularLocations.length === 0 ? (
+                    <div className="no-ranking">표시할 인기 보관소가 없습니다</div>
+                ) : (
+                    popularLocations.map((item) => (
+                        <div
+                            key={item.rank}
+                            className="ranking-item"
+                            onClick={() => onRankingClick({
+                                address: item.address,
+                                jimTypeId: item.jimTypeId
+                            })}
+                        >
+                            <div className="ranking-content">
+                                <div className="ranking-number-container">
+                                    <div className="cube-face front">{item.rank}</div>
+                                    <div className="cube-face back">{item.rank}</div>
+                                    <div className="cube-face top">{item.rank}</div>
+                                    <div className="cube-face bottom">{item.rank}</div>
+                                </div>
+                                <div className="ranking-location-container">
+                                    <div className="cube-face front">{item.location}</div>
+                                    <div className="cube-face back">{item.location}</div>
+                                    <div className="cube-face top">{item.location}</div>
+                                    <div className="cube-face bottom">{item.location}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );

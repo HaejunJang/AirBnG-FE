@@ -17,7 +17,7 @@ ReservationListNew CSS Module .reservationListNew {
   box-shadow: 0 0 20px rgba(0,0,0,0.08);
   position: relative;
   padding-bottom: 0;
-  padding-top: 60px;   
+  /*padding-top: 60px;   */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -313,7 +313,7 @@ ReservationListNew CSS Module .reservationListNew {
   min-height: calc(100dvh - 200px);
   overflow-y: auto;
   background-color: #fff;
-  padding: 70px 20px 70px 20px;
+  padding: 20px 20px 70px 20px;
   box-sizing: border-box;
   width: 100%;
 }
@@ -607,8 +607,8 @@ ReservationListNew CSS Module .reservationListNew {
 .cardActions {
   display: flex;
   gap: 8px;
-  margin-top: 16px;
-  padding-top: 16px;
+  /*margin-top: 16px;*/
+  /*padding-top: 16px;*/
   border-top: 1px solid #f3f4f6;
 }
 
@@ -641,6 +641,9 @@ ReservationListNew CSS Module .reservationListNew {
   background: #fef2f2;
   color: #dc2626;
   border-color: #fecaca;
+    padding: 5px;
+    position: relative;
+    bottom: 0;
 }
 
 .cancelBtn:hover {
@@ -682,16 +685,18 @@ ReservationListNew CSS Module .reservationListNew {
 }
 
 .moreBtn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: #dbeafe;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  top: 50px;
 }
 
 .moreBtn:hover {
@@ -745,6 +750,7 @@ ReservationListNew CSS Module .reservationListNew {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  padding: 4px 0;
   transition: all 0.2s;
   background: #dbeafe;
   color: #2563eb;
