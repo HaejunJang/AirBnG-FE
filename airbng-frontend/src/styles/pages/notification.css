@@ -1,33 +1,34 @@
 /* 전체 앱 컨테이너 */
-.app-container {
-    font-family: 'Pretendard', sans-serif;
-    margin: 0 auto;
-    max-width: 412px;
-    background-color: #f5f5f5;
-    box-sizing: border-box;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+/*.app-container {*/
+/*    font-family: 'Pretendard', sans-serif;*/
+/*    margin: 0 auto;*/
+/*    max-width: 412px;*/
+/*    background-color: #f5f5f5;*/
+/*    box-sizing: border-box;*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*}*/
 
 .notification-app-content {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    background-color: #f5f5f5;
+    background: white;
+    /*margin: 0 auto;*/
+    max-width: 412px;
+    height: 100vh;
 }
 
-.main-content {
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    display: flex;
-    max-width: 412px;
-    flex-direction: column;
-    flex-grow: 1;
-    overflow: hidden;
-    padding-top: 60px;
-    padding-bottom: 80px;
-}
+/*.main-content {*/
+/*    box-shadow: 0 2px 10px rgba(0,0,0,0.1);*/
+/*    display: flex;*/
+/*    max-width: 412px;*/
+/*    flex-direction: column;*/
+/*    flex-grow: 1;*/
+/*    overflow: hidden;*/
+/*    padding-top: 60px;*/
+/*    padding-bottom: 80px;*/
+/*}*/
 
 /* Header 스타일 */
 .header {
