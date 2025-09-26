@@ -1,5 +1,6 @@
 import AddressPicker from './AddressPicker';
 import ImageUploader from './ImageUploader';
+import '../../../styles/pages/register.css';
 
 export default function Step2Basics({
     lockerName, setLockerName,
@@ -9,7 +10,7 @@ export default function Step2Basics({
 }) {
     return (
         <div className="step step-2 active">
-            <div className="form-group">
+            <div className="register-form-group">
                 <label htmlFor="lockerName">보관소 이름</label>
                 <input id="lockerName" value={lockerName}
                 onChange={(e)=>setLockerName(e.target.value)} placeholder="한글, 영어, 숫자만 사용 가능" required />

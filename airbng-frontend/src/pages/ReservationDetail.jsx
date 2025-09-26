@@ -77,18 +77,18 @@ const ReservationDetail = () => {
   }
 
   // 로딩 중이거나 에러가 있을 때 처리
-  if (loading) {
-    return (
-      <div className={styles.reservationDetail}>
-        <Header headerTitle="예약 상세" showBackButton />
-        <div className={styles.content}>
-          <div style={{ textAlign: "center", padding: "50px 0" }}>
-            로딩 중...
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className={styles.reservationDetail}>
+  //       <Header headerTitle="예약 상세" showBackButton />
+  //       <div className={styles.content}>
+  //         <div style={{ textAlign: "center", padding: "50px 0" }}>
+  //           로딩 중...
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (

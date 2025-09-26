@@ -10,63 +10,60 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   /* 회색 (#D5D5D5) 필터 */
-  filter: invert(84%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  filter: invert(84%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%)
+    contrast(100%);
 }
 
 /* 활성/호버 시 브랜드 색 (#4561DB) */
 .nav-item.active .nav-icon,
 .nav-item:hover .nav-icon {
-  filter: invert(36%) sepia(94%) saturate(3547%) hue-rotate(228deg) brightness(87%) contrast(86%);
+  filter: invert(36%) sepia(94%) saturate(3547%) hue-rotate(228deg)
+    brightness(87%) contrast(86%);
 }
 
 /* 바텀 네비게이션 바 */
 .bottom-nav {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
+  max-width: var(--app-max-width); /* 412px */
   height: var(--bottom-nav-height);
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
-  justify-content: space-between;      /* 각 탭을 동일 폭으로 배치 */
+  justify-content: space-between;
   align-items: center;
   z-index: 1000;
-  box-shadow: 0 -1px 4px rgba(0,0,0,.05);
-  -webkit-tap-highlight-color: transparent; /* iOS 탭 반짝임 제거 */
-  transform: translateZ(0);            /* 고정 느낌 강화 */
+  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05);
   padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* 큰 화면 중앙 정렬 (앱 폭 고정) */
-@media (min-width: 413px) {
-  .bottom-nav {
-    max-width: var(--app-max-width);
-    left: 50%;
-    transform: translateX(-50%) translateZ(0);
-    border-radius: 0;
-  }
 }
 
 /* 네비 아이템: 같은 너비로 고정 */
 .nav-item {
-  flex: 1 1 0;                     
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: #D5D5D5;
-  padding: 8px 0;                      /* 좌우 패딩을 줄이고 중앙 정렬 */
+  color: #d5d5d5;
+  padding: 8px 0; /* 좌우 패딩을 줄이고 중앙 정렬 */
   border-radius: 8px;
   height: 60px;
   transition: background var(--fast), color var(--fast); /* transform 제거 */
 }
 
 /* Hover 시 배경만 살짝 */
-.nav-item:hover { background: #f8f9fa; }
+.nav-item:hover {
+  background: #f8f9fa;
+}
 
 /* 활성 상태는 색만 변경 (굵기 변경 X) */
-.nav-item.active { color: var(--primary); }
+.nav-item.active {
+  color: var(--primary);
+}
 
 .nav-text {
   font-size: 12px;
@@ -77,28 +74,41 @@
 }
 
 /* 비활성은 투명도로만 차이 */
-.nav-item:not(.active) .nav-text { opacity: .6; }
+.nav-item:not(.active) .nav-text {
+  opacity: 0.6;
+}
 
 /* 굵기 변경으로 인한 레이아웃 점프 방지 */
-.nav-item.active .nav-text { font-weight: 600; } /* 의미상 유지(동일 값) */
+.nav-item.active .nav-text {
+  font-weight: 600;
+} /* 의미상 유지(동일 값) */
 
 /* 반응형(모바일 폭) */
 @media (max-width: 412px) {
-  .nav-item { height: 56px; }
-  .nav-icon { width: 22px; height: 22px; }
-  .nav-text { font-size: 11px; }
-  .bottom-nav { height: 70px; }
+  .nav-item {
+    height: 56px;
+  }
+  .nav-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .nav-text {
+    font-size: 11px;
+  }
+  .bottom-nav {
+    height: 70px;
+  }
 }
 
 /* 배지를 아이콘 기준으로 배치 */
-.nav-icon-wrap{
+.nav-icon-wrap {
   position: relative;
   display: grid;
   place-items: center;
 }
 
 /* 하단 탭 배지 */
-.nav-badge{
+.nav-badge {
   position: absolute;
   top: -6px;
   right: -10px;
@@ -113,16 +123,38 @@
   line-height: 18px;
   display: inline-block;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
   pointer-events: none; /* 탭 클릭 방해 금지 */
 }
 
 /* 고해상도/작은 화면 보정 */
-@media (max-width: 412px){
-  .nav-badge{ top: -5px; right: -9px; min-width: 16px; height: 16px; line-height: 16px; font-size: 10px; }
+@media (max-width: 412px) {
+  .nav-badge {
+    top: -5px;
+    right: -9px;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+    font-size: 10px;
+  }
 }
 
 /* 사용자 설정: 모션 최소화 요청 시 애니메이션 제거 */
 @media (prefers-reduced-motion: reduce) {
-  .nav-icon, .nav-item, .nav-text { transition: none !important; }
+  .nav-icon,
+  .nav-item,
+  .nav-text {
+    transition: none !important;
+  }
+  /* 데스크탑: 412px 바에 맞춰 '뷰포트' 가운데 정렬 */
+}
+@media (min-width: 1024px) {
+  .bottom-nav {
+    /* 앱 박스의 오른쪽 가장자리 위치에 맞춰 고정 */
+    left: auto;
+    transform: none;
+    /* right: calc((100vw - var(--banner-w) - var(--app-max-width)) / 2); */
+    width: var(--app-max-width);
+    border-radius: 12px 12px 0 0; /* 옵션 */
+  }
 }

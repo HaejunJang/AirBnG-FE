@@ -10,6 +10,8 @@ import s2Blank from '../../../assets/2_blank_ic.svg';
 import s3Blank from '../../../assets/3_blank_ic.svg';
 import s4Blank from '../../../assets/4_blank_ic.svg';
 
+import '../../../styles/pages/register.css';
+
 const FULL = { 1: s1Full, 2: s2Full, 3: s3Full, 4: s4Full };
 const BLANK = { 1: s2Blank, 2: s2Blank, 3: s3Blank, 4: s4Blank };
 

@@ -4,6 +4,8 @@ import {
   getReservationList,
   deleteReservationApi,
   cancelReservationApi,
+  confirmReservationApi,
+  completeReservationApi
 } from "../api/reservationApi";
 import { useAuth } from "../context/AuthContext";
 import { Modal, useModal } from "../components/common/ModalUtil";
@@ -88,8 +90,12 @@ const ReservationListNew = () => {
   const { user } = useAuth();
   const memberId = user?.id;
 
-  const [activeTab, setActiveTab] = useState("upcoming");
-  const [userRole, setUserRole] = useState("customer"); // 'customer' or 'host'
+  const [activeTab, setActiveTab] = useState(() => {
+    return sessionStorage.getItem('reservationList_activeTab') || "upcoming";
+  });
+  const [userRole, setUserRole] = useState(() => {
+    return sessionStorage.getItem('reservationList_userRole') || "customer";
+  });
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [nextCursorId, setNextCursorId] = useState(null);
@@ -235,6 +241,7 @@ const ReservationListNew = () => {
   const handleTabChange = (tabId) => {
     if (loading) return;
     setActiveTab(tabId);
+    sessionStorage.setItem('reservationList_activeTab', tabId);
     setReservations([]);
     setNextCursorId(null);
     setHasNextPage(true);
@@ -247,6 +254,7 @@ const ReservationListNew = () => {
   const handleRoleChange = (role) => {
     if (loading) return;
     setUserRole(role);
+    sessionStorage.setItem('reservationList_userRole', role);
     setReservations([]);
     setNextCursorId(null);
     setHasNextPage(true);
@@ -281,16 +289,36 @@ const ReservationListNew = () => {
   // 예약 취소
   const handleCancelReservation = async (reservationId) => {
     try {
-      await cancelReservationApi(reservationId, memberId);
-      showSuccess("취소 완료", "예약이 취소되었습니다.");
-      // 목록 새로고침
-      setReservations([]);
-      setNextCursorId(null);
-      setHasNextPage(true);
-      await fetchReservations(true);
+      const response = await cancelReservationApi(reservationId);
+      const data = response.data;
+
+      if (data.code === 1000) {
+        const result = data.result;
+        const totalAmount = result ? result.amount + result.fee : 0;
+        const refundAmount = totalAmount - (result ? result.chargeFee : 0);
+        const refundMessage = result.chargeFee !== 0 
+          ? `💰 환불 정보
+
+          결제 금액: ${totalAmount.toLocaleString()}원
+          취소 수수료: ${result.chargeFee.toLocaleString()}원
+          환불 금액: ${refundAmount.toLocaleString()}원
+(*1일내 환불 처리)`
+          : `전액 환불 처리됩니다.
+(*1일내 환불 처리)`;
+      
+        showSuccess("취소 완료", refundMessage);
+        
+        // 목록 새로고침
+        setReservations([]);
+        setNextCursorId(null);
+        setHasNextPage(true);
+        await fetchReservations(true);
+      } else {
+        showError("예약 취소 실패", data.message);
+      }
     } catch (error) {
-      console.error("예약 취소 오류:", error);
-      showError("취소 실패", "예약 취소에 실패했습니다.");
+      console.error("예약 취소 실패:", error);
+      showError("예약 취소 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -305,32 +333,101 @@ const ReservationListNew = () => {
     setActiveMoreMenu(null);
   };
 
-  // 취소 확인 모달
-  const showCancelConfirm = (reservationId) => {
-    showConfirm(
-      "예약 취소",
-      "정말로 예약을 취소하시겠습니까?",
-      () => handleCancelReservation(reservationId),
-      null
-    );
+  // 수수료 안내와 함께 취소 확인
+  const showCancelConfirm = (reservationId, reservationState) => {
+    if (reservationState === "CONFIRMED") {
+      // CONFIRMED 상태에서는 수수료 안내 포함
+      const cancelMessage = `⚠️ 취소 수수료 안내
+
+예약 확정 후 취소 시 수수료가 발생할 수 있어요!
+• 당일 취소: 20%
+• 하루 전 취소: 10%  
+• 그 외: 수수료 없음
+
+(*정확한 수수료는 취소 처리 후 안내됩니다)`;
+
+      showConfirm(
+        "예약 취소",
+        cancelMessage,
+        () => handleCancelReservation(reservationId),
+        () => {}
+      );
+    } else {
+      // 다른 상태에서는 바로 취소
+      showConfirm(
+        "예약 취소",
+        "정말로 예약을 취소하시겠습니까?",
+        () => handleCancelReservation(reservationId),
+        () => {}
+      );
+    }
   };
 
   // 완료 확인 처리
-  const handleCompleteConfirm = (reservationId) => {
-    // TODO: 완료 확인 API 호출
-    showSuccess("완료 확인", "예약이 완료 처리되었습니다.");
+  const handleCompleteConfirm = async (reservationId) => {
+    try{
+      const response = await completeReservationApi(reservationId);
+      const data = response.data;
+
+      if (data.code === 1000) {
+        showSuccess("완료 확인", "예약이 완료 처리되었습니다.");
+        // 목록 새로고침
+        setReservations([]);
+        setNextCursorId(null);
+        setHasNextPage(true);
+        await fetchReservations(true);
+      } else {
+        showError("완료 실패", data.message);
+      }
+    } catch (error) {
+      console.error("예약 완료 실패:", error);
+      showError("완료 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
+    }
+
   };
 
   // 승인/거절 처리 (호스트용)
-  const handleApprove = (reservationId) => {
-    // TODO: 승인 API 호출
-    showSuccess("승인 완료", "예약이 승인되었습니다.");
+  const handleApprove = async (reservationId) => {
+    try {
+      const response = await confirmReservationApi(reservationId, true);
+      const data = response.data;
+
+      if (data.code === 1000) {
+        showSuccess("승인되었습니다!", "");
+        // 목록 새로고침
+        setReservations([]);
+        setNextCursorId(null);
+        setHasNextPage(true);
+        await fetchReservations(true);
+      } else {
+        showError("승인 실패", data.message);
+      }
+    } catch (error) {
+      console.error("예약 승인 실패:", error);
+      showError("승인 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
+    }
   };
 
   const handleReject = (reservationId) => {
-    showConfirm("예약 거절", "정말로 이 예약을 거절하시겠습니까?", () => {
-      // TODO: 거절 API 호출
-      showSuccess("거절 완료", "예약이 거절되었습니다.");
+    showConfirm("예약 거절", "정말로 이 예약을 거절하시겠습니까?", async () => {
+      try {
+        const response = await confirmReservationApi(reservationId, false);
+        const data = response.data;
+
+        if (data.code === 1000) {
+          showSuccess("거절되었습니다!", "");
+          // 목록 새로고침
+          setReservations([]);
+          setNextCursorId(null);
+          setHasNextPage(true);
+          await fetchReservations(true);
+        } else {
+          showError("거절 실패", data.message);
+        }
+      } catch (error) {
+        console.error("예약 거절 실패:", error);
+        showError("거절 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
+      }
     });
   };
 
@@ -375,13 +472,13 @@ const ReservationListNew = () => {
         };
       case "CANCELLED":
         return {
-          text: "취소됨",
+          text: userRole === "customer" ? "취소함" : "취소됨",
           color: `${styles.textRed600} ${styles.bgRed50}`,
           icon: <XCircle className={styles.w4} />,
         };
       case "REJECTED":
         return {
-          text: "거절됨",
+          text: userRole === "customer" ? "거절됨" : "거절함",
           color: `${styles.textRed600} ${styles.bgRed50}`,
           icon: <XCircle className={styles.w4} />,
         };
@@ -422,152 +519,161 @@ const ReservationListNew = () => {
             <span>{statusInfo.text}</span>
           </div>
 
-          {/* 오른쪽 상단 ... 버튼 (취소/거절 탭에서만) */}
-          {showDeleteMenu && (
-            <div className={styles.moreMenuContainer}>
-              <button
-                className={styles.moreBtn}
-                onClick={e => {
-                  e.stopPropagation();
-                  toggleMoreMenu(reservation.reservationId);
-                }}
-                aria-label="삭제 메뉴"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="12" r="1"></circle>
-                  <circle cx="19" cy="12" r="1"></circle>
-                  <circle cx="5" cy="12" r="1"></circle>
-                </svg>
-              </button>
-              {activeMoreMenu === reservation.reservationId && (
-                <div 
-                  className={styles.moreMenu}
-                  onClick={e => e.stopPropagation()}
-                >
-                  <button
-                    className={styles.moreMenuItem}
-                    onClick={() => showDeleteConfirm(reservation.reservationId)}
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 액션 버튼들 */}
-          {reservation.state === "PENDING" && userRole === "host" && (
-            <div className={styles.actionButtonsInline}>
-              <button
-                className={styles.approveBtn}
-                onClick={() => handleApprove(reservation.reservationId)}
-              >
-                승인
-              </button>
-              <button
-                className={styles.rejectBtn}
-                onClick={() => handleReject(reservation.reservationId)}
-              >
-                거절
-              </button>
-            </div>
-          )}
-
-          {(reservation.state === "FINISHED_WAIT" ||
-            (reservation.state === "COMPLETING_KEEPER_ONLY" &&
-              userRole === "customer") ||
-            (reservation.state === "COMPLETING_DROPPER_ONLY" &&
-              userRole === "host")) && (
+          {/* 오른쪽 영역 */}
+          <div className={styles.headerRightSection}>
+            {/* 예약 상세 버튼 */}
             <button
-              className={styles.completeBtn}
-              onClick={() => handleCompleteConfirm(reservation.reservationId)}
+              className={styles.detailBtn}
+              onClick={() =>
+                goToReservationDetail(
+                  navigate,
+                  reservation.reservationId,
+                  memberId,
+                  { activeTab, userRole }
+                )
+              }
             >
-              완료 확인
+              예약 상세
             </button>
-          )}
-        </div>
 
-        {/* 예약 정보 */}
-        <div className={styles.cardContent}>
-          <div className={styles.placeInfo}>
-            <div className={styles.placeImage}>
-              {reservation.lockerImage ? (
-                <img src={reservation.lockerImage} alt="보관소" />
-              ) : (
-                <div className={styles.placeImagePlaceholder}></div>
-              )}
-            </div>
-            <div className={styles.placeDetails}>
-              <h3 className={styles.placeName}>
-                {reservation.lockerName || reservation.placeName}
-              </h3>
-              <p className={styles.placeMeta}>
-                {formatDuration(reservation.durationHours)} • {jimTypes}
-              </p>
-            </div>
-          </div>
-
-          {/* 시간 정보 */}
-          <div className={styles.timeInfo}>
-            <div className={styles.timeCol}>
-              <div className={styles.timeLabel}>시작 날짜</div>
-              <div className={styles.timeValue}>
-                {formatDateTime(reservation.startTime)}
+            {/* 오른쪽 상단 ... 버튼 (취소/거절 탭에서만) */}
+            {showDeleteMenu && (
+              <div className={styles.moreMenuContainer}>
+                <button
+                  className={styles.moreBtn}
+                  onClick={e => {
+                    e.stopPropagation();
+                    toggleMoreMenu(reservation.reservationId);
+                  }}
+                  aria-label="삭제 메뉴"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <circle cx="19" cy="12" r="1"></circle>
+                    <circle cx="5" cy="12" r="1"></circle>
+                  </svg>
+                </button>
+                {activeMoreMenu === reservation.reservationId && (
+                  <div 
+                    className={styles.moreMenu}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <button
+                      className={styles.moreMenuItem}
+                      onClick={() => showDeleteConfirm(reservation.reservationId)}
+                    >
+                      삭제
+                    </button>
+                  </div>
+                )}
               </div>
-            </div>
-            <div className={styles.timeCol}>
-              <div className={styles.timeLabel}>종료 날짜</div>
-              <div className={styles.timeValue}>
-                {formatDateTime(reservation.endTime)}
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* 현재 이용중 표시 */}
-        {isCurrentUse && (
-          <div className={styles.currentUseIndicator}>
-            <CheckCircle className={styles.w4} />
-            <span>
+              {/* 예약 정보 */}
+              <div className={styles.cardContent}>
+                  <div className={styles.placeInfo}>
+                      <div className={styles.placeImage}>
+                          {reservation.lockerImage ? (
+                              <img src={reservation.lockerImage} alt="보관소"/>
+                          ) : (
+                              <div className={styles.placeImagePlaceholder}></div>
+                          )}
+                      </div>
+                      <div className={styles.placeDetails}>
+                          <h3 className={styles.placeName}>
+                              {reservation.lockerName || reservation.placeName}
+                          </h3>
+                          <p className={styles.placeMeta}>
+                              {formatDuration(reservation.durationHours)} • {jimTypes}
+                          </p>
+                      </div>
+                  </div>
+
+                  {/* 시간 정보 */}
+                  <div className={styles.timeInfo}>
+                      <div className={styles.timeCol}>
+                          <div className={styles.timeLabel}>시작 날짜</div>
+                          <div className={styles.timeValue}>
+                              {formatDateTime(reservation.startTime)}
+                          </div>
+                      </div>
+                      <div className={styles.timeCol}>
+                          <div className={styles.timeLabel}>종료 날짜</div>
+                          <div className={styles.timeValue}>
+                              {formatDateTime(reservation.endTime)}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              {/* 현재 이용중 표시 */}
+              {isCurrentUse && (
+                  <div className={styles.currentUseIndicator}>
+                      <CheckCircle className={styles.w4}/>
+                      <span>
               {userRole === "customer"
-                ? "현재 이용중인 예약입니다"
-                : "현재 보관중인 예약입니다"}
+                  ? "현재 이용중인 예약입니다"
+                  : "현재 보관중인 예약입니다"}
             </span>
+                  </div>
+              )}
+              
+        {/* 완료대기 탭 추가 정보 (완료 확인을 이미 한 경우만) */}
+        {activeTab === "finishing" && (
+          <div className={styles.finishingInfo}>
+            {reservation.state === "COMPLETING_DROPPER_ONLY" && userRole === "customer" && (
+              <div className={`${styles.infoBox} ${styles.purple}`}>
+                <p className={styles.infoTitle}>
+                  상대방의 완료 확인을 기다리고 있습니다
+                </p>
+              </div>
+            )}
+            {reservation.state === "COMPLETING_KEEPER_ONLY" && userRole === "host" && (
+              <div className={`${styles.infoBox} ${styles.purple}`}>
+                <p className={styles.infoTitle}>
+                  상대방의 완료 확인을 기다리고 있습니다
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* 완료대기 탭 추가 정보 */}
+        {/* 완료대기 탭 완료 확인 버튼 */}
         {activeTab === "finishing" && (
-          <div className={styles.finishingInfo}>
+          <>
             {reservation.state === "FINISHED_WAIT" && (
-              <div className={`${styles.infoBox} ${styles.warning}`}>
-                <p className={styles.infoTitle}>
-                  양쪽 모두 완료 확인이 필요합니다
-                </p>
-                <p className={styles.infoDesc}>
-                  이용이 완료되면 완료 확인을 눌러주세요.
-                </p>
+              <div className={`${styles.cardActions} ${styles.single}`}>
+                <button
+                  className={`${styles.completeBtn} ${styles.fullWidth}`}
+                  onClick={() => handleCompleteConfirm(reservation.reservationId)}
+                >
+                  완료 확인
+                </button>
               </div>
             )}
-            {reservation.state === "COMPLETING_DROPPER_ONLY" && (
-              <div className={`${styles.infoBox} ${styles.purple}`}>
-                <p className={styles.infoTitle}>
-                  {userRole === "customer"
-                    ? "상대방의 완료 확인을 기다리고 있습니다"
-                    : "완료 확인이 필요합니다"}
-                </p>
+            {reservation.state === "COMPLETING_DROPPER_ONLY" && userRole === "host" && (
+              <div className={`${styles.cardActions} ${styles.single}`}>
+                <button
+                  className={`${styles.completeBtn} ${styles.fullWidth}`}
+                  onClick={() => handleCompleteConfirm(reservation.reservationId)}
+                >
+                  완료 확인
+                </button>
               </div>
             )}
-            {reservation.state === "COMPLETING_KEEPER_ONLY" && (
-              <div className={`${styles.infoBox} ${styles.purple}`}>
-                <p className={styles.infoTitle}>
-                  {userRole === "customer"
-                    ? "완료 확인이 필요합니다"
-                    : "상대방의 완료 확인을 기다리고 있습니다"}
-                </p>
+            {reservation.state === "COMPLETING_KEEPER_ONLY" && userRole === "customer" && (
+              <div className={`${styles.cardActions} ${styles.single}`}>
+                <button
+                  className={`${styles.completeBtn} ${styles.fullWidth}`}
+                  onClick={() => handleCompleteConfirm(reservation.reservationId)}
+                >
+                  완료 확인
+                </button>
               </div>
             )}
-          </div>
+          </>
         )}
 
         {/* 액션 버튼들 */}
@@ -575,7 +681,7 @@ const ReservationListNew = () => {
           <div className={`${styles.cardActions} ${styles.single}`}>
             <button
               className={`${styles.cancelBtn} ${styles.fullWidth}`}
-              onClick={() => showCancelConfirm(reservation.reservationId)}
+              onClick={() => showCancelConfirm(reservation.reservationId, reservation.state)}
             >
               예약 취소
             </button>
@@ -588,44 +694,32 @@ const ReservationListNew = () => {
             <div className={`${styles.cardActions} ${styles.double}`}>
               <button
                 className={styles.cancelBtn}
-                onClick={() => showCancelConfirm(reservation.reservationId)}
+                onClick={() => showCancelConfirm(reservation.reservationId, reservation.state)}
               >
                 예약 취소
               </button>
             </div>
           )}
 
-        {/* 완료된 예약의 더보기 메뉴 */}
-        {(reservation.state === "COMPLETED" ||
-          reservation.state === "CANCELLED") && (
-          <div className={`${styles.cardActions} ${styles.withMenu}`}>
-            {reservation.state === "COMPLETED" && userRole === "customer" && (
-              <button
-                className={styles.rebookBtn}
-                onClick={() => reBooking(navigate, reservation.lockerId)}
-              >
-                다시 예약
-              </button>
-            )}
+        {/* 완료된 예약의 다시 예약 버튼 */}
+        {reservation.state === "COMPLETED" && userRole === "customer" && (
+          <div className={`${styles.cardActions} ${styles.single}`}>
+            <button
+              className={`${styles.rebookBtn} ${styles.fullWidth}`}
+              onClick={() => {
+                const lockerId = reservation.lockerId || reservation.lockerNo;
+                if (!lockerId) {
+                  showError("예약 불가", "보관소 정보가 없어 다시 예약할 수 없습니다.");
+                  return;
+                }
+                reBooking(navigate, lockerId);
+              }}
+            >
+              다시 예약
+            </button>
           </div>
         )}
 
-        {/* 예약 상세 버튼 (상단 우측) */}
-        {reservation.state !== "CANCELLED" &&
-          reservation.state !== "COMPLETED" && (
-            <button
-              className={styles.detailBtn}
-              onClick={() =>
-                goToReservationDetail(
-                  navigate,
-                  reservation.reservationId,
-                  memberId
-                )
-              }
-            >
-              예약 상세 &gt;
-            </button>
-          )}
       </div>
     );
   };
@@ -663,12 +757,29 @@ const ReservationListNew = () => {
     return filtered;
   };
 
+  // URL 파라미터에서 상태 복원 (컴포넌트 마운트 시에만)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const returnTab = urlParams.get('returnTab');
+    const returnRole = urlParams.get('returnRole');
+    
+    if (returnTab) {
+      setActiveTab(returnTab);
+      sessionStorage.setItem('reservationList_activeTab', returnTab);
+    }
+    if (returnRole) {
+      setUserRole(returnRole);
+      sessionStorage.setItem('reservationList_userRole', returnRole);
+    }
+  }, [location.search]);
+
   // 초기 로딩
   useEffect(() => {
     if (memberId) {
       fetchReservations(true);
       document.querySelector(`.${styles.contentNew}`)?.scrollTo(0, 0);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, userRole, memberId]);
 
   // 외부 클릭시 더보기 메뉴 닫기
