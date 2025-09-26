@@ -63,16 +63,16 @@
 }
 
 .auth-required {
-  margin: 0 auto;
-  padding: 20px 20px 40px 20px; 
-  max-width: 412px;
-  text-align: center;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  animation: fadeInUpAuth 0.7s cubic-bezier(.22,1,.36,1) both
-
+    margin: 0 auto;
+    padding: 20px 20px 40px 20px;
+    max-width: 412px;
+    text-align: center;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    animation: fadeInUpAuth 0.7s cubic-bezier(.22, 1, .36, 1) both
+}
 
 /* 말풍선 아이콘 뱃지 */
 .auth-required__icon {
