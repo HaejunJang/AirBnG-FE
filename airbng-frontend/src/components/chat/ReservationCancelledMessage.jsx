@@ -59,46 +59,55 @@ export default function ReservationCancelledMessage({ payload }) {
   if (!payload) return null;
   const { reservation, refund, title, subtitle } = payload;
 
-  const amt = refund && typeof refund.amount === "number" ? refund.amount : 0;
-  const rtype = refund ? refund.refundType : "-";
+  const amt     = (refund && typeof refund.amount === "number") ? refund.amount : 0;
+  const rtype   = refund ? refund.refundType : "-";
   const rstatus = refund ? refund.status : "PENDING";
-  const period = formatPeriod(reservation?.startTime, reservation?.endTime);
+  const period  = formatPeriod(reservation?.startTime, reservation?.endTime);
 
   return (
     <div className="bubble bubble--system">
-      <div className="reservation-cancel-card">
-        <div className="reservation-cancel-header">
-          <span className="reservation-cancel-badge">예약 취소</span>
-          <h4 className="reservation-cancel-title">{title || "예약이 취소되었습니다."}</h4>
-          {subtitle && <p className="reservation-cancel-subtitle">{subtitle}</p>}
+      <article className="rcancel">
+        {/* 상단 라인 */}
+        <header className="rcancel__head">
+          <span className="rcancel__badge">예약 취소</span>
+          <h4 className="rcancel__title">{title || "예약이 취소되었습니다."}</h4>
+          <p className="rcancel__sub">
+            {String(rstatus).toUpperCase()==="COMPLETED" ? "환불이 완료되었습니다!" : "환불이 접수되었어요."}
+          </p>
+        </header>
+
+        {/* 본문: 좌측 상세, 우측 요약 */}
+        <div className="rcancel__grid">
+          <div className="rcancel__details">
+            <div className="rcancel__row">
+              <span className="rcancel__label">보관소</span>
+              <span className="rcancel__val" title={reservation?.lockerName || "-"}>
+                {reservation?.lockerName || "-"}
+              </span>
+            </div>
+            <div className="rcancel__row">
+              <span className="rcancel__label">기간</span>
+              <span className="rcancel__val">{period.date}</span>
+            </div>
+            <div className="rcancel__row">
+              <span className="rcancel__label">시간</span>
+              <span className="rcancel__val">{period.time}</span>
+            </div>
+            <div className="rcancel__row">
+              <span className="rcancel__label">환불 종류</span>
+              <span className="rcancel__val">{getRefundType(rtype)}</span>
+            </div>
+          </div>
+
+          {/* 오른쪽 요약 박스 */}
+          <aside className="rcancel__summary">
+            <div className="rcancel__amt">{formatKRW(amt)}</div>
+            <div className={`rcancel__status is-${String(rstatus).toLowerCase()}`}>
+              {getRefundStatus(rstatus)}
+            </div>
+          </aside>
         </div>
-        <div className="reservation-cancel-body">
-          <div className="reservation-cancel-row">
-            <span className="reservation-cancel-label">보관소</span>
-            <span className="reservation-cancel-value">{reservation?.lockerName || "-"}</span>
-          </div>
-          <div className="reservation-cancel-row">
-            <span className="reservation-cancel-label">기간</span>
-            <span className="reservation-cancel-value">{period.date}</span>
-          </div>
-          <div className="reservation-cancel-row">
-            <span className="reservation-cancel-label">시간</span>
-            <span className="reservation-cancel-value">{period.time}</span>
-          </div>
-          <div className="reservation-cancel-row">
-            <span className="reservation-cancel-label">환불 금액</span>
-            <span className="reservation-cancel-value strong">{formatKRW(amt)}</span>
-          </div>
-          <div className="reservation-cancel-row">
-            <span className="reservation-cancel-label">환불 종류</span>
-            <span className="reservation-cancel-value">{getRefundType(rtype)}</span>
-          </div>
-          <div className="reservation-cancel-row">
-            <span className="reservation-cancel-label">상태</span>
-            <span className="reservation-cancel-value">{getRefundStatus(rstatus)}</span>
-          </div>
-        </div>
-      </div>
+      </article>
     </div>
   );
 }

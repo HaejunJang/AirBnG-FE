@@ -306,43 +306,38 @@ export default function ChatRoom({ convId, meId }) {
   useEffect(() => {
     if (!client || !connected) return;
 
-    const onPersonal = (frame) => {
-      try {
-        const payload = JSON.parse(frame.body);
-        pushLocal({
-          convId,
-          msgId: `card-${payload?.reservation?.reservationId}-${Date.now()}`,
-          senderId: 0,
-          senderName: 'system',
-          type: 'CANCELLED_WITH_REFUND',
-          payload,
-          sentAtMs: Date.now(),
-        });
-      } catch (e) { console.error('card payload parse error', e); }
-    };
+  //   const normalize = (p, cid) => ({
+  //    convId: cid,
+  //    msgId: `cancelled-${p?.reservation?.reservationId}-${p?.refund?.refundId ?? Date.now()}`,
+  //    senderId: 0,
+  //    senderName: 'system',
+  //    type: 'reservation_cancelled',          // ← 히스토리와 동일한 타입으로 통일
+  //    reservation: p?.reservation || null,    // ← 평탄화
+  //    refund: p?.refund || null,
+  //    text: p?.title || '예약이 취소되었습니다.',
+  //    sentAtMs: Date.now(),
+  //  });
+
+  // const onPersonal = (frame) => {
+  //   try {
+  //     const payload = JSON.parse(frame.body);
+  //     pushLocal(normalize(payload, convId));
+  //   } catch (e) { console.error('card payload parse error', e); }
+  // };
 
   const onTopic = (frame) => {
     try {
-      const payload = JSON.parse(frame.body); // CancelledWithRefundCardDto
-      // convId가 payload에 함께 오니 신뢰해서 사용(혹은 현재 convId 비교)
-      const cid = payload?.convId || convId;
-      pushLocal({
-        convId: cid,
-        msgId: `card-${payload?.reservation?.reservationId}-${Date.now()}`,
-        senderId: 0,
-        senderName: 'system',
-        type: 'CANCELLED_WITH_REFUND',
-        payload,
-        sentAtMs: Date.now(),
-      });
+      const dto = JSON.parse(frame.body);            // 서버가 보낸 MessageDto
+      pushLocal(dto, { upsertBy: 'msgId' });
     } catch (e) { console.error('topic card payload parse error', e); }
   };
 
     const subs = [];
     // 개인 큐: 이미 열려있는 화면에 즉시
-    subs.push(client.subscribe('/user/queue/chat.cards', onPersonal));
+    // subs.push(client.subscribe('/user/queue/chat.cards', onPersonal));
     // 대화 토픽: 백엔드가 /topic/conversations/{convId}/cards 로 쏘고 있음
-    subs.push(client.subscribe(`/topic/conversations/${convId}/cards`, onTopic));
+    // subs.push(client.subscribe(`/topic/conversations/${convId}/cards`, onTopic));
+    subs.push(client.subscribe(`/topic/conversations.${convId}`, onTopic));
 
     return () => { subs.forEach(s => { try { s?.unsubscribe(); } catch {} }); };
   }, [client, connected, convId, pushLocal]);
@@ -387,8 +382,8 @@ export default function ChatRoom({ convId, meId }) {
 
           return (
             <ChatMessage
-              // key={m.msgId}
-              key={isMine ? `${m.msgId}-${peerLastReadSeq}-${peerInRoom?1:0}` : m.msgId}
+              key={m.msgId}
+              // key={isMine ? `${m.msgId}-${peerLastReadSeq}-${peerInRoom?1:0}` : m.msgId}
               me={isMine}
               msg={m}
               name={displayName}
