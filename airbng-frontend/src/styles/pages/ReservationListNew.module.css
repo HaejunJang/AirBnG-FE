@@ -686,8 +686,8 @@ ReservationListNew CSS Module .reservationListNew {
 
 .moreBtn {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   border: 1px solid #d1d5db;
   background: #f9fafb;
   border-radius: 6px;
@@ -696,7 +696,7 @@ ReservationListNew CSS Module .reservationListNew {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  top: 50px;
+  /* top: 50px; */
 }
 
 .moreBtn:hover {
@@ -744,13 +744,12 @@ ReservationListNew CSS Module .reservationListNew {
 
 /* 예약 상세 버튼 */
 .detailBtn {
-  padding: 6px 12px;
+  padding: 4px 8px;
   font-size: 13px;
   font-weight: 500;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  padding: 4px 0;
   transition: all 0.2s;
   background: #dbeafe;
   color: #2563eb;
