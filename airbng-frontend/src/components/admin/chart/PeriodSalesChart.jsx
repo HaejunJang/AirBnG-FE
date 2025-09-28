@@ -16,8 +16,8 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
 
-// 요일 라벨 (월~일)
-const WEEKDAY_KOR = ['월', '화', '수', '목', '금', '토', '일'];
+// 요일 라벨 (일~토) - dayjs().day()는 일요일이 0부터 시작
+const WEEKDAY_KOR = ['일', '월', '화', '수', '목', '금', '토'];
 
 const PeriodSalesChart = ({ data = [], activeTab }) => {
     // 2자리 연도를 4자리로 변환하는 함수
@@ -109,7 +109,7 @@ const PeriodSalesChart = ({ data = [], activeTab }) => {
                 return {
                     date: d.format('YYYY-MM-DD'),
                     displayDate: d.format('M/D'),
-                    weekday: WEEKDAY_KOR[d.day()],
+                    weekday: WEEKDAY_KOR[d.day()], // 이제 올바른 요일이 표시됩니다
                     sales: 0,
                     count: 0,
                 };
