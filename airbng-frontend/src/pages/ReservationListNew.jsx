@@ -888,7 +888,7 @@ const ReservationListNew = () => {
                 userRole === "customer" ? styles.active : ""
               }`}
             >
-              맡긴 내역
+              이용 내역
             </button>
             <button
               onClick={() => handleRoleChange("host")}
@@ -896,7 +896,7 @@ const ReservationListNew = () => {
                 userRole === "host" ? styles.active : ""
               }`}
             >
-              맡아준 내역
+              제공 내역
             </button>
           </div>
         </div>
