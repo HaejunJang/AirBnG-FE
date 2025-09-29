@@ -56,6 +56,7 @@
     font-size: 14px;
     min-width: 120px;
     background-color: white;
+    height: 40px;
 }
 
 .select:focus {
