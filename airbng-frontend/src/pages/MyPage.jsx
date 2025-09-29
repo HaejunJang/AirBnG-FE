@@ -6,6 +6,8 @@ import { Modal, useModal } from "../components/common/ModalUtil";
 import "../styles/pages/MyPage.css";
 import { infoApi } from "../api/infoApi";
 import cardIcon from "../assets/cardIcon.svg";
+import mypageIcon from "../assets/mypage.svg";
+import reservationIcon from "../assets/res_history.svg";
 
 export default function MyPage() {
   const { user, ready, isLoggedIn, logout, setUser } = useAuth();
@@ -376,7 +378,9 @@ export default function MyPage() {
         {/* 메뉴 섹션 */}
         <div className="menu-section">
           <div className="menu-item active" onClick={goToMyInfo}>
-            <div className="menu-icon user-icon"></div>
+            <div className="menu-icon user-icon">
+              <img src={mypageIcon} alt="내 정보 아이콘"/>
+            </div>
             <div className="menu-content">
               <h3>내 정보 보기/수정</h3>
               <p>개인정보를 확인하고 수정하세요</p>
@@ -385,7 +389,9 @@ export default function MyPage() {
           </div>
 
           <div className="menu-item active" onClick={goToReservations}>
-            <div className="menu-icon calendar-icon"></div>
+            <div className="menu-icon calendar-icon">
+              <img src={reservationIcon} alt="예약 내역 아이콘"/>
+            </div>
             <div className="menu-content">
               <h3>예약 내역 보기</h3>
               <p>나의 예약 현황을 확인하세요</p>

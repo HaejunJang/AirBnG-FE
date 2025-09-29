@@ -63,15 +63,15 @@
 }
 
 .auth-required {
-  margin: 0 auto;
-  padding: 20px 20px 40px 20px; 
-  max-width: 412px;
-  text-align: center;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  animation: fadeInUpAuth 0.7s cubic-bezier(.22,1,.36,1) both
+    margin: 0 auto;
+    padding: 20px 20px 40px 20px;
+    max-width: 412px;
+    text-align: center;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    animation: fadeInUpAuth 0.7s cubic-bezier(.22, 1, .36, 1) both
 }
 
 /* 말풍선 아이콘 뱃지 */
@@ -1407,7 +1407,7 @@
    FAB
    ============================================================= */
 .fab {
-  position: fixed;
+  position: absolute;
   left: 50%;
   transform: translate(-50%, 0);
   bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 12px);
@@ -1422,7 +1422,7 @@
 }
 
 .fab--primary { background: var(--primary); color: #fff; }
-.fab:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0,0,0,.18); }
+/*.fab:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0,0,0,.18); }*/
 
 /* =============================================================
    Reservation Cancel Card

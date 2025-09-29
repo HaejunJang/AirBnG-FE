@@ -64,7 +64,7 @@
 
 /* 메인 컨텐츠 */
 .mainContent {
-  padding: 20px;
+  padding: 17px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -103,7 +103,7 @@
   background: #f8f9fa;
   border-radius: 12px;
   padding: 4px;
-  overflow-x: auto;
+  overflow-x: hidden;
   gap: 2px;
 }
 
