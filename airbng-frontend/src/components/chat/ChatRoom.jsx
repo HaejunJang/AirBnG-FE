@@ -86,6 +86,12 @@ export default function ChatRoom({ convId, meId }) {
     return 0;
   };
 
+  useEffect(() => {
+    if (!messages?.length) return;
+    const lastSeq = lastValidSeqOf(messages);
+    setPeerLastReadSeq((prev) => Math.max(prev, lastSeq));
+  }, [convId, messages]);
+
   // READ 보고
   useEffect(() => {
     reportSeenRef.current = async (seq) => {
@@ -96,6 +102,15 @@ export default function ChatRoom({ convId, meId }) {
         console.log('[READ SEND]', { convId, seq });
         await markReadApi(convId, seq);
         publish(`/app/conversations/${convId}/read`, { lastSeenSeq: seq });
+        // 서버 힌트 지연/미발행 대비: 로컬로 Inbox 뱃지 0으로 즉시 반영
+        try {
+          window.dispatchEvent(new CustomEvent('inbox:hint', {
+            detail: { convId, unreadTotal: 0, preview: '' }
+          }));
+          window.dispatchEvent(new CustomEvent('inbox:read', {
+            detail: { convId, unreadTotal: 0 }
+          }));
+        } catch {}
       } catch (e) {
         console.warn('markRead failed', e);
       }
@@ -184,7 +199,10 @@ export default function ChatRoom({ convId, meId }) {
       personal.unsubscribeTyping?.(convId);
       clearTimeout(typingClearRef.current);
     };
-  }, [connected, convId, personal, meId, pokePeerInRoom]);
+  }, [connected, convId, meId, pokePeerInRoom,
+    personal.unsubscribeRead, personal.unsubscribeTyping,
+    personal.subscribeRead, personal.subscribeTyping
+  ]);
 
   // 같은 방이면 상대는 최신까지 읽은 것으로 간주
   useEffect(() => {
@@ -205,6 +223,7 @@ export default function ChatRoom({ convId, meId }) {
     if (!messages?.length) return;
     const lastSeq = lastValidSeqOf(messages);
     reportSeenRef.current?.(lastSeq);
+    // setPeerLastReadSeq((prev) => Math.max(prev, lastSeq));
   }, [messages]);
 
   // 연결 직후 (구독이 잡힌 다음 살짝 딜레이 후 sync 전송)

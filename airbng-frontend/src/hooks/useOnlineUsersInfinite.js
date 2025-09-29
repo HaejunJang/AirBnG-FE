@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchOnlineUsersPage } from '../api/chatApi';
-import { onStomp } from '../utils/stompClient';
+import useStomp from './useStomp';
 
 export default function useOnlineUsersInfinite({
   search = '',
@@ -13,6 +13,7 @@ export default function useOnlineUsersInfinite({
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { subscribe } = useStomp();
 
   const qRef = useRef(search);
   const runIdRef = useRef(0);       // 검색/리셋 세션 id (레이스 방지)
@@ -95,7 +96,7 @@ export default function useOnlineUsersInfinite({
         loadPage(0, false);
       }, 300);
     };
-    const off = onStomp?.('/topic/presence', handler);
+    const off = subscribe?.('/topic/presence', handler);
     return () => {
       if (typeof off === 'function') off();
       if (timer) clearTimeout(timer);

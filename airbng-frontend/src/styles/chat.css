@@ -72,7 +72,7 @@
   border-radius: 0;
   box-shadow: none;
   animation: fadeInUpAuth 0.7s cubic-bezier(.22,1,.36,1) both
-
+}
 
 /* 말풍선 아이콘 뱃지 */
 .auth-required__icon {
