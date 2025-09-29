@@ -458,8 +458,8 @@ const ReservationListNew = () => {
           // finishing 탭에서 endTime이 지난 CONFIRMED는 "완료 대기중"으로 표시
           if (activeTab === "finishing" && now > endTime) {
             return {
-              text: "완료 대기중",
-              color: `${styles.textYellow600} ${styles.bgYellow50}`,
+              text: "완료 확인 필요",
+              color: `${styles.textPurple600} ${styles.bgPurple50}`,
               icon: <AlertCircle className={styles.w4} />,
             };
           }
@@ -472,14 +472,15 @@ const ReservationListNew = () => {
 
       case "COMPLETING_DROPPER_ONLY":
         return {
-          text: userRole === "customer" ? "완료 확인함" : "완료 확인 필요",
-          color: `${styles.textPurple600} ${styles.bgPurple50}`,
+          text: userRole === "customer" ? "완료 대기중" : "완료 확인 필요",
+          color: userRole === "customer" ? `${styles.textYellow600} ${styles.bgYellow50}` : `${styles.textPurple600} ${styles.bgPurple50}`,
           icon: <AlertCircle className={styles.w4} />,
         };
+        
       case "COMPLETING_KEEPER_ONLY":
         return {
-          text: userRole === "customer" ? "완료 확인 필요" : "완료 확인함",
-          color: `${styles.textPurple600} ${styles.bgPurple50}`,
+          text: userRole === "customer" ? "완료 확인 필요" : "완료 대기중",
+          color: userRole === "customer" ? `${styles.textPurple600} ${styles.bgPurple50}` : `${styles.textYellow600} ${styles.bgYellow50}`,
           icon: <AlertCircle className={styles.w4} />,
         };
       case "COMPLETED":
@@ -887,7 +888,7 @@ const ReservationListNew = () => {
                 userRole === "customer" ? styles.active : ""
               }`}
             >
-              맡긴 내역
+              이용 내역
             </button>
             <button
               onClick={() => handleRoleChange("host")}
@@ -895,7 +896,7 @@ const ReservationListNew = () => {
                 userRole === "host" ? styles.active : ""
               }`}
             >
-              맡아준 내역
+              제공 내역
             </button>
           </div>
         </div>
