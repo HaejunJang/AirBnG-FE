@@ -328,7 +328,7 @@ const ReservationDetail = () => {
           />
           <div className={styles.lockerDetails}>
             <h2 className={styles.lockerName}>{data.lockerName || "보관소"}</h2>
-            <p className={styles.lockerAddress}>서울 강남구 강남대로 396</p>
+            <p className={styles.lockerAddress}>{data.fullAddress || "주소 정보 없음"}</p>
           </div>
         </div>
 

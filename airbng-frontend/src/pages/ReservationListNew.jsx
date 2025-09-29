@@ -156,7 +156,7 @@ const ReservationListNew = () => {
         return ["CONFIRMED"]; // 현재 이용중만 필터링은 별도 로직으로
       case "finishing":
         return [
-          "FINISHED_WAIT",
+          "CONFIRMED",
           "COMPLETING_DROPPER_ONLY",
           "COMPLETING_KEEPER_ONLY",
         ];
@@ -432,7 +432,7 @@ const ReservationListNew = () => {
   };
 
   // 상태별 아이콘과 색상 반환
-  const getStatusInfo = (status, userRole) => {
+  const getStatusInfo = (status, userRole, reservation) => {
     switch (status) {
       case "PENDING":
         return {
@@ -441,27 +441,46 @@ const ReservationListNew = () => {
           icon: <Clock className={styles.w4} />,
         };
       case "CONFIRMED":
+        if (reservation) {
+          const now = new Date();
+          const startTime = new Date(reservation.startTime);
+          const endTime = new Date(reservation.endTime);
+          
+          // 현재 이용중인 경우
+          if (now >= startTime && now <= endTime) {
+            return {
+              text: userRole === "customer" ? "이용중" : "보관중",
+              color: `${styles.textGreen600} ${styles.bgGreen50}`,
+              icon: <CheckCircle className={styles.w4} />,
+            };
+          }
+          
+          // finishing 탭에서 endTime이 지난 CONFIRMED는 "완료 대기중"으로 표시
+          if (activeTab === "finishing" && now > endTime) {
+            return {
+              text: "완료 확인 필요",
+              color: `${styles.textPurple600} ${styles.bgPurple50}`,
+              icon: <AlertCircle className={styles.w4} />,
+            };
+          }
+        }
         return {
           text: userRole === "customer" ? "예약확정" : "승인완료",
           color: `${styles.textBlue600} ${styles.bgBlue50}`,
           icon: <CheckCircle className={styles.w4} />,
         };
-      case "FINISHED_WAIT":
-        return {
-          text: "완료 대기중",
-          color: `${styles.textYellow600} ${styles.bgYellow50}`,
-          icon: <AlertCircle className={styles.w4} />,
-        };
+
       case "COMPLETING_DROPPER_ONLY":
         return {
-          text: userRole === "customer" ? "완료 확인함" : "완료 확인 필요",
-          color: `${styles.textPurple600} ${styles.bgPurple50}`,
+          text: userRole === "customer" ? "완료 대기중" : "완료 확인 필요",
+          color: userRole === "customer" ? `${styles.textYellow600} ${styles.bgYellow50}` : `${styles.textPurple600} ${styles.bgPurple50}`,
           icon: <AlertCircle className={styles.w4} />,
         };
+        
       case "COMPLETING_KEEPER_ONLY":
         return {
-          text: userRole === "customer" ? "완료 확인 필요" : "완료 확인함",
-          color: `${styles.textPurple600} ${styles.bgPurple50}`,
+          text: userRole === "customer" ? "완료 확인 필요" : "완료 대기중",
+          color: userRole === "customer" ? `${styles.textPurple600} ${styles.bgPurple50}` : `${styles.textYellow600} ${styles.bgYellow50}`,
           icon: <AlertCircle className={styles.w4} />,
         };
       case "COMPLETED":
@@ -491,9 +510,8 @@ const ReservationListNew = () => {
     }
   };
 
-  // 현재 이용중인지 확인 (current 탭에서만 표시)
+  // 현재 이용중인지 확인
   const isCurrentlyInUse = (reservation) => {
-    if (activeTab !== "current") return false;
     const now = new Date();
     const startTime = new Date(reservation.startTime);
     const endTime = new Date(reservation.endTime);
@@ -504,7 +522,7 @@ const ReservationListNew = () => {
 
   // 예약 카드 컴포넌트
   const ReservationCard = ({ reservation }) => {
-    const statusInfo = getStatusInfo(reservation.state, userRole);
+    const statusInfo = getStatusInfo(reservation.state, userRole, reservation);
     const jimTypes = getJimTypesText(reservation.jimTypeResults);
     const isCurrentUse = isCurrentlyInUse(reservation);
 
@@ -569,57 +587,58 @@ const ReservationListNew = () => {
               </div>
             )}
           </div>
+
         </div>
 
-              {/* 예약 정보 */}
-              <div className={styles.cardContent}>
-                  <div className={styles.placeInfo}>
-                      <div className={styles.placeImage}>
-                          {reservation.lockerImage ? (
-                              <img src={reservation.lockerImage} alt="보관소"/>
-                          ) : (
-                              <div className={styles.placeImagePlaceholder}></div>
-                          )}
-                      </div>
-                      <div className={styles.placeDetails}>
-                          <h3 className={styles.placeName}>
-                              {reservation.lockerName || reservation.placeName}
-                          </h3>
-                          <p className={styles.placeMeta}>
-                              {formatDuration(reservation.durationHours)} • {jimTypes}
-                          </p>
-                      </div>
-                  </div>
-
-                  {/* 시간 정보 */}
-                  <div className={styles.timeInfo}>
-                      <div className={styles.timeCol}>
-                          <div className={styles.timeLabel}>시작 날짜</div>
-                          <div className={styles.timeValue}>
-                              {formatDateTime(reservation.startTime)}
-                          </div>
-                      </div>
-                      <div className={styles.timeCol}>
-                          <div className={styles.timeLabel}>종료 날짜</div>
-                          <div className={styles.timeValue}>
-                              {formatDateTime(reservation.endTime)}
-                          </div>
-                      </div>
-                  </div>
-              </div>
-
-              {/* 현재 이용중 표시 */}
-              {isCurrentUse && (
-                  <div className={styles.currentUseIndicator}>
-                      <CheckCircle className={styles.w4}/>
-                      <span>
-              {userRole === "customer"
-                  ? "현재 이용중인 예약입니다"
-                  : "현재 보관중인 예약입니다"}
-            </span>
-                  </div>
+        {/* 예약 정보 */}
+        <div className={styles.cardContent}>
+          <div className={styles.placeInfo}>
+            <div className={styles.placeImage}>
+              {reservation.lockerImage ? (
+                <img src={reservation.lockerImage} alt="보관소" />
+              ) : (
+                <div className={styles.placeImagePlaceholder}></div>
               )}
-              
+            </div>
+            <div className={styles.placeDetails}>
+              <h3 className={styles.placeName}>
+                {reservation.lockerName || reservation.placeName}
+              </h3>
+              <p className={styles.placeMeta}>
+                {formatDuration(reservation.durationHours)} • {jimTypes}
+              </p>
+            </div>
+          </div>
+
+          {/* 시간 정보 */}
+          <div className={styles.timeInfo}>
+            <div className={styles.timeCol}>
+              <div className={styles.timeLabel}>시작 날짜</div>
+              <div className={styles.timeValue}>
+                {formatDateTime(reservation.startTime)}
+              </div>
+            </div>
+            <div className={styles.timeCol}>
+              <div className={styles.timeLabel}>종료 날짜</div>
+              <div className={styles.timeValue}>
+                {formatDateTime(reservation.endTime)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 현재 이용중 표시 */}
+        {isCurrentUse && activeTab === "current" && (
+          <div className={styles.currentUseIndicator}>
+            <CheckCircle className={styles.w4} />
+            <span>
+              {userRole === "customer"
+                ? "현재 이용중인 예약입니다"
+                : "현재 보관중인 예약입니다"}
+            </span>
+          </div>
+        )}
+
         {/* 완료대기 탭 추가 정보 (완료 확인을 이미 한 경우만) */}
         {activeTab === "finishing" && (
           <div className={styles.finishingInfo}>
@@ -643,7 +662,7 @@ const ReservationListNew = () => {
         {/* 완료대기 탭 완료 확인 버튼 */}
         {activeTab === "finishing" && (
           <>
-            {reservation.state === "FINISHED_WAIT" && (
+            {reservation.state === "CONFIRMED" && (
               <div className={`${styles.cardActions} ${styles.single}`}>
                 <button
                   className={`${styles.completeBtn} ${styles.fullWidth}`}
@@ -688,6 +707,23 @@ const ReservationListNew = () => {
           </div>
         )}
 
+        {reservation.state === "PENDING" && userRole === "host" && (
+          <div className={`${styles.cardActions} ${styles.double}`}>
+            <button
+              className={styles.rejectBtn}
+              onClick={() => handleReject(reservation.reservationId)}
+            >
+              거절
+            </button>
+            <button
+              className={styles.approveBtn}
+              onClick={() => handleApprove(reservation.reservationId)}
+            >
+              승인
+            </button>
+          </div>
+        )}
+
         {reservation.state === "CONFIRMED" &&
           activeTab === "upcoming" &&
           userRole === "customer" && (
@@ -706,14 +742,7 @@ const ReservationListNew = () => {
           <div className={`${styles.cardActions} ${styles.single}`}>
             <button
               className={`${styles.rebookBtn} ${styles.fullWidth}`}
-              onClick={() => {
-                const lockerId = reservation.lockerId || reservation.lockerNo;
-                if (!lockerId) {
-                  showError("예약 불가", "보관소 정보가 없어 다시 예약할 수 없습니다.");
-                  return;
-                }
-                reBooking(navigate, lockerId);
-              }}
+              onClick={() => reBooking(navigate, reservation.lockerId)}
             >
               다시 예약
             </button>
@@ -740,17 +769,37 @@ const ReservationListNew = () => {
       states.includes(reservation.state)
     );
 
-    // current 탭에서는 현재 이용중인 것만 표시
-    if (activeTab === "current") {
+    // upcoming 탭에서는 CONFIRMED 상태 중 startTime이 현재 시간 이후인 것들만 표시
+    if (activeTab === "upcoming") {
       const now = new Date();
       filtered = filtered.filter((reservation) => {
-        const startTime = new Date(reservation.startTime);
-        const endTime = new Date(reservation.endTime);
-        return (
-          reservation.state === "CONFIRMED" &&
-          now >= startTime &&
-          now <= endTime
-        );
+        if (reservation.state === "CONFIRMED") {
+          const startTime = new Date(reservation.startTime);
+          return now < startTime;
+        }
+        return true; // PENDING은 그대로 표시
+      });
+    }
+
+    // current 탭에서는 현재 이용중인 것만 표시
+    if (activeTab === "current") {
+      filtered = filtered.filter((reservation) => {
+        return isCurrentlyInUse(reservation);
+      });
+    }
+
+    // finishing 탭에서는 CONFIRMED 상태 중 endTime이 지난 것들과 기존 완료대기 상태들을 표시
+    if (activeTab === "finishing") {
+      const now = new Date();
+      filtered = filtered.filter((reservation) => {
+        if (reservation.state === "CONFIRMED") {
+          const endTime = new Date(reservation.endTime);
+          return now > endTime;
+        }
+        return [
+          "COMPLETING_DROPPER_ONLY",
+          "COMPLETING_KEEPER_ONLY",
+        ].includes(reservation.state);
       });
     }
 
@@ -839,7 +888,7 @@ const ReservationListNew = () => {
                 userRole === "customer" ? styles.active : ""
               }`}
             >
-              맡긴 내역
+              이용 내역
             </button>
             <button
               onClick={() => handleRoleChange("host")}
@@ -847,7 +896,7 @@ const ReservationListNew = () => {
                 userRole === "host" ? styles.active : ""
               }`}
             >
-              맡아준 내역
+              제공 내역
             </button>
           </div>
         </div>

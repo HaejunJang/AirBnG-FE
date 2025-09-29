@@ -259,4 +259,3 @@ export const useNotification = () => {
 
     return { notify, requestNotificationPermission };
 };
-

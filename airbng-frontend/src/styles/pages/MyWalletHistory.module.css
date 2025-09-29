@@ -103,7 +103,7 @@
   background: #f8f9fa;
   border-radius: 12px;
   padding: 4px;
-  overflow-x: auto;
+  overflow-x: hidden;
   gap: 2px;
 }
 

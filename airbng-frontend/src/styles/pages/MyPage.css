@@ -336,47 +336,20 @@
 }
 
 /* 아이콘 스타일 */
-.user-icon::before {
-  content: "";
-  width: 20px;
-  height: 20px;
-  background: #4561db;
-  border: 2px solid #4561db;
-  border-radius: 50% 50% 0 0;
-  position: relative;
+.user-icon, .calendar-icon {
+  width: 48px;
+  height: 48px;
+  color: #4561db;
+  background: rgb(241, 244, 255);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-.user-icon::after {
-  content: "";
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 12px;
-  background: #4561db;
-  border-radius: 12px 12px 0 0;
-}
-
-.calendar-icon::before {
-  content: "";
-  width: 18px;
-  height: 20px;
-  border: 2px solid #4561db;
-  border-radius: 2px;
-  position: relative;
-}
-
-.calendar-icon::after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 2px;
-  background: #4561db;
-  box-shadow: 0 4px 0 #4561db, 0 8px 0 #4561db;
+.user-icon img, .calendar-icon img {
+  width: 28px;
+  height: 28px;
+  color: #4561db;
 }
 
 .review-icon::before {
