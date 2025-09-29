@@ -93,18 +93,50 @@ export default function usePersonalQueues({
     };
   }, [connected, subscribe, onAck, onError, onInboxHint, onInboxRead]);
 
+  function normalizeReadPayload(raw) { 
+    if (typeof raw === 'string') {
+      const s = raw.trim();
+      if (/^\d+$/.test(s)) return { lastReadSeq: Number(s) };
+      try {
+        const obj = JSON.parse(s);
+        if (typeof obj === 'number') return { lastReadSeq: obj };
+        if (obj && (obj.lastReadSeq ?? obj.seq ?? obj.last_seen_seq)) {
+          const n = Number(obj.lastReadSeq ?? obj.seq ?? obj.last_seen_seq);
+          if (Number.isFinite(n)) return { lastReadSeq: n, ...obj };
+        }
+        return obj || {};
+      } catch { return {}; }
+    }
+    if (typeof raw === 'number') return { lastReadSeq: raw };
+    if (raw && (raw.lastReadSeq ?? raw.seq ?? raw.last_seen_seq)) {
+      const n = Number(raw.lastReadSeq ?? raw.seq ?? raw.last_seen_seq);
+      if (Number.isFinite(n)) return { lastReadSeq: n, ...raw };
+    }
+    return raw || {};
+  }
+
   /* ===== 2) 방별 개인 큐 동적 구독: READ ===== */
   function subscribeRead(convId, handler) {
     unsubscribeRead(convId);
-    console.log('[SUB read]', `/user/queue/read.${convId}`);
-    const unsub = subscribe(`/user/queue/read.${convId}`, frame => {
-      const raw = safeJSON(frame.body); // number | object
-      console.log('[READ FRAME]', `/user/queue/read.${convId}`, raw);
-      const payload = (typeof raw === 'number') ? { lastReadSeq: raw } : raw;
-      handler?.(payload);
-    });
-    readSubsRef.current.set(convId, { unsub, handler });
+    // 브로커/서버 구현에 따라 점/슬래시 둘 다 시도
+    const channels = [
+      `/user/queue/read.${convId}`,
+      `/user/queue/read/${convId}`,
+    ];
+    const unsubs = channels.map(ch =>
+      subscribe(ch, frame => {
+        const raw = safeJSON(frame.body);
+        const payload = normalizeReadPayload(raw);
+        if (!Number.isFinite(Number(payload?.lastReadSeq))) return;
+        console.log('[READ FRAME]', ch, raw, '→', payload);
+        handler?.(payload);
+      })
+   );
+   // 언섭 묶음으로 관리
+   const unsub = () => unsubs.forEach(u => { try { u?.(); } catch {} });
+   readSubsRef.current.set(convId, { unsub, handler });
   }
+
   function unsubscribeRead(convId) {
     const item = readSubsRef.current.get(convId);
     if (item?.unsub) { try { item.unsub(); } catch {} }
@@ -114,12 +146,18 @@ export default function usePersonalQueues({
   /* ===== 3) 방별 개인 큐 동적 구독: TYPING ===== */
   function subscribeTyping(convId, handler) {
     unsubscribeTyping(convId);
-    console.log('[SUB typing]', `/user/queue/typing.${convId}`);
-    const unsub = subscribe(`/user/queue/typing.${convId}`, frame => {
-      const payload = safeJSON(frame.body);          // { userId, typing: boolean, at }
-      console.log('[TYPING FRAME]', `/user/queue/typing.${convId}`, payload);
-      handler?.(payload);
-    });
+    const channels = [
+      `/user/queue/typing.${convId}`,
+      `/user/queue/typing/${convId}`,
+    ];
+    const unsubs = channels.map(ch =>
+      subscribe(ch, frame => {
+        const payload = safeJSON(frame.body); // { userId, typing, at }
+        console.log('[TYPING FRAME]', ch, payload);
+        handler?.(payload);
+      })
+    );
+    const unsub = () => unsubs.forEach(u => { try { u?.(); } catch {} });
     typingSubsRef.current.set(convId, { unsub, handler });
   }
   function unsubscribeTyping(convId) {
@@ -135,21 +173,35 @@ export default function usePersonalQueues({
     // READ
     for (const [convId, { handler }] of readSubsRef.current.entries()) {
       try { readSubsRef.current.get(convId)?.unsub?.(); } catch {}
-      const unsub = subscribe(`/user/queue/read.${convId}`, frame => {
-        const raw = safeJSON(frame.body);
-        const payload = (typeof raw === 'number') ? { lastReadSeq: raw } : raw;
-        handler?.(payload);
-      });
+      const channels = [
+        `/user/queue/read.${convId}`,
+        `/user/queue/read/${convId}`,
+      ];
+      const unsubs = channels.map(ch =>
+        subscribe(ch, frame => {
+          const raw = safeJSON(frame.body);
+          const payload = normalizeReadPayload(raw);
+          handler?.(payload);
+        })
+      );
+      const unsub = () => unsubs.forEach(u => { try { u?.(); } catch {} });
       readSubsRef.current.set(convId, { unsub, handler });
     }
 
     // TYPING
     for (const [convId, { handler }] of typingSubsRef.current.entries()) {
       try { typingSubsRef.current.get(convId)?.unsub?.(); } catch {}
-      const unsub = subscribe(`/user/queue/typing.${convId}`, frame => {
-        const payload = safeJSON(frame.body);
-        handler?.(payload);
-      });
+      const channels = [
+        `/user/queue/typing.${convId}`,
+        `/user/queue/typing/${convId}`,
+      ];
+      const unsubs = channels.map(ch =>
+        subscribe(ch, frame => {
+          const payload = safeJSON(frame.body);
+          handler?.(payload);
+        })
+      );
+      const unsub = () => unsubs.forEach(u => { try { u?.(); } catch {} });
       typingSubsRef.current.set(convId, { unsub, handler });
     }
   }, [connected, subscribe]);

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchOnlineUsers } from '../api/chatApi';
-import { onStomp } from '../utils/stompClient'; // 네 프로젝트에 이미 있음(구독 헬퍼)
+import useStomp from './useStomp';
 
 /**
  * 온라인 유저 목록을 불러오고, /topic/presence 구독으로 실시간 반영.
@@ -12,6 +12,8 @@ export default function useOnlineUsers({ search = '', limit = 50, autoRefreshMs 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const keywordRef = useRef(search);
+
+  const { subscribe } = useStomp();
 
   const load = useCallback(async () => {
     try {
@@ -36,7 +38,7 @@ export default function useOnlineUsers({ search = '', limit = 50, autoRefreshMs 
   // STOMP presence 이벤트 구독 → 간단히 재로딩
   useEffect(() => {
     // onStomp(topic, callback) 형태 가정 (네 utils/stompClient 기준)
-    const off = onStomp?.('/topic/presence', () => {
+    const off = subscribe?.('/topic/presence', () => {
       // 이벤트가 잦아도 불필요한 중복요청 줄이기 (throttle)
       if (loading) return;
       load();
