@@ -1,12 +1,13 @@
 .container {
-  width: 412px;
-  min-height: 100vh;
-  background: white;
-  overflow-y: auto;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  position: relative;
-  padding-bottom: 80px;
-  padding-top: var(--header-height, 60px);
+    width: 412px;
+    min-height: 100vh;
+    background: white;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding-bottom: 80px;
+    padding-top: var(--header-height, 60px);
+    border-radius: var(--radius-24)
 }
 
 /* 헤더 스타일 - 단순한 버전 */

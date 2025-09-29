@@ -64,7 +64,7 @@
 
 /* 메인 컨텐츠 */
 .mainContent {
-  padding: 20px;
+  padding: 17px;
   display: flex;
   flex-direction: column;
   gap: 20px;

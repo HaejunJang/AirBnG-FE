@@ -1407,7 +1407,7 @@
    FAB
    ============================================================= */
 .fab {
-  position: fixed;
+  position: absolute;
   left: 50%;
   transform: translate(-50%, 0);
   bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 12px);
@@ -1422,7 +1422,7 @@
 }
 
 .fab--primary { background: var(--primary); color: #fff; }
-.fab:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0,0,0,.18); }
+/*.fab:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0,0,0,.18); }*/
 
 /* =============================================================
    Reservation Cancel Card

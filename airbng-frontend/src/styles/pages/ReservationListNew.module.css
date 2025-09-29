@@ -696,7 +696,7 @@ ReservationListNew CSS Module .reservationListNew {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  /* top: 50px; */
+  /*top: 50px;*/
 }
 
 .moreBtn:hover {

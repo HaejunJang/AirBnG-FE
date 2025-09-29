@@ -12,7 +12,7 @@ const SplashScreen = ({ onNavigateToHome }) => {
                 // fallback: window.location 사용
                 window.location.href = '/page/home';
             }
-        }, 2000);
+        }, 3000);
 
         // 클릭, 키보드, 터치 이벤트 리스너
         const handleInteraction = () => {
