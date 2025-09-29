@@ -169,12 +169,6 @@ export const useSSEManager = (memberId) => {
                 console.log('[SSE Hook] 알림 수신:', alarmData);
                 handleAlarmEvent(alarmData);
 
-                showNotification(
-                    'AirBnG 알림',
-                    alarmData.message || '새 알림이 도착했습니다.',
-                    { tag: `alarm-${eventId}` } // tag도 eventId 기준으로 고정
-                );
-
                 // lastProcessed 갱신 (숫자형 ID인 경우)
                 const numericId = Number(eventId);
                 if (!isNaN(numericId) && numericId > (lastProcessedRef.current || 0)) {
