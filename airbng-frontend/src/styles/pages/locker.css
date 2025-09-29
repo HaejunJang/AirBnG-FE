@@ -228,6 +228,17 @@
 .airbng-locker .btn-restart{ background:#e8fbe8; color:#2e7d32; }
 .airbng-locker .btn-restart:hover{ background:#d0f0d0; }
 
+@keyframes fadeInUpWelcome {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .airbng-locker .empty-locker-section {
     display: flex;
     flex-direction: column;
@@ -237,6 +248,7 @@
     width: 100%;
     max-width: 412px;
     padding: 0;
+    animation: fadeInUpWelcome 0.7s cubic-bezier(.22,1,.36,1) both;
 }
 
 .airbng-locker .empty-locker-icon img {
@@ -282,6 +294,7 @@
   display: flex;
   gap: 14px;
   justify-content: center;
+  margin-bottom: 350px;
 }
 
 .airbng-locker .login-btn,

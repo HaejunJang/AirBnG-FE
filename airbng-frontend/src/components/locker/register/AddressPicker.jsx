@@ -37,7 +37,7 @@ export default function AddressPicker({ address, setAddress, setAddressEnglish, 
     };
 
     return (
-        <div className="form-group">
+        <div className="register-form-group">
             <label>주소</label>
             <div className="input-with-icon" onClick={openSearch} id="locationInputWrapper">
                 <img src={LocationSearch} className="location-icon" alt="주소 검색" />

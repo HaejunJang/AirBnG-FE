@@ -1,6 +1,7 @@
 import React, { useMemo, memo } from 'react';
 import ReservationMessage from './ReservationMessage';
-// decideReservation 직접 쓰지 말고, 부모 콜백 우선 (없으면 fallback)
+import ReservationCancelledMessage from './ReservationCancelledMessage';
+// 부모 콜백 우선, 없으면 API fallback
 import { decideReservation as decideReservationApi } from '../../api/chatApi';
 
 function AttachmentView({ a, pending, failed }) {
@@ -34,15 +35,13 @@ function ChatMessage({
   me, msg, name, showName, avatarUrl,
   peerLastReadSeq, peerInRoom, presenceSettled,
   convId, meId,
-  onApproveReservation, onRejectReservation, // 부모 콜백(있으면 사용)
+  onApproveReservation, onRejectReservation, onCancelReservation,
 }) {
-  // Hook은 최상단에서, 모든 렌더에서 항상 호출
+  // ---- 시간 포맷
   const seoulTimeFmt = useMemo(
     () => new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' }),
     []
   );
-
-  // 시간 레이블 안전 계산
   const pickMs = (m) => {
     if (Number.isFinite(m?.sentAtMs)) return m.sentAtMs;
     if (m?.sentAt) {
@@ -56,7 +55,7 @@ function ChatMessage({
   try { timeLabel = seoulTimeFmt.format(new Date(ms)); }
   catch { timeLabel = seoulTimeFmt.format(new Date()); }
 
-  // 읽음 배지 표시 로직
+  // ---- 읽음 배지
   const msgSeq  = Number(msg?.seq);
   const peerSeq = Number(peerLastReadSeq);
   const hasSeq = Number.isFinite(msgSeq);
@@ -71,12 +70,29 @@ function ChatMessage({
   const initial = (name || '상').slice(0, 1);
   const text = msg?.text ?? '';
 
-  // ===== 본문(body) 생성 - 단일 분기 =====
+  // ---- 취소/환불 카드 payload 통합 (신규/레거시 모두 커버)
+  const cancelledPayload = useMemo(() => {
+    const t = msg?.type;
+    if (t === 'reservation_cancelled') {
+      return {
+        reservation: msg?.reservation,
+        refund: msg?.refund,
+        title: msg?.text || '예약이 취소되었습니다.',
+      };
+    }
+    if (t === 'CANCELLED_WITH_REFUND' && msg?.payload) {
+      return msg.payload; // 서버가 통째로 보낸 레거시 페이로드
+    }
+    return null;
+  }, [msg]);
+
+  // ---- 본문 렌더
   let body;
-  if (msg?.type === 'reservation' && msg?.reservation) {
+  if (cancelledPayload) {
+    body = <ReservationCancelledMessage payload={cancelledPayload} />;
+  } else if (msg?.type === 'reservation' && msg?.reservation) {
     const card = msg.reservation;
 
-    // 부모 콜백이 오면 그걸 쓰고, 없으면 API로 fallback
     const onApprove = () =>
       onApproveReservation
         ? onApproveReservation(card.reservationId)
@@ -87,8 +103,8 @@ function ChatMessage({
         ? onRejectReservation(card.reservationId, reason)
         : decideReservationApi({ convId, reservationId: card.reservationId, approve: false, reason }).catch(console.error);
 
-    // 버튼 노출 여부: 서버 페이로드가 최종 판단
     const canAct = !!card?.canApprove && Number(meId) !== Number(msg?.senderId);
+    const onCancel = () => onCancelReservation?.(card.reservationId);
 
     body = (
       <ReservationMessage
@@ -97,17 +113,18 @@ function ChatMessage({
         canAct={canAct}
         onApprove={onApprove}
         onReject={onReject}
+        onCancel={onCancel}
       />
     );
   } else if (msg?.attachments?.length) {
     body = msg.attachments.map((a, idx) => (
-      <AttachmentView key={a.fileName || a.imageUrl || idx} a={a} pending={!!msg._pending} failed={!!msg.failed}/>
+      <AttachmentView key={a.fileName || a.imageUrl || idx} a={a} pending={!!msg._pending} failed={!!msg.failed} />
     ));
   } else {
     body = text;
   }
 
-  // ===== 렌더 =====
+  // ---- 렌더
   if (me) {
     return (
       <div className="msg-row msg-row--me" data-read={showUnreadBadge ? 'n' : 'y'}>
@@ -144,4 +161,15 @@ function ChatMessage({
   );
 }
 
-export default memo(ChatMessage);
+export default memo(ChatMessage, (prev, next) => {
+  if (prev.peerLastReadSeq !== next.peerLastReadSeq) return false;
+  if (prev.peerInRoom !== next.peerInRoom) return false;
+  if (prev.presenceSettled !== next.presenceSettled) return false;
+  if (prev.me !== next.me) return false;
+  if (prev.msg !== next.msg) return false;
+  const p = prev.msg || {}, n = next.msg || {};
+  if ((p.seq ?? 0) !== (n.seq ?? 0)) return false;
+  if (!!p._pending !== !!n._pending) return false;
+  if (!!p.failed !== !!n.failed) return false;
+  return true;
+});

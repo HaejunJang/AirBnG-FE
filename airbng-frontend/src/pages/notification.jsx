@@ -323,31 +323,27 @@ const NotificationApp = () => {
     console.log('[NotificationApp] 렌더링 - 연결상태:', isConnected, '총 알림:', alarms?.length || 0);
 
     return (
-        <div className="app-container">
-            <div className="notification-app-content">
-                <div className="main-content">
-                    <Header
-                        headerTitle="알림"
-                        showBackButton={true}
-                        backUrl="/page/home"
-                    />
-                    {!memberId ? (
-                        <div className="welcome-wrapper">
-                            <Welcome subtitle="로그인 후 사용 가능합니다." />
-                        </div>
-                    ) : (
-                        <>
-                            <NotificationList
-                                notifications={alarms || []}
-                                deletedNotificationIds={deletedRef}
-                                onRemove={removeNotification}
-                                onClearAll={clearAllNotifications}
-                                getAlarmKey={getAlarmKey} // 통일된 키 생성기 전달
-                            />
-                        </>
-                    )}
+        <div className="notification-app-content">
+            <Header
+                headerTitle="알림"
+                showBackButton={true}
+                backUrl="/page/home"
+            />
+            {!memberId ? (
+                <div className="welcome-wrapper">
+                    <Welcome subtitle="로그인 후 사용 가능합니다."/>
                 </div>
-            </div>
+            ) : (
+                <>
+                    <NotificationList
+                        notifications={alarms || []}
+                        deletedNotificationIds={deletedRef}
+                        onRemove={removeNotification}
+                        onClearAll={clearAllNotifications}
+                        getAlarmKey={getAlarmKey} // 통일된 키 생성기 전달
+                    />
+                </>
+            )}
         </div>
     );
 };

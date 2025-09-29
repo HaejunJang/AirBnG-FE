@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, useRef } from 'react';
 import { fetchInbox } from '../api/chatApi';
 import { useAuth } from './AuthContext';
 import usePersonalQueues from '../hooks/usePersonalQueues';
@@ -8,6 +8,29 @@ const Ctx = createContext(null);
 export function UnreadProvider({ children }) {
   const { ready, isLoggedIn } = useAuth() || {};
   const [byConv, setByConv] = useState({}); // { [convId]: number }
+  const openConvRef = useRef(null); // 현재 열려있는 방 convId 저장
+
+  // ChatRoom이 브로드캐스트하는 오픈/클로즈 이벤트 구독
+  useEffect(() => {
+    const onOpen = (e) => {
+      const id = e?.detail?.convId ?? null;
+      openConvRef.current = id;
+      if (!id) return;
+      // 들어오자마자 리스트 뱃지 0으로 확정
+      setByConv(prev => {
+        const next = { ...prev };
+        next[id] = 0;
+        return next;
+      });
+    };
+    const onClose = () => { openConvRef.current = null; };
+    window.addEventListener('chat:open', onOpen);
+    window.addEventListener('chat:close', onClose);
+    return () => {
+      window.removeEventListener('chat:open', onOpen);
+      window.removeEventListener('chat:close', onClose);
+    };
+  }, []);
 
   // 합계
   const total = useMemo(
@@ -34,6 +57,15 @@ export function UnreadProvider({ children }) {
         onInboxHint: (hint) => {
             const { convId, unreadTotal } = hint || {};
             if (!convId) return;
+            // 열린 방이면 서버가 몇을 주든 리스트는 0으로 고정
+            if (openConvRef.current && convId === openConvRef.current) {
+              setByConv(prev => {
+                const next = { ...prev };
+                next[convId] = 0;
+                return next;
+              });
+              return;
+            }
             setByConv(prev => {
             const next = { ...prev };
             // 서버가 절대값을 주면 그 값으로, 아니면 +1
@@ -43,6 +75,17 @@ export function UnreadProvider({ children }) {
             );
             return next;
             });
+        },
+        // === 추가: 읽음 이벤트가 오면 해당 방 unread를 0으로 ===
+        onInboxRead: (read) => {
+          const { convId } = read || {};
+          if (!convId) return;
+          setByConv(prev => {
+            if (!prev[convId]) return prev;
+            const next = { ...prev };
+            next[convId] = 0;
+            return next;
+          });
         },
     });
 

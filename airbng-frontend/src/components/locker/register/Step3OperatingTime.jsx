@@ -1,10 +1,12 @@
+import '../../../styles/pages/register.css';
+
 const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2,'0')}:00`);
 
 
 export default function Step3OperatingTime({ startTime, setStartTime, endTime, setEndTime, onNext, disabled }) {
     return (
         <div className="step step-3 active">
-            <div className="form-group">
+            <div className="register-form-group">
                 <label>운영 시간</label>
                 <div className="time-select-group">
                     <div className="time-select-box">

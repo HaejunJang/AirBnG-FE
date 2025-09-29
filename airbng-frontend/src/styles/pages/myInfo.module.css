@@ -28,7 +28,7 @@
 
 .editProfileContainer {
   flex: 1;
-  padding: 80px 20px 40px 20px;
+  padding: 20px 20px 40px 20px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -197,10 +197,10 @@
 
 .formInput {
   flex: 1;
-  height: 35px;
-  padding: 0 16px;
+  height: 54px;
+  padding: 0 14px;
   border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border-radius: 10px;
   font-size: 16px;
   background-color: #ffffff;
   transition: border-color 0.2s ease;
@@ -281,7 +281,7 @@
 }
 
 .saveButton {
-  width: 100%;
+  width: 90%;
   height: 50px;
   background-color: #4561db;
   color: #ffffff;
@@ -291,8 +291,9 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  margin-top: 20px;
-
+  /*margin-top: 20px;*/
+    bottom: 50px;
+    position: absolute;
   /*position: relative; !* fixed 제거 *!*/
   /*transform: none;*/
   /*left: auto;*/

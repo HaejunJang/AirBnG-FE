@@ -15,6 +15,7 @@ import ClockIcon from "../assets/clock copy.svg";
 import { Modal, useModal } from "../components/common/ModalUtil";
 import CheckIcon from "../components/reservation/CheckIcon";
 import { getConversationByPeer, getOrCreateConversation } from "../api/chatApi";
+import BsChat from "../assets/messages.svg";
 
 const ReservationDetail = () => {
   const navigate = useNavigate();
@@ -76,18 +77,18 @@ const ReservationDetail = () => {
   }
 
   // 로딩 중이거나 에러가 있을 때 처리
-  if (loading) {
-    return (
-      <div className={styles.reservationDetail}>
-        <Header headerTitle="예약 상세" showBackButton />
-        <div className={styles.content}>
-          <div style={{ textAlign: "center", padding: "50px 0" }}>
-            로딩 중...
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className={styles.reservationDetail}>
+  //       <Header headerTitle="예약 상세" showBackButton />
+  //       <div className={styles.content}>
+  //         <div style={{ textAlign: "center", padding: "50px 0" }}>
+  //           로딩 중...
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (
@@ -327,7 +328,7 @@ const ReservationDetail = () => {
           />
           <div className={styles.lockerDetails}>
             <h2 className={styles.lockerName}>{data.lockerName || "보관소"}</h2>
-            <p className={styles.lockerAddress}>서울 강남구 강남대로 396</p>
+            <p className={styles.lockerAddress}>{data.fullAddress || "주소 정보 없음"}</p>
           </div>
         </div>
 
@@ -467,9 +468,7 @@ const ReservationDetail = () => {
                       onClick={handleChatGo}
                       aria-label="채팅 바로가기"
                     >
-                      <svg className={styles.chatIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
+                    <img src={BsChat} className={styles.chatIcon} alt="채팅" width={22} height={22} />
                     </button>
                   </>
                 ) : null}

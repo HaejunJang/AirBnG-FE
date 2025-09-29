@@ -2,21 +2,33 @@
 
 /* 헤더 컴포넌트 */
 .commonHeader {
-  position: fixed;
+  /* position: fixed; */
+  /* top: 0; */
+  /* left: 50%; */
+  /* transform: translateX(-50%); */
+  /* width: 100%; */
+  /* max-width: var(--app-max-width); */
+  position: sticky;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   width: 100%;
-  max-width: var(--app-max-width);
   height: var(--header-height);
   background: var(--surface);
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  padding: 10px 16px;
+  /* padding: 10px 16px; */
   z-index: 1000;
-  box-sizing: border-box;
-  border-bottom: 1px solid var(--border);
+    border-bottom: none;
+}
+.commonHeader::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 20px;  /* 왼쪽 여백 */
+    right: 20px; /* 오른쪽 여백 */
+    height: 1px;
+    background-color: var(--border);
 }
 
 /* 보더 숨김 */
@@ -42,6 +54,7 @@
   width: var(--header-icon-size);
   height: var(--header-icon-size);
   flex-shrink: 0;
+    margin-left: 10px;
 }
 
 .backIcon {
@@ -61,6 +74,7 @@
   width: var(--header-icon-size);
   height: var(--header-icon-size);
   transition: opacity var(--fast);
+    margin-right: 10px;
 }
 
 .backIcon:hover,

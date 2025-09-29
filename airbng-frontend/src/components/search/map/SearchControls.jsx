@@ -39,7 +39,7 @@ const SearchControls = ({ address, reservationDate, jimTypeId, onBagTypeChange, 
                     method="get"
                 >
                     <input
-                        className="search-input"
+                        className="search-page-input"
                         type="text"
                         name="query"
                         id="searchInput"

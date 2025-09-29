@@ -1,6 +1,5 @@
 import { httpAuth } from "../http";
 
-
 export const getPeriodSales = ({ startDate, endDate, page = 0, size = 10 }) => {
     return httpAuth.get("/admin/sales/period", {
         params: {

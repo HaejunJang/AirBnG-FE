@@ -1,5 +1,14 @@
 import qs from "qs";
 import { httpAuth, httpPublic } from "./http";
+import { v4 as uuid } from 'uuid';
+
+const newIdemKey = () => {
+  // browser(window) 우선, web worker(self) 보조
+  const g = typeof window !== 'undefined' ? window : undefined;
+  if (g?.crypto?.randomUUID) return g.crypto.randomUUID();
+  return uuid(); // 폴백
+};
+const _idemCache = new Map();
 
 export const getReservationList = ({
   isDropper,
@@ -25,8 +34,22 @@ export const getReservationList = ({
 };
 
 // 예약 취소
-export const cancelReservationApi = (reservationId) => {
-  return httpAuth.patch(`/reservations/${reservationId}/cancel`);
+export const cancelReservationApi = async (reservationId) => {
+  const key = _idemCache.get(reservationId) ?? newIdemKey();
+  _idemCache.set(reservationId, key);
+  try {
+    const res = await httpAuth.patch(
+      `/reservations/${reservationId}/cancel`,
+      null,
+      { headers: { 'Idempotency-Key': key } }
+    );
+    // 성공하면 캐시 제거
+    _idemCache.delete(reservationId);
+    return res;
+  } catch (e) {
+    // 실패 시 재시도하면 같은 키를 쓰도록 캐시 유지
+    throw e;
+  }
 };
 
 // 예약 승인/거절
@@ -37,7 +60,7 @@ export const confirmReservationApi = (reservationId, approve) => {
 };
 
 // 예약 완료
-export const completeReservationApi = (reservationId, approve) => {
+export const completeReservationApi = (reservationId) => {
   return httpAuth.patch(`/reservations/${reservationId}/complete`);
 };
 

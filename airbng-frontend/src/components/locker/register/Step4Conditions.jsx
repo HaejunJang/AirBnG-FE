@@ -1,5 +1,6 @@
 import CircleFull from '../../../assets/circle_check_full.svg';
 import CircleBlank from '../../../assets/circle_check_blank.svg';
+import '../../../styles/pages/register.css';
 
 export default function Step4Conditions({ items = [], setItems, onSubmit, submitting, disabled }) {
   const toggle = (id) => {
@@ -13,7 +14,7 @@ export default function Step4Conditions({ items = [], setItems, onSubmit, submit
 
   return (
     <div className="step step-4 active">
-      <div className="form-group">
+      <div className="register-form-group">
         <label>짐 보관 조건</label>
 
         {items.map(i => (

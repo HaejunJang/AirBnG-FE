@@ -6,16 +6,24 @@ export default function LoginRequired({ kind = '채팅' }) {
 
   return (
     <section className="auth-required">
-      <div className="auth-required__icon">💬</div>
-      <h2 className="auth-required__title">{kind} 이용 안내</h2>
+      <h2 className="auth-required__title">환영합니다!</h2>
       <p className="auth-required__desc">
-        로그인 후 {kind} 기능을 사용할 수 있습니다.
+        {kind} 기능을 이용하려면
+        <br />
+        로그인 또는 회원가입이 필요합니다.
       </p>
       <div className="auth-required__actions">
-        <Link className="btn btn--primary" to="/page/login" state={{ from: location }}>
+        <Link
+          className="btn login-btn"
+          to={`/page/login?redirect=${encodeURIComponent(location.pathname)}`}
+          state={{ from: location }}
+        >
           로그인
         </Link>
-        <Link className="btn btn--outline" to="/page/signup">
+        <Link
+          className="btn signup-btn"
+          to={`/page/signup?redirect=${encodeURIComponent(location.pathname)}`}
+        >
           회원가입
         </Link>
       </div>

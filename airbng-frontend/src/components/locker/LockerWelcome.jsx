@@ -19,7 +19,7 @@ export default function LockerWelcome() {
               로그인 후 보관소 등록/관리 기능을 사용할 수 있습니다.
             </p>
             <div className="welcome-buttons">
-              <button className="login-btn" onClick={() => nav("/page/login")}>로그인</button>
+              <button className="login-btn" onClick={() => nav("/page/login?redirect=/page/lockers")}>로그인</button>
               <button className="signup-btn" onClick={() => nav("/page/signup")}>회원가입</button>
             </div>
           </div>

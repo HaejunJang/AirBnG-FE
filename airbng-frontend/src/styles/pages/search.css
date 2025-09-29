@@ -73,7 +73,7 @@
   width: 100%;
 }
 
-.search-input {
+.search-page-input {
     flex: 1;
     height: 100%;
     border: none;
@@ -85,7 +85,7 @@
     line-height: 15px;
     cursor: pointer;
 }
-.search-input:focus {
+.search-page-input:focus {
     outline: none;
     box-shadow: none;
 }

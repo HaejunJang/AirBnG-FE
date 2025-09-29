@@ -75,7 +75,7 @@ export default function MyPage() {
   }, [user?.id, sessionProfile?.roles, updateSessionProfile, setUser]);
 
   // ---- 로딩 & 모달 상태 ----
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const { modalState, hideModal, showError, showLogin, showConfirm } =
     useModal();
 
@@ -187,21 +187,21 @@ export default function MyPage() {
   }, [ready, isLoggedIn, animatePageElements]);
 
   // ---- 모달/로딩 핸들러 ----
-  const showLoading = () => setLoading(true);
-  const hideLoading = () => setLoading(false);
+  // const showLoading = () => setLoading(true);
+  // const hideLoading = () => setLoading(false);
 
   // ---- 네비게이션 핸들러 ----
   const redirectParam = encodeURIComponent(location.pathname);
 
   const goToLogin = () => {
-    showLoading();
+    // showLoading();
     setTimeout(() => {
       navigate(`/page/login?redirect=${redirectParam}`, { replace: true });
     }, 300);
   };
 
   const goToSignup = () => {
-    showLoading();
+    // showLoading();
     setTimeout(() => {
       navigate(`/page/signup?redirect=${redirectParam}`, { replace: true });
     }, 300);
@@ -217,7 +217,7 @@ export default function MyPage() {
 
   const goToMyInfo = () => {
     if (!requireLoginThen(goToMyInfo)) return;
-    showLoading();
+    // showLoading();
     setTimeout(() => {
       navigate(`/page/mypage/update?memberId=${user.id}`, { replace: true });
     }, 300);
@@ -225,7 +225,7 @@ export default function MyPage() {
 
   const goToReservations = () => {
     if (!requireLoginThen(goToReservations)) return;
-    showLoading();
+    // showLoading();
     setTimeout(() => {
       navigate("/page/reservations/list");
     }, 300);
@@ -234,7 +234,7 @@ export default function MyPage() {
   // ---- 로그아웃 ----
   const onLogout = () => {
     showConfirm("로그아웃", "정말로 로그아웃하시겠습니까?", async () => {
-      showLoading();
+      // showLoading();
       try {
         await logout(); // AuthContext가 서버 요청 + 클라이언트 정리
       } catch (e) {
@@ -242,9 +242,10 @@ export default function MyPage() {
           "알림",
           "서버와 통신 중 문제가 있었지만 로그아웃을 완료했습니다."
         );
-      } finally {
-        setTimeout(hideLoading, 400);
       }
+      // finally {
+        // setTimeout(hideLoading, 400);
+      // }
     });
   };
 
@@ -405,17 +406,17 @@ export default function MyPage() {
     );
   };
 
-  const Loading = () => {
-    if (!loading) return null;
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>처리 중...</p>
-        </div>
-      </div>
-    );
-  };
+  // const Loading = () => {
+  //   if (!loading) return null;
+  //   return (
+  //     <div className="loading-overlay">
+  //       <div className="loading-spinner">
+  //         <div className="spinner"></div>
+  //         <p>처리 중...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
   // ---- 렌더링 ----
   if (!ready) {
@@ -455,7 +456,7 @@ export default function MyPage() {
         onCancel={modalState.onCancel}
         onClose={hideModal}
       />
-      <Loading />
+      {/*<Loading />*/}
     </div>
   );
 }

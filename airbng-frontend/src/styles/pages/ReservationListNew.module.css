@@ -17,7 +17,7 @@ ReservationListNew CSS Module .reservationListNew {
   box-shadow: 0 0 20px rgba(0,0,0,0.08);
   position: relative;
   padding-bottom: 0;
-  padding-top: 60px;   
+  /*padding-top: 60px;   */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -313,7 +313,7 @@ ReservationListNew CSS Module .reservationListNew {
   min-height: calc(100dvh - 200px);
   overflow-y: auto;
   background-color: #fff;
-  padding: 70px 20px 70px 20px;
+  padding: 20px 20px 70px 20px;
   box-sizing: border-box;
   width: 100%;
 }
@@ -335,6 +335,12 @@ ReservationListNew CSS Module .reservationListNew {
   align-items: flex-start;
   margin-bottom: 16px;
   position: relative;
+}
+
+.headerRightSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .statusBadge {
@@ -419,31 +425,43 @@ ReservationListNew CSS Module .reservationListNew {
 .approveBtn,
 .rejectBtn,
 .completeBtn {
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: 10px 16px;
+  font-size: 14px;
   font-weight: 500;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  text-align: center;
 }
 
 .approveBtn {
-  background: #dcfce7;
-  color: #16a34a;
+  background-color: #4561db;
+  color: #ffffff;
+  border: 1px solid #4561db;
+  flex: 1;
 }
 
 .approveBtn:hover {
-  background: #bbf7d0;
+  background-color: #3d52c4;
+  border-color: #3d52c4;
 }
 
 .rejectBtn {
-  background: #fef2f2;
-  color: #dc2626;
+  background-color: rgba(69, 97, 219, 0.1);
+  color: #4561db;
+  border: 1px solid rgba(69, 97, 219, 0.2);
+  flex: 1;
 }
 
 .rejectBtn:hover {
-  background: #fecaca;
+  background-color: rgba(69, 97, 219, 0.15);
+  border-color: rgba(69, 97, 219, 0.25);
+}
+
+.completeBtn {
+  background: #dbeafe;
+  color: #2563eb;
 }
 
 .completeBtn {
@@ -589,8 +607,8 @@ ReservationListNew CSS Module .reservationListNew {
 .cardActions {
   display: flex;
   gap: 8px;
-  margin-top: 16px;
-  padding-top: 16px;
+  /*margin-top: 16px;*/
+  /*padding-top: 16px;*/
   border-top: 1px solid #f3f4f6;
 }
 
@@ -623,6 +641,9 @@ ReservationListNew CSS Module .reservationListNew {
   background: #fef2f2;
   color: #dc2626;
   border-color: #fecaca;
+    padding: 5px;
+    position: relative;
+    bottom: 0;
 }
 
 .cancelBtn:hover {
@@ -638,6 +659,14 @@ ReservationListNew CSS Module .reservationListNew {
   background: #f3f4f6;
   color: #374151;
   border-color: #d1d5db;
+}
+
+.rebookBtn.fullWidth {
+  flex: 1;
+}
+
+.completeBtn.fullWidth {
+  flex: 1;
 }
 
 .rebookBtn:hover {
@@ -656,8 +685,9 @@ ReservationListNew CSS Module .reservationListNew {
 }
 
 .moreBtn {
-  width: 36px;
-  height: 36px;
+  position: relative;
+  width: 28px;
+  height: 28px;
   border: 1px solid #d1d5db;
   background: #f9fafb;
   border-radius: 6px;
@@ -666,17 +696,17 @@ ReservationListNew CSS Module .reservationListNew {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  /* top: 50px; */
 }
 
 .moreBtn:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
+  background: #bfdbfe;
 }
 
 .moreBtn svg {
   width: 16px;
   height: 16px;
-  color: #6b7280;
+  color: #2563eb;
 }
 
 .moreMenu {
@@ -699,35 +729,34 @@ ReservationListNew CSS Module .reservationListNew {
   font-size: 14px;
   font-weight: 500;
   color: #dc2626;
-  background: none;
-  border: none;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s;
-  text-align: left;
+  transition: all 0.2s;
+  text-align: center;
 }
 
 .moreMenuItem:hover {
-  background: #f9fafb;
+  background: #fecaca;
+  border-color: #f87171;
 }
 
 /* 예약 상세 버튼 */
 .detailBtn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: none;
-  border: none;
-  color: #4f46e5;
+  padding: 4px 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  padding: 4px 0;
-  border-bottom: 1px solid transparent;
   transition: all 0.2s;
+  background: #dbeafe;
+  color: #2563eb;
 }
 
 .detailBtn:hover {
-  border-bottom-color: #4f46e5;
+  background: #bfdbfe;
 }
 
 /* 빈 상태 */
